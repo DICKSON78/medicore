@@ -46,6 +46,12 @@ class Item extends Model
         return $this->hasMany(ItemPrice::class, 'item_id');
     }
 
+    public function dispensations()
+    {
+        return $this->hasMany(PatientPaymentCacheItem::class, 'item_id')
+            ->where('status', 'Served');
+    }
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i');

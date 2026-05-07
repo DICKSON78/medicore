@@ -13,7 +13,9 @@ const DispensingMainRoutes = () => {
       />
       <Route
         path="dispensing-requests/*"
-        element={<DispensingRoutes consultationType="Pharmacy" />}
+        element={
+          <DispensingRoutes consultationType="Pharmacy" stockItem="Yes" />
+        }
       />
       <Route
         path="reports/*"

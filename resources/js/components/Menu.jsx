@@ -337,6 +337,26 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.payment_center,
         },
         {
+          title: "Installment Management",
+          icon: <PaymentModesIcon />,
+          to: "/payment-center/installment-management",
+          show: user.privileges.payment_center,
+          items: [
+            {
+              title: "Partial Payments",
+              icon: <WaitingIcon />,
+              to: "/payment-center/installment-management/partial-payments",
+              show: user.privileges.payment_center,
+            },
+            {
+              title: "Completed Payments",
+              icon: <DoneIcon />,
+              to: "/payment-center/installment-management/completed-payments",
+              show: user.privileges.payment_center,
+            },
+          ],
+        },
+        {
           title: "Cleared Patient Bills",
           icon: <DoneIcon />,
           to: "/payment-center/patient-bills/cleared",
@@ -488,6 +508,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.medicine_center,
         },
         {
+          title: "Medicine Item Balance Report",
+          icon: <ReportsIcon />,
+          to: "/medicine-center/item-balance",
+          show: user.privileges.medicine_center,
+        },
+        {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/medicine-center/reports",
@@ -499,12 +525,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/medicine-center/reports/stock-management",
               show: user.privileges.medicine_center,
               items: [
-                {
-                  title: "Item Balance Report",
-                  icon: <ReportsIcon />,
-                  to: "/medicine-center/reports/stock-management/item-balance",
-                  show: user.privileges.medicine_center,
-                },
                 {
                   title: "Quantity Dispensed Report",
                   icon: <ReportsIcon />,
@@ -695,6 +715,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.medicine_center,
         },
         {
+          title: "Lens Stock",
+          icon: <ItemsIcon />,
+          to: "/inventory-management/lens-stock",
+          show: user.privileges.inventory_management,
+        },
+        {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/inventory-management/reports",
@@ -706,12 +732,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/inventory-management/reports/stock-management",
               show: user.privileges.inventory_management,
               items: [
-                {
-                  title: "Item Balance Report",
-                  icon: <ReportsIcon />,
-                  to: "/inventory-management/reports/stock-management/item-balance",
-                  show: user.privileges.inventory_management,
-                },
                 {
                   title: "Quantity Dispensed Report",
                   icon: <ReportsIcon />,

@@ -129,9 +129,10 @@ const ColumnHeaderTitleContainer = styled("div")(({ theme }) => ({
   textOverflow: "ellipsis",
 }));
 
-const SearchTextField = ({ placeholder, onChange, sx }) => {
+const SearchTextField = ({ label, placeholder, onChange, sx }) => {
   return (
     <TextField
+      label={label}
       variant="outlined"
       placeholder={placeholder || "Search"}
       InputProps={{

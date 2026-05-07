@@ -81,32 +81,38 @@ const PendingCreditPatients = () => {
                 headerName: "S/N",
                 valueGetter: (item, index) =>
                   params.per_page * (params.page - 1) + index + 1,
+                tableCellProps: { sx: { width: 80 } },
               },
               {
                 field: "full_name",
                 headerName: "Patient Name",
                 valueGetter: (item, index) => item.check_in.patient.full_name,
+                tableCellProps: { sx: { width: 200 } },
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
                 valueGetter: (item, index) => item.check_in.patient_id,
+                tableCellProps: { sx: { width: 120 } },
               },
               {
                 field: "date_of_birth",
                 headerName: "Age",
                 valueGetter: (item, index) =>
                   getAge(item.check_in.patient.date_of_birth),
+                tableCellProps: { sx: { width: 80 } },
               },
               {
                 field: "gender",
                 headerName: "Gender",
                 valueGetter: (item, index) => item.check_in.patient.gender,
+                tableCellProps: { sx: { width: 80 } },
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
                 valueGetter: (item, index) => item.check_in.patient.phone,
+                tableCellProps: { sx: { width: 150 } },
               },
               {
                 field: "require_glass",
@@ -133,19 +139,23 @@ const PendingCreditPatients = () => {
                     <span style={{ color: '#999', fontStyle: 'italic' }}>Not specified</span>
                   );
                 },
+                tableCellProps: { sx: { width: 150 } },
               },
               {
                 field: "created_by",
                 headerName: "Sent By",
                 valueGetter: (item, index) => item.creator?.full_name,
+                tableCellProps: { sx: { width: 150 } },
               },
               {
                 field: "created_at",
                 headerName: "Date Sent",
+                tableCellProps: { sx: { width: 150 } },
               },
               {
                 field: "actions",
                 headerName: "Actions",
+                tableCellProps: { sx: { width: 100 } },
                 renderCell: (item) => (
                   <Stack
                     direction="row"

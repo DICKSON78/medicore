@@ -24,7 +24,7 @@ import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomR
 import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
-import DispensingRoutes from "../pages/dispensing/DispensingRoutes";
+import DispensingMainRoutes from "../pages/dispensing/DispensingMainRoutes";
 import OtherDispensingRoutes from "../pages/other-dispensing/OtherDispensingRoutes";
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
 import MarketingRoutes from "../pages/marketing/MarketingRoutes";
@@ -146,7 +146,7 @@ const App = () => {
                   element={
                     <>
                       {user?.privileges?.dispensing ? (
-                        <DispensingRoutes />
+                        <DispensingMainRoutes />
                       ) : (
                         <div>No dispensing privileges</div>
                       )}

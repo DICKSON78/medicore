@@ -285,17 +285,19 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <CardActions>
-        <Box flexGrow={1} />
-        <Button
-          variant="outlined"
-          size="large"
-          color="secondary"
-          onClick={() => modal.close()}
-        >
-          Close
-        </Button>
-      </CardActions>
+      {modal && (
+        <CardActions>
+          <Box flexGrow={1} />
+          <Button
+            variant="outlined"
+            size="large"
+            color="secondary"
+            onClick={() => modal.close()}
+          >
+            Close
+          </Button>
+        </CardActions>
+      )}
     </React.Fragment>
   );
 };

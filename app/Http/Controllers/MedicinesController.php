@@ -22,13 +22,16 @@ class MedicinesController extends Controller
         try {
             $user = $request->user();
             // Default allow: if user missing or admin, allow optional clinic filter via request
-            if (!$user || ($user->role === 'Admin')) {
+            if (!$user || $user->is_admin) {
                 $clinic_id = $request->clinic_id;
             } else {
                 $clinic_id = $user->clinic_id;
             }
 
             $query = Medicine::with(['clinic', 'unit_of_measure', 'item_type', 'consultation_type'])
+                ->withCount(['medicine_dispensations as issued_today' => function ($q) {
+                    $q->whereDate('created_at', now()->toDateString());
+                }])
                 ->medicines() // Only get medicines/pharmaceuticals
                 ->when($clinic_id, function ($q) use ($clinic_id) {
                     $q->where('clinic_id', $clinic_id);
@@ -36,13 +39,11 @@ class MedicinesController extends Controller
                 ->where('status', 'Active');
 
             // Apply search filter
-            if ($request->has('search') && $request->search) {
-                $search = $request->search;
+            $search = $request->search ?? $request->q;
+            if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('generic_name', 'like', "%{$search}%")
-                      ->orWhere('brand_name', 'like', "%{$search}%");
+                      ->orWhere('code', 'like', "%{$search}%");
                 });
             }
 

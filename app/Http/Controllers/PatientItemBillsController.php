@@ -39,6 +39,7 @@ class PatientItemBillsController extends Controller
         $with_items = $request->with_items;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        $payment_status = $request->payment_status;
 
         $data = PatientItemBill::with(['first_item.payment_cache.consultation', 'creator'])->whereHas('first_item');
 
@@ -94,6 +95,16 @@ class PatientItemBillsController extends Controller
             }]);
         }
 
+        if ($payment_status === 'partial') {
+            $data->whereRaw('(SELECT SUM(amount) FROM patient_item_bill_payments WHERE bill_id = patient_item_bills.id) > 0')
+                  ->whereRaw('(SELECT SUM(amount) FROM patient_item_bill_payments WHERE bill_id = patient_item_bills.id) < (patient_item_bills.amount - patient_item_bills.discount)');
+        } elseif ($payment_status === 'none') {
+            $data->doesntHave('payments');
+        } elseif ($payment_status === 'completed') {
+            $data->whereRaw('(SELECT SUM(amount) FROM patient_item_bill_payments WHERE bill_id = patient_item_bills.id) >= (patient_item_bills.amount - patient_item_bills.discount)')
+                  ->where('status', 'Cleared');
+        }
+
         if ($start_date) {
             $data->whereDate('created_at', '>=', $start_date);
         }
@@ -105,6 +116,86 @@ class PatientItemBillsController extends Controller
         $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+    }
+
+    public function summary(Request $request)
+    {
+        $user = $request->user();
+        $clinic_id = $request->clinic_id;
+        $status = $request->status;
+        $patient_name = $request->patient_name;
+        $patient_id = $request->patient_id;
+        $patient_gender = $request->patient_gender;
+        $patient_phone = $request->patient_phone;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $payment_status = $request->payment_status;
+
+        $data = PatientItemBill::whereHas('first_item');
+
+        if ($user->is_admin) {
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($user) {
+                $query->where('clinic_id', $user->clinic_id);
+            });
+        }
+
+        if ($status) {
+            $data->where('status', $status);
+        }
+
+        if ($patient_name) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
+                $query->fullName('%' . $patient_name . '%');
+            });
+        }
+
+        if ($patient_id) {
+            $data->whereHas('items.payment_cache.check_in', function ($query) use ($patient_id) {
+                $query->where('patient_id', $patient_id);
+            });
+        }
+
+        if ($patient_gender) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
+                $query->where('gender', $patient_gender);
+            });
+        }
+
+        if ($patient_phone) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
+                $query->where('phone', 'like', '%' . $patient_phone . '%');
+            });
+        }
+
+        if ($payment_status === 'partial') {
+            $data->has('payments');
+        } elseif ($payment_status === 'none') {
+            $data->doesntHave('payments');
+        }
+
+        if ($start_date) {
+            $data->whereDate('created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $data->whereDate('created_at', '<=', $end_date);
+        }
+
+        $totalAmount = $data->sum('amount');
+        $totalDiscount = $data->sum('discount');
+        
+        $billIds = $data->pluck('id');
+        $totalPaid = \App\Models\PatientItemBillPayment::whereIn('bill_id', $billIds)->sum('amount');
+
+        $totalDebt = $totalAmount - $totalDiscount - $totalPaid;
+
+        return $this->sendResponse(['total_debt' => $totalDebt], Response::HTTP_OK, 'Success.');
     }
 
     /**
@@ -147,6 +238,16 @@ class PatientItemBillsController extends Controller
     public function clear(Request $request, $id)
     {
         $data = PatientItemBill::findOrFail($id);
+        
+        // Calculate total paid amount
+        $totalPaid = $data->payments()->sum('amount');
+        $amountDue = $data->amount - $data->discount;
+        
+        // Only clear if fully paid
+        if ($totalPaid < $amountDue) {
+            return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Cannot clear bill: Payment is incomplete. Amount paid: ' . number_format($totalPaid) . ', Required: ' . number_format($amountDue));
+        }
+        
         $data->update([
             'status' => 'Cleared',
             'cleared_at' => Carbon::now(),

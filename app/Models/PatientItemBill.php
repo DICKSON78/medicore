@@ -23,6 +23,11 @@ class PatientItemBill extends Model
         return $this->hasMany(PatientPaymentCacheItem::class, 'bill_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(PatientItemBillPayment::class, 'bill_id');
+    }
+
     public function first_item()
     {
         return $this->hasOne(PatientPaymentCacheItem::class, 'bill_id')

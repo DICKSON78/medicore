@@ -2,14 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
+  Box,
   Button,
   Card,
   CardContent,
   CardHeader,
+  Chip,
   Divider,
   LinearProgress,
   Skeleton,
   Stack,
+  Typography,
+  Alert,
 } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
@@ -152,6 +156,24 @@ const PatientBill = () => {
     return bill.amount - bill.discount - (bill.amount_paid || 0);
   };
 
+  const getPaymentStatus = () => {
+    const remaining = getAmountRemaining();
+    if (remaining <= 0) {
+      return { status: 'completed', color: 'success', text: 'Completed' };
+    } else if (bill.amount_paid > 0) {
+      return { status: 'partial', color: 'warning', text: 'Partial Payment' };
+    } else {
+      return { status: 'pending', color: 'error', text: 'Pending' };
+    }
+  };
+
+  const getPaymentProgress = () => {
+    if (!bill) return 0;
+    const totalAmount = bill.amount - bill.discount;
+    const paidAmount = bill.amount_paid || 0;
+    return totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0;
+  };
+
   return (
     <Page
       breadcrumbs={[
@@ -179,35 +201,70 @@ const PatientBill = () => {
           <PageHeader
             title="Patient Bill"
             trailing={
-              <BillPDF
-                bill={bill}
-                items={items}
-                patient={patient}
-              />
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  label={getPaymentStatus().text}
+                  color={getPaymentStatus().color}
+                  variant="outlined"
+                />
+                <BillPDF
+                  bill={bill}
+                  items={items}
+                  patient={patient}
+                />
+              </Stack>
             }
           />
-          <Divider />
           <CardContent>
-            <Descriptions
-              columns={4}
-              items={[
-                { label: "Bill Number", value: bill.id },
-                { label: "Bill Amount", value: numberFormat(bill.amount) },
-                { label: "Discount", value: numberFormat(bill.discount) },
+            <Table
+              columns={[
                 {
-                  label: "Amount Paid",
-                  value: numberFormat(bill.amount_paid || 0),
+                  field: "label",
+                  headerName: "Description",
+                  flex: 1,
+                  tableCellProps: { sx: { width: 150 } },
                 },
                 {
-                  label: "Amount Remaining",
+                  field: "value",
+                  headerName: "Value",
+                  flex: 2,
+                  tableCellProps: { sx: { width: 200 } },
+                  renderCell: (item) => (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: item.color || 'text.primary',
+                        fontWeight: item.fontWeight || 'normal'
+                      }}
+                    >
+                      {item.value}
+                    </Typography>
+                  ),
+                },
+              ]}
+              items={[
+                { label: "Bill Number", value: bill.id },
+                { label: "Total Bill Amount", value: numberFormat(bill.amount) },
+                { label: "Discount", value: numberFormat(bill.discount) },
+                { label: "Net Amount", value: numberFormat(bill.amount - bill.discount) },
+                { 
+                  label: "Amount Paid", 
+                  value: numberFormat(bill.amount_paid || 0),
+                  color: bill.amount_paid > 0 ? 'success.main' : 'text.primary',
+                  fontWeight: bill.amount_paid > 0 ? 'bold' : 'normal'
+                },
+                { 
+                  label: "Amount Remaining", 
                   value: numberFormat(getAmountRemaining()),
+                  color: getAmountRemaining() > 0 ? 'error.main' : 'success.main',
+                  fontWeight: 'bold'
                 },
                 { label: "Created By", value: bill.creator?.full_name },
                 { label: "Date Created", value: bill.created_at },
                 { label: "Bill Status", value: bill.status },
-                { label: "Cleared By", value: bill.clearer?.full_name },
-                { label: "Date Cleared", value: bill.cleared_at },
+                
               ]}
+              hidePaginationFooter
               containerProps={{
                 variant: "outlined",
                 sx: {
@@ -215,9 +272,9 @@ const PatientBill = () => {
                   p: 2,
                 },
               }}
-              itemSpacing={1}
             />
-            <Card variant="outlined">
+          </CardContent>
+          <Card variant="outlined">
               <CardHeader title="Bill Items" />
               <Divider />
               <CardContent>
@@ -228,36 +285,37 @@ const PatientBill = () => {
                       field: "index",
                       headerName: "S/N",
                       valueGetter: (item, index) => index + 1,
+                      tableCellProps: { sx: { width: 80 } },
                     },
                     {
                       field: "item_id",
-                      headerName: "Item Name",
-                      valueGetter: (item, index) => item.item.name,
+                      headerName: "Item ID",
+                      valueGetter: (item) => item.item?.id || '',
+                      tableCellProps: { sx: { width: 100 } },
                     },
                     {
-                      field: "payment_mode_id",
-                      headerName: "Payment Mode",
-                      valueGetter: (item, index) => item.payment_mode.name,
+                      field: "name",
+                      headerName: "Item Name",
+                      valueGetter: (item) => item.item?.name || '',
+                      tableCellProps: { sx: { width: 200 } },
                     },
                     {
                       field: "unit_price",
                       headerName: "Unit Price",
-                      valueGetter: (item, index) =>
-                        numberFormat(item.unit_price || 0),
+                      valueGetter: (item) => numberFormat(item.item?.unit_price || 0),
+                      tableCellProps: { sx: { width: 120 } },
                     },
                     {
                       field: "quantity",
                       headerName: "Quantity",
-                      valueGetter: (item, index) =>
-                        numberFormat(item.quantity || 0),
+                      valueGetter: (item) => item.quantity || 0,
+                      tableCellProps: { sx: { width: 100 } },
                     },
                     {
-                      field: "total_price",
-                      headerName: "Subtotal",
-                      valueGetter: (item, index) =>
-                        numberFormat(
-                          (item.unit_price || 0) * (item.quantity || 0)
-                        ),
+                      field: "amount",
+                      headerName: "Amount",
+                      valueGetter: (item) => numberFormat(item.amount || 0),
+                      tableCellProps: { sx: { width: 120 } },
                     },
                   ]}
                   items={items}
@@ -271,7 +329,19 @@ const PatientBill = () => {
                 />
               </CardContent>
             </Card>
-          </CardContent>
+          <Box mt={2}>
+              {/* Enhanced Payment History Section */}
+              <Card variant="outlined" sx={{ mb: 2 }}>
+                <CardHeader 
+                  title="Payment History & Details" 
+                  subheader="Complete record of all payments made by the patient"
+                />
+                <Divider />
+                <CardContent>
+                  <PatientBillPayments bill={bill} fetchBill={fetchBill} />
+                </CardContent>
+              </Card>
+            </Box>
           <Divider />
           {loading && <LinearProgress />}
           <Stack
@@ -282,23 +352,45 @@ const PatientBill = () => {
             flexWrap="wrap"
             p={2}
           >
-            <Button
-              variant="contained"
-              color="success"
-              onClick={showBillPaymentsModal}
-            >
-              Bill Payments
-            </Button>
             {bill.status === "Pending" ? (
-              <Button
-                disabled={loading || getAmountRemaining() > 0}
-                variant="contained"
-                color="primary"
-                onClick={confirmClearBill}
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                justifyContent="flex-end"
+                flexWrap="wrap"
+                p={2}
               >
-                Clear Bill
-              </Button>
-            ) : null}
+                <Button
+                  disabled={loading || getAmountRemaining() > 0}
+                  variant="contained"
+                  color="primary"
+                  onClick={confirmClearBill}
+                >
+                  Clear Bill
+                </Button>
+                {getAmountRemaining() <= 0 && (
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    Bill is fully paid but not yet cleared. Click "Clear Bill" to complete the process.
+                  </Alert>
+                )}
+              </Stack>
+            ) : (
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                justifyContent="flex-end"
+                flexWrap="wrap"
+                p={2}
+              >
+                <Chip
+                  label={`Bill ${bill.status.toLowerCase()}`}
+                  color={bill.status === 'Cleared' ? 'success' : 'default'}
+                  variant="outlined"
+                />
+              </Stack>
+            )}
           </Stack>
         </Card>
       ) : null}

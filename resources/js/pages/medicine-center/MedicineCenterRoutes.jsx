@@ -8,6 +8,7 @@ import EditMedicine from "./EditMedicine";
 import AddMedicine from "./AddMedicine";
 import MedicineTaking from "./MedicineTaking";
 import CreateMedicineTaking from "./CreateMedicineTaking";
+import MedicineItemBalance from "./reports/MedicineItemBalance";
 import ReportsRoutes from "./ReportsRoutes";
 
 const MedicineCenterRoutes = () => {
@@ -44,6 +45,15 @@ const MedicineCenterRoutes = () => {
       <Route
         path="medicine-taking/create"
         element={<CreateMedicineTaking />}
+      />
+      <Route
+        path="item-balance"
+        element={
+          <MedicineItemBalance
+            module="Medicine Center"
+            consultationType="Pharmacy"
+          />
+        }
       />
       <Route
         path="reports/*"

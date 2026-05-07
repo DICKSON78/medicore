@@ -41,7 +41,19 @@ class ItemsController extends Controller
             $is_stock_item = $request->is_stock_item;
             $include_all_stock = $request->include_all_stock;
             $payment_mode_id = $request->payment_mode_id;
-            $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices']);
+            $date = $request->date;
+            $end_date = $request->end_date;
+
+            $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])
+                ->withCount(['dispensations as dispensed_count' => function ($query) use ($date, $end_date) {
+                    if ($date && $end_date) {
+                        $query->whereBetween('created_at', [$date, $end_date]);
+                    } elseif ($date) {
+                        $query->whereDate('created_at', $date);
+                    } else {
+                        $query->whereDate('created_at', now()->toDateString());
+                    }
+                }]);
 
             if ($user->is_admin) {
                 $data->with(['clinic']);
@@ -103,6 +115,17 @@ class ItemsController extends Controller
                 
                 // Note: has_expiry and expiry_date columns don't exist in items table
                 // Removed expiry filtering for now
+            }
+
+            if ($request->stock_status) {
+                $stockStatus = $request->stock_status;
+                if ($stockStatus === 'Out of Stock') {
+                    $data->where('balance', '<=', 0);
+                } elseif ($stockStatus === 'Low Stock') {
+                    $data->where('balance', '>', 0)->where('balance', '<=', 5);
+                } elseif ($stockStatus === 'In Stock') {
+                    $data->where('balance', '>', 5);
+                }
             }
 
             if ($payment_mode_id) {

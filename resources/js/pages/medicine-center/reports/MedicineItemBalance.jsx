@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Stack, Tooltip, IconButton } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/RefreshRounded";
 
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
@@ -10,7 +12,7 @@ import { numberFormat, throttle } from "../../../helpers";
 const MedicineItemBalance = ({ module, consultationType }) => {
   const [params, setParams] = useState({
     status: "Active",
-    search: undefined,
+    q: undefined,
     report_period: "weekly",
   });
 
@@ -38,7 +40,6 @@ const MedicineItemBalance = ({ module, consultationType }) => {
       breadcrumbs={[
         { title: "Home" },
         { title: module || "Medicine Center" },
-        { title: "Reports" },
         { title: "Medicine Item Balance" },
       ]}
     >
@@ -46,8 +47,8 @@ const MedicineItemBalance = ({ module, consultationType }) => {
         title={`Medicine Item Balance Report - ${getReportPeriodTitle()}`}
         uri="api/medicines"
         params={{ ...params, status: "Active" }}
-        headerTrailingContent={
-          <React.Fragment>
+        prependInner={
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 2 }}>
             <Select
               label="Report Period"
               options={[
@@ -62,74 +63,92 @@ const MedicineItemBalance = ({ module, consultationType }) => {
               onChange={(value) =>
                 setParams({ ...params, report_period: value })
               }
-              sx={{ width: 150, mr: 2 }}
+              sx={{ minWidth: 180 }}
             />
             <SearchTextField
-              placeholder="Search Medicine"
+              label="Search"
+              placeholder="Search by name..."
               onChange={(value) =>
-                throttle(() => setParams({ ...params, search: value }), 1000)
+                throttle(() => setParams(prev => ({ ...prev, q: value })), 500)
               }
-              sx={{ width: 200 }}
+              sx={{ width: 250 }}
             />
-          </React.Fragment>
+          </Stack>
         }
         columns={[
           {
             field: "name",
-            headerName: "Medicine Name",
+            headerName: "Item Name",
             valueGetter: (item) => item.name,
-          },
-          {
-            field: "code",
-            headerName: "Medicine Code",
-            valueGetter: (item) => item.code || 'N/A',
-          },
-          {
-            field: "generic_name",
-            headerName: "Generic Name",
-            valueGetter: (item) => item.generic_name || 'N/A',
-          },
-          {
-            field: "brand_name",
-            headerName: "Brand Name",
-            valueGetter: (item) => item.brand_name || 'N/A',
-          },
-          {
-            field: "unit_of_measure_id",
-            headerName: "Unit of Measure",
-            valueGetter: (item) => item.unit_of_measure?.name || 'N/A',
-          },
-          {
-            field: "unit_buying_price",
-            headerName: "Unit Price (TZS)",
-            valueGetter: (item) => `Tz ${numberFormat(item.unit_buying_price || 0)}`,
-          },
-          {
-            field: "selling_price",
-            headerName: "Selling Price (TZS)",
-            valueGetter: (item) => `Tz ${numberFormat(item.selling_price || 0)}`,
+            tableCellProps: { sx: { width: 250 } },
           },
           {
             field: "balance",
-            headerName: "Current Balance",
+            headerName: "Total Items",
+            tableCellProps: { sx: { width: 120 } },
             valueGetter: (item) => {
               const balance = parseFloat(item.balance) || 0;
-              // Display 0 instead of negative values to avoid confusion during inspections
               return numberFormat(balance < 0 ? 0 : balance);
+            },
+          },
+          {
+            field: "issued_today",
+            headerName: "Issued Per Day",
+            tableCellProps: { sx: { width: 120 } },
+            valueGetter: (item) => {
+              const issued = parseInt(item.issued_today) || 0;
+              return numberFormat(issued);
+            },
+          },
+          {
+            field: "remaining_stock",
+            headerName: "Remain Stock",
+            tableCellProps: { sx: { width: 120 } },
+            valueGetter: (item) => {
+              const balance = parseFloat(item.balance) || 0;
+              const issued = parseInt(item.issued_today) || 0;
+              const remaining = balance - issued;
+              return numberFormat(remaining < 0 ? 0 : remaining);
             },
           },
           {
             field: "expiry_date",
             headerName: "Expiry Date",
+            tableCellProps: { sx: { width: 150 } },
             valueGetter: (item) => {
-              if (!item.expiry_date) return 'No expiry';
-              return new Date(item.expiry_date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
+              if (!item.expiry_date) return "No expiry";
+              const expiryDate = new Date(item.expiry_date);
+              const now = new Date();
+              const formattedDate = expiryDate.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
               });
+              // Mark expired items
+              if (expiryDate < now) {
+                return `${formattedDate} (Expired)`;
+              }
+              return formattedDate;
             },
           },
+        ]}
+        summationFooterColumns={[
+          { value: "Totals", span: 2, tableCellProps: { sx: { fontWeight: "bold" } } },
+          {
+            reducer: (total, item) => total + (parseFloat(item.balance) < 0 ? 0 : parseFloat(item.balance) || 0),
+          },
+          {
+            reducer: (total, item) => total + (parseInt(item.issued_today) || 0),
+          },
+          {
+            reducer: (total, item) => {
+              const balance = parseFloat(item.balance) || 0;
+              const issued = parseInt(item.issued_today) || 0;
+              const remaining = balance - issued;
+              return total + (remaining < 0 ? 0 : remaining);
+            },
+          },
+          { value: "" },
         ]}
       />
     </Page>

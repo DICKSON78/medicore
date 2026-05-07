@@ -6,7 +6,11 @@ import PendingCashPatientItems from "./pending-cash-patients/PendingPatientItems
 import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatients";
 import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
 import PatientBills from "./patient-bills/PatientBills";
+import PartialPatientBills from "./patient-bills/PartialPatientBills";
 import PatientBill from "./patient-bills/PatientBill";
+import CompletedPayments from "./completed-payments/CompletedPayments";
+import InstallmentManagementRoutes from "./installment-management/InstallmentManagementRoutes";
+import InstallmentManagementDashboard from "./installment-management/InstallmentManagementDashboard";
 import Expenses from "../financial-management/expenses/Expenses";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
@@ -37,6 +41,11 @@ const PaymentCenterRoutes = () => {
         element={<PendingCreditPatientItems />}
       />
       <Route
+        path="/patient-bills/partial"
+        exact
+        element={<PartialPatientBills />}
+      />
+      <Route
         path="/patient-bills/:status"
         exact
         element={<PatientBills />}
@@ -44,6 +53,20 @@ const PaymentCenterRoutes = () => {
       <Route
         path="/patient-bills/:status/:patientId/:billId"
         element={<PatientBill />}
+      />
+      <Route
+        path="/installment-management"
+        exact
+        element={<InstallmentManagementDashboard />}
+      />
+      <Route
+        path="/installment-management/*"
+        element={<InstallmentManagementRoutes />}
+      />
+      <Route
+        path="/completed-payments"
+        exact
+        element={<CompletedPayments />}
       />
       <Route
         path="/expenses"

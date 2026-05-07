@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Stack, IconButton, Tooltip } from "@mui/material";
+import { Button, Card, CardContent, Divider, Stack, IconButton, Tooltip, Typography } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/RefreshRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -12,6 +12,7 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const DispensingRequests = ({ consultationType, stockItem }) => {
+  console.log('DispensingRequests Component Mounted:', { consultationType, stockItem });
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -87,12 +88,28 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
   // }, [consultationType, lockNotificationKey, unlockNotificationKey]);
 
   useEffect(() => {
+    console.log('DispensingRequests Debug:', { consultationType, stockItem, loading, error, data });
     if (error) {
       addToast({ message: formatError(error), severity: "error" });
     }
-  }, [error]);
+  }, [error, data, loading]);
 
   // Notification badges are now handled by the stable useDynamicNotifications hook in Menu component
+
+  console.log('DispensingRequests About to Render:', { consultationType, stockItem, loading, error, data });
+  
+  if (error) {
+    console.error('DispensingRequests Error:', error);
+    return (
+      <Page>
+        <Card>
+          <CardContent>
+            <Typography color="error">Error loading dispensing requests: {formatError(error)}</Typography>
+          </CardContent>
+        </Card>
+      </Page>
+    );
+  }
 
   return (
     <Page

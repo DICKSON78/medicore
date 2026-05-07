@@ -194,14 +194,20 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
           color: 'primary.main', 
           mr: 1,
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          minWidth: 80
         }}>
           {row.icon}
         </Box>
         <Typography 
           variant="caption" 
           color="text.secondary"
-          sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}
+          sx={{ 
+            fontWeight: 600, 
+            textTransform: 'uppercase', 
+            letterSpacing: 0.5,
+            minWidth: 150
+          }}
         >
           {row.label}
         </Typography>
@@ -212,7 +218,8 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
           sx={{ 
             fontWeight: 500,
             color: 'text.primary',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            minWidth: 200
           }}
         >
           {row.value}

@@ -197,6 +197,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
     $router->apiResource('/patient-item-payments', PatientItemPaymentsController::class);
 
+    $router->get('/patient-item-bills-summary', [PatientItemBillsController::class, 'summary']);
     $router->apiResource('/patient-item-bills', PatientItemBillsController::class);
     $router->patch('/patient-item-bills/{id}/clear', [PatientItemBillsController::class, 'clear']);
     $router->apiResource('/patient-item-bill-payments', PatientItemBillPaymentsController::class);
