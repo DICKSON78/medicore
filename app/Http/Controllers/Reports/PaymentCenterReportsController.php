@@ -34,19 +34,27 @@ class PaymentCenterReportsController extends Controller
         $patient_phone = $request->patient_phone;
         $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+
+        // Regular cash payments (non-installment)
         $item_payments = PatientItemPayment::with(['channel', 'creator'])
             ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
             ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+
+        // Installment payments - onyesha TU zile ambazo bill imekuwa Cleared siku hiyo hiyo
         $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
             ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
             ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+            // Onyesha tu bills zilizokamilika (Cleared)
+            ->where('pib.status', 'Cleared')
+            // Cleared_at lazima iwe siku moja na payment husika
+            ->whereRaw('DATE(pib.cleared_at) = DATE(patient_item_bill_payments.created_at)');
 
         if ($user->is_admin) {
             $item_payments->with(['creator.clinic']);
@@ -103,8 +111,27 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
         }
 
-        $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
-        $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
+        $item_payments->select(
+            DB::raw("'Cash' as transaction_type"),
+            'pt.first_name', 'pt.middle_name', 'pt.last_name',
+            'pch.patient_id', 'channel_id',
+            'patient_item_payments.amount',
+            'patient_item_payments.discount',
+            'patient_item_payments.created_at',
+            'patient_item_payments.created_by',
+            DB::raw('group_concat(it.name separator ", ") as items')
+        )->groupBy('patient_item_payments.id');
+
+        $bill_payments->select(
+            DB::raw("'Installment Completed' as transaction_type"),
+            'pt.first_name', 'pt.middle_name', 'pt.last_name',
+            'pch.patient_id', 'channel_id',
+            'patient_item_bill_payments.amount',
+            DB::raw('0 as discount'),
+            'patient_item_bill_payments.created_at',
+            'patient_item_bill_payments.created_by',
+            DB::raw('group_concat(it.name separator ", ") as items')
+        )->groupBy('patient_item_bill_payments.id');
 
         $data = $item_payments->union($bill_payments);
         $data->orderBy('created_at', 'desc');
