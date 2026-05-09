@@ -12,12 +12,6 @@ class PatientItemBillsController extends Controller
 {
     use ApiResponse;
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         $request->validate([
@@ -45,7 +39,6 @@ class PatientItemBillsController extends Controller
 
         if ($user->is_admin) {
             $data->with(['creator.clinic']);
-
             if ($clinic_id) {
                 $data->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -113,7 +106,8 @@ class PatientItemBillsController extends Controller
             $data->whereDate('created_at', '<=', $end_date);
         }
 
-        $data->orderBy('created_at', 'desc');
+        // Mpya juu — tumia updated_at ili mgonjwa alipelipa hivi karibuni atokee juu
+        $data->orderBy('updated_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -189,45 +183,24 @@ class PatientItemBillsController extends Controller
 
         $totalAmount = $data->sum('amount');
         $totalDiscount = $data->sum('discount');
-        
         $billIds = $data->pluck('id');
         $totalPaid = \App\Models\PatientItemBillPayment::whereIn('bill_id', $billIds)->sum('amount');
-
         $totalDebt = $totalAmount - $totalDiscount - $totalPaid;
 
         return $this->sendResponse(['total_debt' => $totalDebt], Response::HTTP_OK, 'Success.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $data = PatientItemBill::with(['creator', 'clearer', 'first_item.payment_cache.consultation'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $data = PatientItemBill::findOrFail($id);
@@ -238,23 +211,20 @@ class PatientItemBillsController extends Controller
     public function clear(Request $request, $id)
     {
         $data = PatientItemBill::findOrFail($id);
-        
-        // Calculate total paid amount
+
         $totalPaid = $data->payments()->sum('amount');
         $amountDue = $data->amount - $data->discount;
-        
-        // Only clear if fully paid
+
         if ($totalPaid < $amountDue) {
             return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Cannot clear bill: Payment is incomplete. Amount paid: ' . number_format($totalPaid) . ', Required: ' . number_format($amountDue));
         }
-        
+
         $data->update([
             'status' => 'Cleared',
             'cleared_at' => Carbon::now(),
             'cleared_by' => $request->user()->id,
         ]);
 
-        // Determine next department based on patient's treatment needs when bill is cleared
         if ($data->first_item) {
             $patient = $data->first_item->payment_cache->check_in->patient;
             $waitingTime = $patient->current_waiting_time;
@@ -266,173 +236,72 @@ class PatientItemBillsController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Cleared successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //
     }
 
-    /**
-     * Determine the next department for a patient based on their treatment needs
-     */
     private function determineNextDepartment($waitingTime, $paymentCache)
     {
-        // Check if patient has consultation that requires glasses FIRST
         $consultation = $paymentCache->consultation;
-        
-        // Also check if patient has glass items that require optician attention
+
         $hasGlassItems = $paymentCache->items()
             ->whereHas('consultation_type', function($query) {
                 $query->where('name', 'Glass');
             })
             ->count() > 0;
-        
+
         if (($consultation && $consultation->require_glass === 'Yes') || $hasGlassItems) {
-            // Patient needs glasses, send to optician (consultation department) FIRST
             $waitingTime->sendToConsultation();
-            
-            // If consultation exists, set sent_to_optician_at if not already set
+
             if ($consultation && !$consultation->sent_to_optician_at) {
                 $consultation->update([
                     'sent_to_optician_at' => now(),
                     'sent_to_optician_by' => $consultation->creator_id ?? null,
                 ]);
             }
-            
-            // If no consultation exists but patient has glass items, create one
+
             if (!$consultation && $hasGlassItems) {
-                // Find the first glass item to create consultation
                 $glassItem = $paymentCache->items()
                     ->whereHas('consultation_type', function($query) {
                         $query->where('name', 'Glass');
                     })
                     ->first();
-                
+
                 if ($glassItem) {
-                    $consultation = Consultation::create([
-                        'payment_cache_item_id' => $glassItem->id,
-                        'patient_direction' => 'Direct to Optician',
-                        'created_by' => $glassItem->creator_id ?? 1, // Default to system user if no creator
+                    \App\Models\Consultation::create([
+                        'patient_id' => $waitingTime->patient_id,
+                        'payment_cache_id' => $paymentCache->id,
                         'require_glass' => 'Yes',
                         'sent_to_optician_at' => now(),
-                        'sent_to_optician_by' => $glassItem->creator_id ?? 1,
+                        'created_by' => auth()->id(),
                     ]);
-                    
-                    $paymentCache->consultation_id = $consultation->id;
-                    $paymentCache->save();
                 }
             }
-            
-            \Log::info('Patient moved to consultation (optician) after bill cleared', [
-                'patient_id' => $waitingTime->patient_id,
-                'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',
-                'require_glass' => $consultation ? $consultation->require_glass : 'Yes (auto-created)',
-                'sent_to_optician_at' => $consultation ? $consultation->sent_to_optician_at : 'now',
-                'has_glass_items' => $hasGlassItems
-            ]);
             return;
         }
-        
-        // Only check for dispensing if patient doesn't have glass items
+
         $pendingItems = $paymentCache->items()
             ->where('status', '!=', 'Served')
             ->count();
-        
+
         if ($pendingItems > 0) {
-            // Patient has items that need dispensing (non-glass items)
             $waitingTime->sendToDispensing();
-            \Log::info('Patient moved to dispensing after bill cleared (non-glass items)', [
-                'patient_id' => $waitingTime->patient_id,
-                'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',
-                'pending_items' => $pendingItems
-            ]);
             return;
         }
 
-        // Check if patient has consultation that requires glasses
-        $consultation = $paymentCache->consultation;
-        
-        // Also check if patient has glass items that require optician attention
-        $hasGlassItems = $paymentCache->items()
-            ->whereHas('consultation_type', function($query) {
-                $query->where('name', 'Glass');
-            })
-            ->count() > 0;
-        
-        if (($consultation && $consultation->require_glass === 'Yes') || $hasGlassItems) {
-            // Patient needs glasses, send to optician (consultation department)
-            $waitingTime->sendToConsultation();
-            
-            // If consultation exists, set sent_to_optician_at if not already set
-            if ($consultation && !$consultation->sent_to_optician_at) {
-                $consultation->update([
-                    'sent_to_optician_at' => now(),
-                    'sent_to_optician_by' => $consultation->creator_id ?? null,
-                ]);
-            }
-            
-            // If no consultation exists but patient has glass items, create one
-            if (!$consultation && $hasGlassItems) {
-                // Find the first glass item to create consultation
-                $glassItem = $paymentCache->items()
-                    ->whereHas('consultation_type', function($query) {
-                        $query->where('name', 'Glass');
-                    })
-                    ->first();
-                
-                if ($glassItem) {
-                    $consultation = Consultation::create([
-                        'payment_cache_item_id' => $glassItem->id,
-                        'patient_direction' => 'Direct to Optician',
-                        'created_by' => $glassItem->creator_id ?? 1, // Default to system user if no creator
-                        'require_glass' => 'Yes',
-                        'sent_to_optician_at' => now(),
-                        'sent_to_optician_by' => $glassItem->creator_id ?? 1,
-                    ]);
-                    
-                    $paymentCache->consultation_id = $consultation->id;
-                    $paymentCache->save();
-                }
-            }
-            
-            \Log::info('Patient moved to consultation (optician) after bill cleared', [
-                'patient_id' => $waitingTime->patient_id,
-                'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',
-                'require_glass' => $consultation ? $consultation->require_glass : 'Yes (auto-created)',
-                'sent_to_optician_at' => $consultation ? $consultation->sent_to_optician_at : 'now',
-                'has_glass_items' => $hasGlassItems
-            ]);
-            return;
-        }
-
-        // Check if patient has any procedures scheduled
         $hasProcedures = $paymentCache->items()
             ->whereHas('item.consultation_type', function($query) {
                 $query->where('name', 'like', '%Surgery%')
                       ->orWhere('name', 'like', '%Procedure%');
             })
             ->count() > 0;
-        
+
         if ($hasProcedures) {
-            // Patient has procedures, send to procedure room
             $waitingTime->sendToProcedureRoom();
-            \Log::info('Patient moved to procedure room after bill cleared', [
-                'patient_id' => $waitingTime->patient_id,
-                'patient_name' => $waitingTime->patient->full_name ?? 'Unknown'
-            ]);
             return;
         }
 
-        // If no specific treatment needs, return to reception
         $waitingTime->returnToReception('Bill cleared - treatment complete');
-        \Log::info('Patient returned to reception after bill cleared - no further treatment needed', [
-            'patient_id' => $waitingTime->patient_id,
-            'patient_name' => $waitingTime->patient->full_name ?? 'Unknown'
-        ]);
     }
 }
