@@ -16,6 +16,13 @@ export default defineConfig({
       usePolling: true,
     },
   },
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8000',
+      changeOrigin: true,
+      secure: false,
+    },
+  },
   // Ensure production builds don't reference development server
   base: process.env.NODE_ENV === 'production' ? '/' : '/',
   optimizeDeps: {

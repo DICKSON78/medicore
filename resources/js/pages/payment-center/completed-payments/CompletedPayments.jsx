@@ -80,16 +80,9 @@ const CompletedPayments = () => {
     }
   }, [error]);
 
-  // Debug: Log data structure
-  useEffect(() => {
-    console.log('CompletedPayments - Data:', data);
-    console.log('CompletedPayments - Loading:', loading);
-    console.log('CompletedPayments - Error:', error);
-  }, [data, loading, error]);
-
   const getTotalCompletedAmount = () => {
     if (!data || !data.data) return 0;
-    return data.data.reduce((acc, bill) => acc + (bill.amount_paid || 0), 0) || 0;
+    return data.data.reduce((acc, bill) => acc + (parseFloat(bill.amount_paid) || 0), 0) || 0;
   };
 
   const getTotalBillsCount = () => {
@@ -153,135 +146,135 @@ const CompletedPayments = () => {
             </Box>
           ) : (
             <Table
-            loading={loading || summaryLoading}
-            columns={[
-              {
-                field: "index",
-                headerName: "S/N",
-                valueGetter: (item, index) =>
-                  params.per_page * (params.page - 1) + index + 1,
-                tableCellProps: { sx: { width: 80 } },
-              },
-              {
-                field: "full_name",
-                headerName: "Patient Name",
-                valueGetter: (item, index) =>
-                  item.first_item.payment_cache.check_in.patient.full_name,
-                tableCellProps: { sx: { width: 200 } },
-              },
-              {
-                field: "patient_id",
-                headerName: "Patient Number",
-                valueGetter: (item, index) =>
-                  item.first_item.payment_cache.check_in.patient_id,
-                tableCellProps: { sx: { width: 120 } },
-              },
-              {
-                field: "phone",
-                headerName: "Phone Number",
-                valueGetter: (item, index) =>
-                  item.first_item.payment_cache.check_in.patient.phone,
-                tableCellProps: { sx: { width: 150 } },
-              },
-              {
-                field: "total_amount",
-                headerName: "Total Bill",
-                valueGetter: (item) => numberFormat(item.amount || 0),
-                tableCellProps: { sx: { width: 120 } },
-              },
-              {
-                field: "discount",
-                headerName: "Discount",
-                valueGetter: (item) => numberFormat(item.discount || 0),
-                tableCellProps: { sx: { width: 100 } },
-              },
-              {
-                field: "amount_paid",
-                headerName: "Amount Paid",
-                valueGetter: (item) => numberFormat(item.amount_paid || 0),
-                tableCellProps: { sx: { width: 120 } },
-              },
-              {
-                field: "payment_completion",
-                headerName: "Payment Status",
-                renderCell: (item) => {
-                  const netAmount = (item.amount || 0) - (item.discount || 0);
-                  const paidAmount = item.amount_paid || 0;
-                  const isFullyPaid = paidAmount >= netAmount;
-                  
-                  return (
-                    <Chip
-                      label={isFullyPaid ? "Fully Paid" : "Partial"}
-                      color={isFullyPaid ? "success" : "warning"}
-                      size="small"
-                    />
-                  );
+              loading={loading || summaryLoading}
+              columns={[
+                {
+                  field: "index",
+                  headerName: "S/N",
+                  valueGetter: (item, index) =>
+                    params.per_page * (params.page - 1) + index + 1,
+                  tableCellProps: { sx: { width: 80 } },
                 },
-                tableCellProps: { sx: { width: 120 } },
-              },
-              {
-                field: "cleared_by",
-                headerName: "Cleared By",
-                valueGetter: (item, index) => item.clearer?.full_name,
-                tableCellProps: { sx: { width: 150 } },
-              },
-              {
-                field: "cleared_at",
-                headerName: "Date Cleared",
-                tableCellProps: { sx: { width: 150 } },
-              },
-              {
-                field: "created_at",
-                headerName: "Date Created",
-                tableCellProps: { sx: { width: 150 } },
-              },
-              {
-                field: "actions",
-                headerName: "Actions",
-                tableCellProps: { sx: { width: 100 } },
-                renderCell: (item) => (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    divider={
-                      <Divider
-                        orientation="vertical"
-                        sx={{ height: 16 }}
+                {
+                  field: "full_name",
+                  headerName: "Patient Name",
+                  valueGetter: (item, index) =>
+                    item.first_item.payment_cache.check_in.patient.full_name,
+                  tableCellProps: { sx: { width: 200 } },
+                },
+                {
+                  field: "patient_id",
+                  headerName: "Patient Number",
+                  valueGetter: (item, index) =>
+                    item.first_item.payment_cache.check_in.patient_id,
+                  tableCellProps: { sx: { width: 120 } },
+                },
+                {
+                  field: "phone",
+                  headerName: "Phone Number",
+                  valueGetter: (item, index) =>
+                    item.first_item.payment_cache.check_in.patient.phone,
+                  tableCellProps: { sx: { width: 150 } },
+                },
+                {
+                  field: "total_amount",
+                  headerName: "Total Bill",
+                  valueGetter: (item) => numberFormat(parseFloat(item.amount) || 0),
+                  tableCellProps: { sx: { width: 120 } },
+                },
+                {
+                  field: "discount",
+                  headerName: "Discount",
+                  valueGetter: (item) => numberFormat(parseFloat(item.discount) || 0),
+                  tableCellProps: { sx: { width: 100 } },
+                },
+                {
+                  field: "amount_paid",
+                  headerName: "Amount Paid",
+                  valueGetter: (item) => numberFormat(parseFloat(item.amount_paid) || 0),
+                  tableCellProps: { sx: { width: 120 } },
+                },
+                {
+                  field: "payment_completion",
+                  headerName: "Payment Status",
+                  renderCell: (item) => {
+                    const netAmount = (parseFloat(item.amount) || 0) - (parseFloat(item.discount) || 0);
+                    const paidAmount = parseFloat(item.amount_paid) || 0;
+                    const isFullyPaid = paidAmount >= netAmount;
+
+                    return (
+                      <Chip
+                        label={isFullyPaid ? "Fully Paid" : "Partial"}
+                        color={isFullyPaid ? "success" : "warning"}
+                        size="small"
                       />
-                    }
-                    spacing={1}
-                  >
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() =>
-                        navigate(
-                          `/payment-center/patient-bills/cleared/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`
-                        )
+                    );
+                  },
+                  tableCellProps: { sx: { width: 120 } },
+                },
+                {
+                  field: "cleared_by",
+                  headerName: "Cleared By",
+                  valueGetter: (item, index) => item.clearer?.full_name,
+                  tableCellProps: { sx: { width: 150 } },
+                },
+                {
+                  field: "cleared_at",
+                  headerName: "Date Cleared",
+                  tableCellProps: { sx: { width: 150 } },
+                },
+                {
+                  field: "created_at",
+                  headerName: "Date Created",
+                  tableCellProps: { sx: { width: 150 } },
+                },
+                {
+                  field: "actions",
+                  headerName: "Actions",
+                  tableCellProps: { sx: { width: 100 } },
+                  renderCell: (item) => (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      divider={
+                        <Divider
+                          orientation="vertical"
+                          sx={{ height: 16 }}
+                        />
                       }
+                      spacing={1}
                     >
-                      View
-                    </Button>
-                  </Stack>
-                ),
-              },
-            ]}
-            items={data.data}
-            itemCount={data.total}
-            page={params.page}
-            pageSize={params.per_page}
-            onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) =>
-              setParams({ ...params, per_page: value, page: 1 })
-            }
-            footerItems={[
-              [
-                { value: "TOTAL COMPLETED PAYMENTS", tableCellProps: { colSpan: 7, sx: { fontWeight: 'bold' } } },
-                { value: numberFormat(getTotalCompletedAmount()), tableCellProps: { sx: { fontWeight: 'bold', color: 'success.main' } } },
-                { value: "", tableCellProps: { colSpan: 3 } }
-              ],
-            ]}
-          />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            `/payment-center/patient-bills/cleared/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`
+                          )
+                        }
+                      >
+                        View
+                      </Button>
+                    </Stack>
+                  ),
+                },
+              ]}
+              items={data.data}
+              itemCount={data.total}
+              page={params.page}
+              pageSize={params.per_page}
+              onPageChange={(page) => setParams({ ...params, page })}
+              onPageSizeChange={(value) =>
+                setParams({ ...params, per_page: value, page: 1 })
+              }
+              footerItems={[
+                [
+                  { value: "TOTAL COMPLETED PAYMENTS", tableCellProps: { colSpan: 7, sx: { fontWeight: 'bold' } } },
+                  { value: numberFormat(getTotalCompletedAmount()), tableCellProps: { sx: { fontWeight: 'bold', color: 'success.main' } } },
+                  { value: "", tableCellProps: { colSpan: 3 } }
+                ],
+              ]}
+            />
           )}
         </CardContent>
       </Card>

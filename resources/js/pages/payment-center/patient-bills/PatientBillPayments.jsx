@@ -143,7 +143,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
   };
 
   const getTotalAmount = () => {
-    return billPayments.reduce((acc, e) => acc + e.amount, 0);
+    return billPayments.reduce((acc, e) => acc + (parseFloat(e.amount) || 0), 0);
   };
 
   return (
@@ -240,7 +240,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                       field: "amount",
                       headerName: "Amount",
                       valueGetter: (item, index) =>
-                        numberFormat(item.amount || 0),
+                        numberFormat(parseFloat(item.amount) || 0),
                     },
                     {
                       field: "created_by",

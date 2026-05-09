@@ -99,6 +99,7 @@ const SelectItems = ({
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       item_type: itemType,
       lens_type_id: lensTypeId,
+      stock_status: consultationType === "Pharmacy" || consultationType === "Medicine" ? "In Stock" : undefined,
     },
     false,
     [],
@@ -316,24 +317,32 @@ const SelectItems = ({
                 </React.Fragment>
               ) : null}
               <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
-                {items.map((e) => (
-                  <FormControlLabel
-                    key={e.id}
-                    control={
-                      <Radio
-                        size="small"
-                        checked={selectedItem === e}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            setSelectedItem(e);
-                          }
-                        }}
-                      />
-                    }
-                    label={<Typography variant="body2">{e.name}</Typography>}
-                    sx={{ display: "flex" }}
-                  />
-                ))}
+                {items.length === 0 && !loadingItems ? (
+                  <Typography variant="body2" color="text.secondary" textAlign="center" mt={2}>
+                    {consultationType === "Pharmacy" || consultationType === "Medicine"
+                      ? "No medicines in stock available."
+                      : "No items found."}
+                  </Typography>
+                ) : (
+                  items.map((e) => (
+                    <FormControlLabel
+                      key={e.id}
+                      control={
+                        <Radio
+                          size="small"
+                          checked={selectedItem === e}
+                          onChange={(event) => {
+                            if (event.target.checked) {
+                              setSelectedItem(e);
+                            }
+                          }}
+                        />
+                      }
+                      label={<Typography variant="body2">{e.name}</Typography>}
+                      sx={{ display: "flex" }}
+                    />
+                  ))
+                )}
               </CardContent>
             </Card>
           </Grid>
