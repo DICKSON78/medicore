@@ -60,30 +60,28 @@ const Stocktaking = () => {
   const [expirationDate, setExpirationDate] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
+  const isMedicine = itemType === "Pharmaceutical";
+
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
     "api/lens-types",
-    {
-      status: "Active",
-      per_page: 500,
-    },
+    { status: "Active", per_page: 500 },
     false,
     [],
     (response) => response.data.data.data
   );
 
+  // Fetch regular items (Lens, Frame, Others, Service)
   const {
-    data: items,
-    setData: setItems,
-    loading: loadingItems,
-    error: itemsError,
-    handleFetch: fetchItems,
+    data: regularItems,
+    loading: loadingRegularItems,
+    handleFetch: fetchRegularItems,
   } = useFetch(
     "api/items",
     {
       status: "Active",
       per_page: 5000,
       is_stock_item: "Yes",
-      include_all_stock: "Yes", // Bypass balance/expiry filtering for stocktaking
+      include_all_stock: "Yes",
       q: itemName,
       item_type: itemType,
       lens_type_id: lensTypeId,
@@ -93,12 +91,30 @@ const Stocktaking = () => {
     (response) => response.data.data.data
   );
 
+  // Fetch medicines (Pharmaceutical)
+  const {
+    data: medicineItems,
+    loading: loadingMedicineItems,
+    handleFetch: fetchMedicineItems,
+  } = useFetch(
+    "api/medicines",
+    {
+      status: "Active",
+      per_page: 5000,
+      q: itemName,
+    },
+    false,
+    { data: [], total: 0 },
+    (response) => response.data.data.data
+  );
+
+  // Combined items based on type selected
+  const items = isMedicine ? (Array.isArray(medicineItems) ? medicineItems : []) : (Array.isArray(regularItems) ? regularItems : []);
+  const loadingItems = isMedicine ? loadingMedicineItems : loadingRegularItems;
+
   const { data, loading, error, handlePost, setError } = usePost(
     "api/stocktakes",
-    {
-      reason,
-      items: selectedItems,
-    }
+    { reason, items: selectedItems }
   );
 
   useEffect(() => {
@@ -106,44 +122,23 @@ const Stocktaking = () => {
   }, []);
 
   useEffect(() => {
-    if (itemType !== "Lens") {
-      setLensTypeId(null);
-    }
-
-    if (itemType === "Lens") {
-      fetchLensTypes();
-    }
+    if (itemType !== "Lens") setLensTypeId(null);
+    if (itemType === "Lens") fetchLensTypes();
   }, [itemType]);
 
   useEffect(() => {
-    // Fetch items when filters change
-    fetchItems();
-  }, [itemName, itemType, lensTypeId]);
-
-  useEffect(() => {
-    if (itemsError) {
-      addToast({ message: formatError(itemsError), severity: "error" });
+    if (!itemType) return;
+    if (isMedicine) {
+      fetchMedicineItems();
+    } else {
+      fetchRegularItems();
     }
-  }, [itemsError]);
-
-  // Error boundary for component
-  useEffect(() => {
-    const handleError = (error) => {
-      console.error("Stocktaking component error:", error);
-      addToast({ message: "An error occurred. Please refresh the page.", severity: "error" });
-    };
-
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
+  }, [itemName, itemType, lensTypeId]);
 
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
-      // Navigate back to dashboard after successful stocktake
-      setTimeout(() => {
-        navigate('/inventory-management/dashboard');
-      }, 1500);
+      setTimeout(() => navigate("/inventory-management/dashboard"), 1500);
     }
   }, [data, navigate]);
 
@@ -154,43 +149,33 @@ const Stocktaking = () => {
   }, [error]);
 
   const handleAddItem = () => {
-    try {
-      if (!selectedItem) {
-        addToast({ message: "Please select an item first.", severity: "warning" });
-        return;
-      }
-
-      if (!quantity || quantity <= 0) {
-        addToast({ message: "Please enter a valid quantity.", severity: "warning" });
-        return;
-      }
-
-      if (!unitBuyingPrice || unitBuyingPrice <= 0) {
-        addToast({ message: "Please enter a valid unit buying price.", severity: "warning" });
-        return;
-      }
-
-      setSelectedItems([
-        ...selectedItems,
-        {
-          item_id: selectedItem.id,
-          item_name: selectedItem.name,
-          quantity,
-          unit_buying_price: unitBuyingPrice,
-          selling_price: sellingPrice,
-          expiration_date: expirationDate,
-        },
-      ]);
-
-      setSelectedItem(null);
-      setQuantity(null);
-      setUnitBuyingPrice(null);
-      setSellingPrice(null);
-      setExpirationDate(null);
-    } catch (error) {
-      console.error("Error adding item:", error);
-      addToast({ message: "Error adding item. Please try again.", severity: "error" });
+    if (!selectedItem) {
+      addToast({ message: "Please select an item first.", severity: "warning" });
+      return;
     }
+    if (!quantity || quantity <= 0) {
+      addToast({ message: "Please enter a valid quantity.", severity: "warning" });
+      return;
+    }
+
+    setSelectedItems([
+      ...selectedItems,
+      {
+        item_id: selectedItem.id,
+        item_name: selectedItem.name,
+        item_source: isMedicine ? "medicine" : "item", // track source
+        quantity,
+        unit_buying_price: unitBuyingPrice,
+        selling_price: sellingPrice,
+        expiration_date: expirationDate,
+      },
+    ]);
+
+    setSelectedItem(null);
+    setQuantity(null);
+    setUnitBuyingPrice(null);
+    setSellingPrice(null);
+    setExpirationDate(null);
   };
 
   const handleRemoveItem = (index) => {
@@ -201,9 +186,7 @@ const Stocktaking = () => {
     setError(null);
 
     if (!reasonRef.current.validate()) {
-      return setError(
-        getValidationError("Please write reason for this stocktaking.")
-      );
+      return setError(getValidationError("Please write reason for this stocktaking."));
     }
 
     if (!selectedItems.length) {
@@ -236,17 +219,8 @@ const Stocktaking = () => {
         <PageHeader title="Stocktaking" />
         <Divider />
         <CardContent>
-          <Grid
-            container
-            spacing={2}
-            mb={2}
-          >
-            <Grid
-              item
-              md={3.5}
-              sm={12}
-              xs={12}
-            >
+          <Grid container spacing={2} mb={2}>
+            <Grid item md={3.5} sm={12} xs={12}>
               <TextField
                 ref={reasonRef}
                 label="Reason"
@@ -255,12 +229,7 @@ const Stocktaking = () => {
                 onChange={(value) => setReason(value)}
               />
             </Grid>
-            <Grid
-              item
-              md={3}
-              sm={12}
-              xs={12}
-            >
+            <Grid item md={3} sm={12} xs={12}>
               <TextField
                 disabled
                 label="Prepared By"
@@ -271,24 +240,14 @@ const Stocktaking = () => {
             </Grid>
           </Grid>
 
-          <Grid
-            container
-            spacing={2}
-          >
-            <Grid
-              item
-              md={3.5}
-              sm={12}
-              xs={12}
-            >
+          <Grid container spacing={2}>
+            <Grid item md={3.5} sm={12} xs={12}>
               <Card variant="outlined">
                 <CardHeader
                   title="Select Item"
                   action={
                     <SearchTextField
-                      onChange={(value) =>
-                        throttle(() => setItemName(value), 1000)
-                      }
+                      onChange={(value) => throttle(() => setItemName(value), 1000)}
                     />
                   }
                   className="no-action-margin"
@@ -300,9 +259,9 @@ const Stocktaking = () => {
                     fullWidth
                     clearable
                     options={["Pharmaceutical", "Lens", "Frame", "Others", "Service"]}
-                    onChange={(value) => setItemType(value)}
+                    onChange={(value) => { setItemType(value); setSelectedItem(null); }}
                   />
-                  {itemType === "Lens" ? (
+                  {itemType === "Lens" && (
                     <Select
                       placeholder="Lens Type"
                       fullWidth
@@ -313,11 +272,15 @@ const Stocktaking = () => {
                       onChange={(value) => setLensTypeId(value)}
                       containerProps={{ mt: 2 }}
                     />
-                  ) : null}
+                  )}
                 </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
-                  {loadingItems ? (
+                  {!itemType ? (
+                    <Typography variant="body2" color="text.secondary" textAlign="center">
+                      Select an item type to load items.
+                    </Typography>
+                  ) : loadingItems ? (
                     <Stack spacing={1}>
                       {[...Array(5)].map((_, index) => (
                         <Skeleton key={index} variant="rectangular" height={40} />
@@ -334,7 +297,16 @@ const Stocktaking = () => {
                             onChange={() => setSelectedItem(e)}
                           />
                         }
-                        label={<Typography variant="body2">{e.name}</Typography>}
+                        label={
+                          <Typography variant="body2">
+                            {e.name}
+                            {isMedicine && (
+                              <Typography variant="caption" color={parseFloat(e.balance) > 0 ? "success.main" : "error.main"} sx={{ ml: 1 }}>
+                                (Stock: {parseFloat(e.balance) || 0})
+                              </Typography>
+                            )}
+                          </Typography>
+                        }
                         sx={{ display: "flex", cursor: "pointer" }}
                         onClick={() => setSelectedItem(e)}
                       />
@@ -348,61 +320,32 @@ const Stocktaking = () => {
               </Card>
             </Grid>
 
-            <Grid
-              item
-              md={8.5}
-              sm={12}
-              xs={12}
-            >
-              <Card
-                variant="outlined"
-                sx={{ mb: 1 }}
-              >
+            <Grid item md={8.5} sm={12} xs={12}>
+              <Card variant="outlined" sx={{ mb: 1 }}>
                 <CardHeader title="Added Items" />
                 <Divider />
                 <CardContent>
-                  {selectedItem ? (
-                    <Grid
-                      container
-                      spacing={1}
-                      alignItems="flex-end"
-                      mb={2}
-                    >
-                      <Grid
-                        item
-                        md={4}
-                        sm={4}
-                        xs={12}
-                      >
+                  {selectedItem && (
+                    <Grid container spacing={1} alignItems="flex-end" mb={2}>
+                      <Grid item md={4} sm={4} xs={12}>
                         <TextField
                           ref={itemRef}
-                          disabled={true}
+                          disabled
                           label="Selected Item"
                           fullWidth
                           required
                           value={selectedItem.name || ""}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={3}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid item md={3} sm={4} xs={12}>
                         <TextField
-                          disabled={true}
+                          disabled
                           label="Unit of Measure"
                           fullWidth
-                          required
                           value={selectedItem.unit_of_measure?.name || ""}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid item md={2} sm={4} xs={12}>
                         <TextField
                           ref={quantityRef}
                           label="Quantity"
@@ -411,8 +354,7 @@ const Stocktaking = () => {
                           defaultValue={quantity}
                           rules={[
                             validationRules.number,
-                            (value) =>
-                              value > 0 || "Quantity has to be greater than 0.",
+                            (value) => value > 0 || "Quantity has to be greater than 0.",
                           ]}
                           onChange={(value) => {
                             value = validateInteger(value);
@@ -420,44 +362,19 @@ const Stocktaking = () => {
                           }}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid item md={2} sm={4} xs={12}>
                         <TextField
                           ref={unitBuyingPriceRef}
                           label="Unit Buying Price"
                           fullWidth
                           defaultValue={unitBuyingPrice}
-                          rules={[
-                            (value) => {
-                              value = (value || "").trim();
-                              return !value
-                                ? true
-                                : validationRules.number(value);
-                            },
-                            (value) => {
-                              value = (value || "").trim();
-                              return !value
-                                ? true
-                                : value > 0 ||
-                                    "Price has to be greater than 0.";
-                            },
-                          ]}
                           onChange={(value) => {
                             value = validateInteger(value);
                             setUnitBuyingPrice(value);
                           }}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid item md={2} sm={4} xs={12}>
                         <TextField
                           label="Selling Price"
                           fullWidth
@@ -470,12 +387,7 @@ const Stocktaking = () => {
                           }}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid item md={2} sm={4} xs={12}>
                         <DatePicker
                           label="Expiration Date"
                           fullWidth
@@ -483,12 +395,7 @@ const Stocktaking = () => {
                           onChange={(value) => setExpirationDate(value)}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={1}
-                        sm={2}
-                        xs={12}
-                      >
+                      <Grid item md={1} sm={2} xs={12}>
                         <Button
                           disabled={loading}
                           fullWidth
@@ -501,7 +408,7 @@ const Stocktaking = () => {
                         </Button>
                       </Grid>
                     </Grid>
-                  ) : null}
+                  )}
 
                   <Table
                     columns={[
@@ -517,26 +424,25 @@ const Stocktaking = () => {
                       {
                         field: "quantity",
                         headerName: "Quantity",
-                        valueGetter: (item, index) =>
-                          numberFormat(item.quantity || 0),
+                        valueGetter: (item) => numberFormat(item.quantity || 0),
                       },
                       {
                         field: "unit_buying_price",
                         headerName: "Unit Buying Price",
-                        valueGetter: (item, index) =>
-                          numberFormat(item.unit_buying_price || 0),
+                        valueGetter: (item) => numberFormat(item.unit_buying_price || 0),
                       },
                       {
                         field: "selling_price",
                         headerName: "Selling Price",
-                        valueGetter: (item, index) =>
-                          numberFormat(item.selling_price || 0),
+                        valueGetter: (item) => numberFormat(item.selling_price || 0),
                       },
                       {
                         field: "expiration_date",
                         headerName: "Expiration Date",
-                        valueGetter: (item, index) =>
-                          item.expiration_date ? new Date(item.expiration_date).toLocaleDateString() : "-",
+                        valueGetter: (item) =>
+                          item.expiration_date
+                            ? new Date(item.expiration_date).toLocaleDateString()
+                            : "-",
                       },
                       {
                         field: "actions",
@@ -544,10 +450,7 @@ const Stocktaking = () => {
                         renderCell: (item, index) => (
                           <Tooltip title="Remove">
                             <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleRemoveItem(index)}
-                              >
+                              <IconButton size="small" onClick={() => handleRemoveItem(index)}>
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
                             </span>
@@ -566,19 +469,8 @@ const Stocktaking = () => {
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="flex-end"
-          flexWrap="wrap"
-          p={2}
-        >
-          <Button
-            disabled={loading || !!data}
-            variant="contained"
-            onClick={confirmSubmit}
-          >
+        <Stack direction="row" spacing={2} alignItems="center" justifyContent="flex-end" flexWrap="wrap" p={2}>
+          <Button disabled={loading || !!data} variant="contained" onClick={confirmSubmit}>
             Save
           </Button>
         </Stack>

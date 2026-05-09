@@ -68,29 +68,59 @@ class StocktakesController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        try {
-            $request->validate([
-                'reason' => 'required',
-                'items' => 'required|array',
-                'items.*.item_id' => 'required|exists:items,id',
-                'items.*.quantity' => 'required|numeric|min:1',
-                'items.*.unit_buying_price' => 'nullable|numeric|min:0',
-                'items.*.selling_price' => 'nullable|numeric|min:0',
-                'items.*.expiration_date' => 'nullable|date',
-            ]);
+   public function store(Request $request)
+{
+    try {
+        $request->validate([
+            'reason' => 'required',
+            'items' => 'required|array',
+            'items.*.item_id' => 'required|integer',
+            'items.*.item_source' => 'nullable|in:item,medicine',
+            'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.unit_buying_price' => 'nullable|numeric|min:0',
+            'items.*.selling_price' => 'nullable|numeric|min:0',
+            'items.*.expiration_date' => 'nullable|date',
+        ]);
 
-            $user = $request->user();
-            $input = $request->only('reason');
-            $input['created_by'] = $user->id;
-            $data = Stocktake::create($input);
+        $user = $request->user();
+        $input = $request->only('reason');
+        $input['created_by'] = $user->id;
+        $data = Stocktake::create($input);
 
-            if ($data) {
-                $input_items = $request->json('items');
+        if ($data) {
+            $input_items = $request->json('items');
 
-                foreach ($input_items as &$input_item) {
-                    // if this item is a stock item, continue
+            foreach ($input_items as &$input_item) {
+                $source = $input_item['item_source'] ?? 'item';
+
+                if ($source === 'medicine') {
+                    // Update medicine balance
+                    $medicine = \App\Models\Medicine::where('id', $input_item['item_id'])
+                        ->where('status', 'Active')
+                        ->first();
+
+                    if ($medicine) {
+                        $input_item['stocktake_id'] = $data->id;
+                        $stocktake_item = StocktakeItem::create([
+                            'stocktake_id' => $data->id,
+                            'item_id' => $input_item['item_id'],
+                            'quantity' => $input_item['quantity'],
+                            'unit_buying_price' => $input_item['unit_buying_price'] ?? null,
+                            'selling_price' => $input_item['selling_price'] ?? null,
+                            'expiration_date' => $input_item['expiration_date'] ?? null,
+                        ]);
+
+                        if ($stocktake_item) {
+                            $medicine->update([
+                                'balance' => $input_item['quantity'],
+                                'unit_buying_price' => $input_item['unit_buying_price'] ?? $medicine->unit_buying_price,
+                                'selling_price' => $input_item['selling_price'] ?? $medicine->selling_price,
+                                'expiry_date' => $input_item['expiration_date'] ?? $medicine->expiry_date,
+                            ]);
+                        }
+                    }
+                } else {
+                    // Regular item (Lens, Frame, etc.)
                     $item = Item::where('id', $input_item['item_id'])
                         ->where('is_stock_item', 'Yes')
                         ->first();
@@ -101,22 +131,21 @@ class StocktakesController extends Controller
 
                         if ($stocktake_item) {
                             $item->update([
-                                'balance' => $stocktake_item->quantity, // Use balance instead of new_balance
+                                'balance' => $stocktake_item->quantity,
                                 'unit_buying_price' => $stocktake_item->unit_buying_price,
-                                // Note: expiry_date column doesn't exist in items table
                             ]);
                         }
                     }
                 }
             }
-
-            return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
-        } catch (\Exception $e) {
-            \Log::error('Stocktake creation error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
-            return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Error creating stocktake: ' . $e->getMessage());
         }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+    } catch (\Exception $e) {
+        \Log::error('Stocktake creation error: ' . $e->getMessage());
+        return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Error creating stocktake: ' . $e->getMessage());
     }
+}
 
     /**
      * Display the specified resource.
