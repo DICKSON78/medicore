@@ -34,13 +34,13 @@ class MedicinesController extends Controller
                 $clinic_id = $user->clinic_id;
             }
 
-            $report_period = $request->get('report_period', 'daily');
+            $report_period = $request->get('report_period', 'weekly');
 
             $query = Medicine::with(['clinic', 'unit_of_measure', 'item_type', 'consultation_type'])
                 ->withCount(['medicine_dispensations as issued_today' => function ($q) use ($report_period) {
                     switch ($report_period) {
-                        case 'weekly':
-                            $q->where('created_at', '>=', now()->startOfWeek());
+                        case 'daily':
+                            $q->whereDate('created_at', now()->toDateString());
                             break;
                         case 'monthly':
                             $q->where('created_at', '>=', now()->startOfMonth());
@@ -48,8 +48,8 @@ class MedicinesController extends Controller
                         case 'yearly':
                             $q->where('created_at', '>=', now()->startOfYear());
                             break;
-                        default: // daily
-                            $q->whereDate('created_at', now()->toDateString());
+                        default: // weekly
+                            $q->where('created_at', '>=', now()->startOfWeek());
                             break;
                     }
                 }])

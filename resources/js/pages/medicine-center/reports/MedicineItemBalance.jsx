@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Stack, Tooltip, IconButton } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/RefreshRounded";
-
+import { Stack } from "@mui/material";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import { SearchTextField } from "../../../components/Table";
 import Select from "../../../components/Select";
-
 import { numberFormat, throttle } from "../../../helpers";
 
 const MedicineItemBalance = ({ module, consultationType }) => {
@@ -22,16 +19,11 @@ const MedicineItemBalance = ({ module, consultationType }) => {
 
   const getReportPeriodTitle = () => {
     switch (params.report_period) {
-      case "daily":
-        return "Daily Report";
-      case "weekly":
-        return "Weekly Report";
-      case "monthly":
-        return "Monthly Report";
-      case "yearly":
-        return "Yearly Report";
-      default:
-        return "";
+      case "daily": return "Daily Report";
+      case "weekly": return "Weekly Report";
+      case "monthly": return "Monthly Report";
+      case "yearly": return "Yearly Report";
+      default: return "";
     }
   };
 
@@ -60,9 +52,7 @@ const MedicineItemBalance = ({ module, consultationType }) => {
               optionsLabel="name"
               optionsValue="id"
               value={params.report_period}
-              onChange={(value) =>
-                setParams({ ...params, report_period: value })
-              }
+              onChange={(value) => setParams({ ...params, report_period: value })}
               sx={{ minWidth: 180 }}
             />
             <SearchTextField
@@ -83,18 +73,21 @@ const MedicineItemBalance = ({ module, consultationType }) => {
             tableCellProps: { sx: { width: 250 } },
           },
           {
-            field: "balance",
+            field: "total_items",
             headerName: "Total Items",
             tableCellProps: { sx: { width: 120 } },
             valueGetter: (item) => {
+              // Stock ya awali = balance iliyobaki + zilizotolewa
               const balance = parseFloat(item.balance) || 0;
-              return numberFormat(balance < 0 ? 0 : balance);
+              const issued = parseInt(item.issued_today) || 0;
+              const total = balance + issued;
+              return numberFormat(total < 0 ? 0 : total);
             },
           },
           {
             field: "issued_today",
-            headerName: "Issued Per Day",
-            tableCellProps: { sx: { width: 120 } },
+            headerName: "Issued Per Period",
+            tableCellProps: { sx: { width: 140 } },
             valueGetter: (item) => {
               const issued = parseInt(item.issued_today) || 0;
               return numberFormat(issued);
@@ -105,10 +98,9 @@ const MedicineItemBalance = ({ module, consultationType }) => {
             headerName: "Remain Stock",
             tableCellProps: { sx: { width: 120 } },
             valueGetter: (item) => {
+              // Remain stock = balance ya sasa (inapungua baada ya dispensing)
               const balance = parseFloat(item.balance) || 0;
-              const issued = parseInt(item.issued_today) || 0;
-              const remaining = balance - issued;
-              return numberFormat(remaining < 0 ? 0 : remaining);
+              return numberFormat(balance < 0 ? 0 : balance);
             },
           },
           {
@@ -124,7 +116,6 @@ const MedicineItemBalance = ({ module, consultationType }) => {
                 month: "short",
                 day: "numeric",
               });
-              // Mark expired items
               if (expiryDate < now) {
                 return `${formattedDate} (Expired)`;
               }
@@ -133,20 +124,22 @@ const MedicineItemBalance = ({ module, consultationType }) => {
           },
         ]}
         summationFooterColumns={[
-          { value: "Totals", span: 2, tableCellProps: { sx: { fontWeight: "bold" } } },
+          { value: "Totals", span: 1, tableCellProps: { sx: { fontWeight: "bold" } } },
           {
-            reducer: (total, item) => total + (parseFloat(item.balance) < 0 ? 0 : parseFloat(item.balance) || 0),
-          },
-          {
-            reducer: (total, item) => total + (parseInt(item.issued_today) || 0),
-          },
-          {
+            // Total Items = balance + issued
             reducer: (total, item) => {
               const balance = parseFloat(item.balance) || 0;
               const issued = parseInt(item.issued_today) || 0;
-              const remaining = balance - issued;
-              return total + (remaining < 0 ? 0 : remaining);
+              return total + (balance + issued < 0 ? 0 : balance + issued);
             },
+          },
+          {
+            // Issued per period
+            reducer: (total, item) => total + (parseInt(item.issued_today) || 0),
+          },
+          {
+            // Remain stock = balance ya sasa
+            reducer: (total, item) => total + (parseFloat(item.balance) < 0 ? 0 : parseFloat(item.balance) || 0),
           },
           { value: "" },
         ]}
