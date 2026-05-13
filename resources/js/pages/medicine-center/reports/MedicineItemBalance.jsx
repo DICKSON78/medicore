@@ -122,6 +122,7 @@ const MedicineItemBalance = ({ module, consultationType }) => {
         summationFooterColumns={[
           {
             value: "Totals",
+            span:2,
             tableCellProps: { sx: { fontWeight: "bold" } },
           },
           {
