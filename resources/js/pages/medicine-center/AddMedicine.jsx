@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   IconButton,
@@ -25,198 +24,132 @@ import TextField from "../../components/TextField";
 import DatePicker from "../../components/DatePicker";
 import Select from "../../components/Select";
 import Table from "../../components/Table";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
-import {
-  formatError,
-  getValidationError,
-  numberFormat,
-} from "../../helpers";
+import { formatError, numberFormat } from "../../helpers";
+
+// item_type_id: 2 = Pharmaceutical, consultation_type_id: 1 = Pharmacy
+const MEDICINE_ITEM_TYPE_ID = 2;
+const MEDICINE_CONSULTATION_TYPE_ID = 1;
 
 const AddMedicine = () => {
   const addToast = useToast();
   const navigate = useNavigate();
 
   const medicineNameRef = useRef();
-  const codeRef = useRef();
   const unitOfMeasureRef = useRef();
   const quantityRef = useRef();
-  const unitBuyingPriceRef = useRef();
-  const sellingPriceRef = useRef();
 
   const [medicineName, setMedicineName] = useState("");
   const [code, setCode] = useState("");
-  const [genericName, setGenericName] = useState("");
-  const [brandName, setBrandName] = useState("");
   const [unitOfMeasureId, setUnitOfMeasureId] = useState("");
   const [quantity, setQuantity] = useState("");
   const [unitBuyingPrice, setUnitBuyingPrice] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
   const [expirationDate, setExpirationDate] = useState(null);
   const [minimumStock, setMinimumStock] = useState("");
   const [selectedMedicines, setSelectedMedicines] = useState([]);
   const [hasShownSuccess, setHasShownSuccess] = useState(false);
 
-  // Fetch units of measure
-  const { data: unitsOfMeasureResponse, loading: unitsLoading, error: unitsError } = useFetch(
+  const { data: unitsOfMeasureResponse, loading: unitsLoading } = useFetch(
     "api/units-of-measure",
-    {
-      status: "Active",
-      per_page: 500,
-    },
+    { status: "Active", per_page: 500 },
     true,
-    {
-      data: [],
-      total: 0,
-      page: 1,
-    },
+    { data: [], total: 0, page: 1 },
     (response) => response.data
   );
 
-  // Extract the actual units of measure array from the paginated response
   const unitsOfMeasure = unitsOfMeasureResponse?.data?.data || [];
 
   const { data, loading, error, handlePost, setError } = usePost(
-    "api/medicines/bulk-create",
+    "api/stocktakes",
     {
-      medicines: selectedMedicines,
+      reason: "Medicine stock added",
+      items: selectedMedicines.map(m => ({
+        item_id: null, // will be created
+        ...m
+      }))
     }
+  );
+
+  // Tumia api/medicines/bulk-create
+  const { data: bulkData, loading: bulkLoading, error: bulkError, handlePost: handleBulkPost } = usePost(
+    "api/medicines/bulk-create",
+    { medicines: selectedMedicines }
   );
 
   useEffect(() => {
     document.title = `Add Medicine - ${window.APP_NAME}`;
-    
-    // Cleanup function to reset success flag
-    return () => {
-      setHasShownSuccess(false);
-    };
+    return () => setHasShownSuccess(false);
   }, []);
 
   useEffect(() => {
-    if (data && data.success && !hasShownSuccess) {
-      console.log('Success response received:', data);
+    if (bulkData && bulkData.success && !hasShownSuccess) {
       setHasShownSuccess(true);
-      addToast({
-        message: "Medicines added successfully",
-        severity: "success",
-      });
+      addToast({ message: "Medicines added successfully", severity: "success" });
       setSelectedMedicines([]);
       navigate('/medicine-center/medicines');
     }
-  }, [data, hasShownSuccess]);
+  }, [bulkData, hasShownSuccess]);
 
   useEffect(() => {
-    if (error) {
-      // Debug: Log the full error
-      console.log('Full error object:', error);
-      console.log('Error response:', error.response);
-      console.log('Error response data:', error.response?.data);
-      
-      addToast({ message: formatError(error), severity: "error" });
-      setError(null);
+    if (bulkError) {
+      addToast({ message: formatError(bulkError), severity: "error" });
     }
-  }, [error]);
+  }, [bulkError]);
 
   const handleAddMedicine = () => {
     if (!medicineName || medicineName.trim() === '') {
-      addToast({
-        message: "Medicine name is required",
-        severity: "warning",
-      });
-      medicineNameRef.current.focus();
+      addToast({ message: "Medicine name is required", severity: "warning" });
       return;
     }
-
     if (!unitOfMeasureId) {
-      addToast({
-        message: "Unit of measure is required",
-        severity: "warning",
-      });
-      unitOfMeasureRef.current.focus();
+      addToast({ message: "Unit of measure is required", severity: "warning" });
       return;
     }
-
     if (!quantity || quantity <= 0) {
-      addToast({
-        message: "Quantity must be greater than 0",
-        severity: "warning",
-      });
-      quantityRef.current.focus();
+      addToast({ message: "Quantity must be greater than 0", severity: "warning" });
       return;
     }
-
-    // Debug: Log the form values
-    console.log('Form values:', {
-      medicineName,
-      code,
-      genericName,
-      brandName,
-      unitOfMeasureId,
-      quantity,
-      unitBuyingPrice,
-      sellingPrice,
-      expirationDate,
-      minimumStock
-    });
 
     const medicine = {
       name: medicineName.trim(),
-      code: code.trim() || null, // Set to null if empty
-      generic_name: genericName.trim() || null, // Set to null if empty
-      brand_name: brandName.trim() || null, // Set to null if empty
-      unit_of_measure_id: parseInt(unitOfMeasureId), // Ensure it's an integer
+      code: code.trim() || null,
+      item_type_id: MEDICINE_ITEM_TYPE_ID,
+      consultation_type_id: MEDICINE_CONSULTATION_TYPE_ID,
+      unit_of_measure_id: parseInt(unitOfMeasureId),
+      is_consultation_item: 'Yes',
+      is_stock_item: 'Yes',
       balance: parseFloat(quantity),
       unit_buying_price: unitBuyingPrice ? parseFloat(unitBuyingPrice) : null,
-      selling_price: sellingPrice ? parseFloat(sellingPrice) : null,
       expiry_date: expirationDate ? expirationDate.toISOString().split('T')[0] : null,
-      minimum_stock: minimumStock ? parseFloat(minimumStock) : null,
+      minimum_stock: minimumStock ? parseFloat(minimumStock) : 0,
       has_expiry: expirationDate ? 'Yes' : 'No',
-      prescription_required: 'No',
-      controlled_substance: 'No',
       status: 'Active',
     };
-
-    // Debug: Log the created medicine object
-    console.log('Created medicine object:', medicine);
 
     setSelectedMedicines([...selectedMedicines, medicine]);
 
     // Clear form
     setMedicineName("");
     setCode("");
-    setGenericName("");
-    setBrandName("");
     setUnitOfMeasureId("");
     setQuantity("");
     setUnitBuyingPrice("");
-    setSellingPrice("");
     setExpirationDate(null);
     setMinimumStock("");
-    medicineNameRef.current.focus();
   };
 
   const handleRemoveMedicine = (index) => {
-    const newSelectedMedicines = [...selectedMedicines];
-    newSelectedMedicines.splice(index, 1);
-    setSelectedMedicines(newSelectedMedicines);
+    setSelectedMedicines(selectedMedicines.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
     if (selectedMedicines.length === 0) {
-      addToast({
-        message: "Please add at least one medicine",
-        severity: "warning",
-      });
+      addToast({ message: "Please add at least one medicine", severity: "warning" });
       return;
     }
-    
-    // Reset success flag for new submission
     setHasShownSuccess(false);
-    
-    // Debug: Log the data being sent
-    console.log('Submitting medicines:', selectedMedicines);
-    handlePost();
+    handleBulkPost();
   };
 
   return (
@@ -238,23 +171,13 @@ const AddMedicine = () => {
             </Stack>
           }
           action={
-            <Button
-              variant="outlined"
-              startIcon={<BackIcon />}
-              onClick={() => navigate('/medicine-center/medicines')}
-            >
+            <Button variant="outlined" startIcon={<BackIcon />} onClick={() => navigate('/medicine-center/medicines')}>
               Back to Medicines
             </Button>
           }
         />
         <Divider />
-
         <CardContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-            <strong>Note:</strong> Fields marked with * are required. All other fields are optional and can be left empty.
-            Empty optional fields will be stored as null in the database.
-          </Typography>
-          
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -264,48 +187,17 @@ const AddMedicine = () => {
                 onChange={(value) => setMedicineName(value || "")}
                 placeholder="e.g., Paracetamol 500mg"
                 fullWidth
-                id="medicine-name"
-                name="medicine_name"
               />
             </Grid>
-
             <Grid item xs={12} md={6}>
               <TextField
-                inputRef={codeRef}
                 label="Medicine Code"
                 value={code || ""}
                 onChange={(value) => setCode(value || "")}
                 placeholder="e.g., PAR500"
                 fullWidth
-                id="medicine-code"
-                name="medicine_code"
               />
             </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Generic Name"
-                value={genericName || ""}
-                onChange={(value) => setGenericName(value || "")}
-                placeholder="e.g., Acetaminophen"
-                fullWidth
-                id="generic-name"
-                name="generic_name"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Brand Name"
-                value={brandName || ""}
-                onChange={(value) => setBrandName(value || "")}
-                placeholder="e.g., Tylenol"
-                fullWidth
-                id="brand-name"
-                name="brand_name"
-              />
-            </Grid>
-
             <Grid item xs={12} md={6}>
               <Select
                 inputRef={unitOfMeasureRef}
@@ -316,18 +208,10 @@ const AddMedicine = () => {
                 value={unitOfMeasureId || ""}
                 onChange={(value) => setUnitOfMeasureId(value || "")}
                 loading={unitsLoading}
-                placeholder={unitsError ? "Error loading units" : "Select unit of measure"}
+                placeholder="Select unit of measure"
                 fullWidth
-                id="unit-of-measure"
-                name="unit_of_measure_id"
               />
-              {unitsError && (
-                <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                  Error loading units of measure: {unitsError?.response?.data?.message || unitsError?.message || 'Unknown error'}
-                </Typography>
-              )}
             </Grid>
-
             <Grid item xs={12} md={6}>
               <TextField
                 inputRef={quantityRef}
@@ -335,75 +219,39 @@ const AddMedicine = () => {
                 type="number"
                 value={quantity || ""}
                 onChange={(value) => setQuantity(value || "")}
-                inputProps={{ min: 0, step: 0.01 }}
                 fullWidth
-                id="quantity"
-                name="quantity"
               />
             </Grid>
-
             <Grid item xs={12} md={6}>
               <TextField
-                inputRef={unitBuyingPriceRef}
                 label="Unit Buying Price (TZS)"
                 type="number"
                 value={unitBuyingPrice || ""}
                 onChange={(value) => setUnitBuyingPrice(value || "")}
-                inputProps={{ min: 0, step: 0.01 }}
                 placeholder="0.00"
                 fullWidth
-                id="unit-buying-price"
-                name="unit_buying_price"
               />
             </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                inputRef={sellingPriceRef}
-                label="Selling Price (TZS)"
-                type="number"
-                value={sellingPrice || ""}
-                onChange={(value) => setSellingPrice(value || "")}
-                inputProps={{ min: 0, step: 0.01 }}
-                placeholder="0.00"
-                fullWidth
-                id="selling-price"
-                name="selling_price"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <DatePicker
-                label="Expiry Date"
-                value={expirationDate}
-                onChange={setExpirationDate}
-                fullWidth
-                id="expiry-date"
-                name="expiry_date"
-              />
-            </Grid>
-
             <Grid item xs={12} md={6}>
               <TextField
                 label="Minimum Stock Level"
                 type="number"
                 value={minimumStock || ""}
                 onChange={(value) => setMinimumStock(value || "")}
-                inputProps={{ min: 0, step: 0.01 }}
                 placeholder="0"
                 fullWidth
-                id="minimum-stock"
-                name="minimum_stock"
               />
             </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                onClick={handleAddMedicine}
+            <Grid item xs={12} md={6}>
+              <DatePicker
+                label="Expiry Date"
+                value={expirationDate}
+                onChange={setExpirationDate}
                 fullWidth
-                size="large"
-              >
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button variant="contained" onClick={handleAddMedicine} fullWidth size="large">
                 Add to List
               </Button>
             </Grid>
@@ -412,11 +260,9 @@ const AddMedicine = () => {
           {selectedMedicines.length > 0 && (
             <>
               <Divider sx={{ my: 3 }} />
-              
               <Typography variant="h6" gutterBottom>
                 Medicines to Add ({selectedMedicines.length})
               </Typography>
-
               <Table
                 columns={[
                   {
@@ -430,11 +276,6 @@ const AddMedicine = () => {
                     valueGetter: (item) => item.code || 'N/A',
                   },
                   {
-                    field: "generic_name",
-                    headerName: "Generic Name",
-                    valueGetter: (item) => item.generic_name || 'N/A',
-                  },
-                  {
                     field: "balance",
                     headerName: "Quantity",
                     valueGetter: (item) => numberFormat(item.balance),
@@ -442,27 +283,19 @@ const AddMedicine = () => {
                   {
                     field: "unit_buying_price",
                     headerName: "Unit Price (TZS)",
-                    valueGetter: (item) => `Tz ${numberFormat(item.unit_buying_price)}`,
+                    valueGetter: (item) => item.unit_buying_price ? numberFormat(item.unit_buying_price) : 'N/A',
                   },
                   {
                     field: "expiry_date",
                     headerName: "Expiry Date",
-                    valueGetter: (item) => {
-                      if (!item.expiry_date) return 'No expiry';
-                      if (typeof item.expiry_date === 'string') return item.expiry_date;
-                      if (item.expiry_date instanceof Date) return item.expiry_date.toISOString().split('T')[0];
-                      return 'No expiry';
-                    },
+                    valueGetter: (item) => item.expiry_date || 'No expiry',
                   },
                   {
                     field: "actions",
                     headerName: "Actions",
                     renderCell: (item, index) => (
                       <Tooltip title="Remove">
-                        <IconButton
-                          color="error"
-                          onClick={() => handleRemoveMedicine(index)}
-                        >
+                        <IconButton color="error" onClick={() => handleRemoveMedicine(index)}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -470,25 +303,20 @@ const AddMedicine = () => {
                   },
                 ]}
                 items={selectedMedicines}
-                itemCount={selectedMedicines.length}
+                hidePaginationFooter
               />
-
               <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/medicine-center/medicines')}
-                  disabled={loading}
-                >
+                <Button variant="outlined" onClick={() => navigate('/medicine-center/medicines')} disabled={bulkLoading}>
                   Cancel
                 </Button>
                 <Button
                   variant="contained"
                   startIcon={<SaveIcon />}
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={bulkLoading}
                   sx={{ flexGrow: 1 }}
                 >
-                  {loading ? "Adding Medicines..." : `Add ${selectedMedicines.length} Medicine(s)`}
+                  {bulkLoading ? "Adding Medicines..." : `Add ${selectedMedicines.length} Medicine(s)`}
                 </Button>
               </Stack>
             </>
