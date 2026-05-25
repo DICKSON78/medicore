@@ -89,8 +89,9 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               }}
               onChange={(value) =>
                 throttle(
-                  () => setParams({ ...params, patient_name: value }),
-                  1000
+                  () => setParams(prev => ({ ...prev, patient_name: value })),
+                  1000,
+                  'patient_name'
                 )
               }
             />
@@ -114,8 +115,9 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               }}
               onChange={(value) =>
                 throttle(
-                  () => setParams({ ...params, patient_id: value }),
-                  1000
+                  () => setParams(prev => ({ ...prev, patient_id: value })),
+                  1000,
+                  'patient_id'
                 )
               }
             />

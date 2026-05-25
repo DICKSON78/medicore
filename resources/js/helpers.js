@@ -110,11 +110,21 @@ export const getWeekEndDate = (date = new Date()) => {
  * @param fn {Function}
  * @param delay {int}
  */
-export const throttle = (fn, delay) => {
+const throttleTimers = {};
+
+export const throttle = (fn, delay, key) => {
+  if (key && throttleTimers[key]) {
+    clearTimeout(throttleTimers[key]);
+  }
+
+  if (key) {
+    throttleTimers[key] = setTimeout(fn, delay);
+    return;
+  }
+
   if (window.throttleTimeoutID) {
     window.clearTimeout(window.throttleTimeoutID);
   }
-
   window.throttleTimeoutID = window.setTimeout(fn, delay);
 };
 
