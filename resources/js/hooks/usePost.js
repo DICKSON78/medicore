@@ -45,10 +45,8 @@ const usePost = (uri, payload = null) => {
         ];
         
         if (notificationEndpoints.some(endpoint => uri.includes(endpoint))) {
-          // Use a small delay to ensure the backend has processed the change
-          setTimeout(() => {
-            notificationEvents.refresh();
-          }, 500);
+          // Trigger notification refresh immediately so badges update fast
+          notificationEvents.refresh();
         }
       })
       .catch((error) => {

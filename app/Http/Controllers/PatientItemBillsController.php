@@ -125,69 +125,88 @@ class PatientItemBillsController extends Controller
         $end_date = $request->end_date;
         $payment_status = $request->payment_status;
 
-        $data = PatientItemBill::whereHas('first_item');
+        $baseQuery = PatientItemBill::whereHas('first_item');
 
         if ($user->is_admin) {
             if ($clinic_id) {
-                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $baseQuery->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             }
         } else {
-            $data->whereHas('creator', function ($query) use ($user) {
+            $baseQuery->whereHas('creator', function ($query) use ($user) {
                 $query->where('clinic_id', $user->clinic_id);
             });
         }
 
         if ($status) {
-            $data->where('status', $status);
+            $baseQuery->where('status', $status);
         }
 
         if ($patient_name) {
-            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
+            $baseQuery->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
                 $query->fullName('%' . $patient_name . '%');
             });
         }
 
         if ($patient_id) {
-            $data->whereHas('items.payment_cache.check_in', function ($query) use ($patient_id) {
+            $baseQuery->whereHas('items.payment_cache.check_in', function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);
             });
         }
 
         if ($patient_gender) {
-            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
+            $baseQuery->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
                 $query->where('gender', $patient_gender);
             });
         }
 
         if ($patient_phone) {
-            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
+            $baseQuery->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
                 $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
         }
 
         if ($payment_status === 'partial') {
-            $data->has('payments');
+            $baseQuery->has('payments');
         } elseif ($payment_status === 'none') {
-            $data->doesntHave('payments');
+            $baseQuery->doesntHave('payments');
         }
 
         if ($start_date) {
-            $data->whereDate('created_at', '>=', $start_date);
+            $baseQuery->whereDate('created_at', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->whereDate('created_at', '<=', $end_date);
+            $baseQuery->whereDate('created_at', '<=', $end_date);
         }
 
-        $totalAmount = $data->sum('amount');
-        $totalDiscount = $data->sum('discount');
-        $billIds = $data->pluck('id');
+        // Total counts and sums across all matching bills
+        $totalAmount = $baseQuery->sum('amount');
+        $totalDiscount = $baseQuery->sum('discount');
+        $billIds = $baseQuery->pluck('id');
         $totalPaid = \App\Models\PatientItemBillPayment::whereIn('bill_id', $billIds)->sum('amount');
         $totalDebt = $totalAmount - $totalDiscount - $totalPaid;
 
-        return $this->sendResponse(['total_debt' => $totalDebt], Response::HTTP_OK, 'Success.');
+        // Status-specific counts using fresh queries (clone base filters)
+        $totalPending = (clone $baseQuery)->where('status', 'Pending')->doesntHave('payments')->count();
+        $totalPartial = (clone $baseQuery)->where('status', 'Pending')->has('payments')->count();
+        $totalCompleted = (clone $baseQuery)->where('status', 'Cleared')->count();
+
+        // Total payments made today (across ALL bills, not filtered by payment_status)
+        $totalPaidToday = \App\Models\PatientItemBillPayment::whereDate('created_at', Carbon::today())->sum('amount');
+
+        return $this->sendResponse([
+            'total_pending' => $totalPending,
+            'total_partial' => $totalPartial,
+            'total_completed' => $totalCompleted,
+            'total_bills' => $totalPending + $totalPartial + $totalCompleted,
+            'total_amount' => $totalAmount,
+            'total_discount' => $totalDiscount,
+            'total_amount_paid' => $totalPaid,
+            'total_debt' => $totalDebt,
+            'total_paid_today' => $totalPaidToday,
+        ], Response::HTTP_OK, 'Success.');
     }
 
     public function store(Request $request)

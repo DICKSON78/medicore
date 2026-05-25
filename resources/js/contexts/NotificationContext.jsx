@@ -139,9 +139,9 @@ export const NotificationProvider = ({ children }) => {
     const unsubscribe = notificationEvents.subscribe(() => {
       // Debounce refresh calls to prevent rapid updates
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
+        timeoutId = setTimeout(() => {
         refreshNotifications();
-      }, 1000); // 1 second delay
+      }, 200);
     });
 
     return () => {

@@ -65,7 +65,8 @@ const CompletedPayments = () => {
     {
       total_completed: 0,
       total_amount_paid: 0,
-      total_bills: 0
+      total_bills: 0,
+      total_paid_today: 0,
     },
     (response) => response.data.data
   );
@@ -79,16 +80,6 @@ const CompletedPayments = () => {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
-
-  const getTotalCompletedAmount = () => {
-    if (!data || !data.data) return 0;
-    return data.data.reduce((acc, bill) => acc + (parseFloat(bill.amount_paid) || 0), 0) || 0;
-  };
-
-  const getTotalBillsCount = () => {
-    if (!data || !data.data) return 0;
-    return data.data.length || 0;
-  };
 
   return (
     <Page
@@ -113,11 +104,11 @@ const CompletedPayments = () => {
                 items={[
                   {
                     label: "Total Completed Bills",
-                    value: getTotalBillsCount(),
+                    value: summaryData?.total_completed || 0,
                   },
                   {
                     label: "Total Amount Paid",
-                    value: numberFormat(getTotalCompletedAmount()),
+                    value: numberFormat(summaryData?.total_amount_paid || 0),
                   },
                 ]}
                 containerProps={{
@@ -270,7 +261,7 @@ const CompletedPayments = () => {
               footerItems={[
                 [
                   { value: "TOTAL COMPLETED PAYMENTS", tableCellProps: { colSpan: 7, sx: { fontWeight: 'bold' } } },
-                  { value: numberFormat(getTotalCompletedAmount()), tableCellProps: { sx: { fontWeight: 'bold', color: 'success.main' } } },
+                  { value: numberFormat(summaryData?.total_amount_paid || 0), tableCellProps: { sx: { fontWeight: 'bold', color: 'success.main' } } },
                   { value: "", tableCellProps: { colSpan: 3 } }
                 ],
               ]}

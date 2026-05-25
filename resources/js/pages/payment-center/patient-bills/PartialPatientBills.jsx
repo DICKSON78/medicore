@@ -65,46 +65,20 @@ const PartialPatientBills = () => {
     {
       total_debt: 0,
       total_paid_today: 0,
-      total_debt_reduction_today: 0
+      total_partial: 0,
     },
     (response) => response.data.data
-  );
-
-  const { data: dailyPaymentsData, loading: dailyPaymentsLoading } = useFetch(
-    "api/patient-item-bill-payments",
-    {
-      start_date: new Date().toISOString().split('T')[0], // Today's date
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
   );
 
   useEffect(() => {
     document.title = `Partial Patient Bills - ${window.APP_NAME}`;
   }, []);
 
-  // Debug: Log data structure
-  useEffect(() => {
-    console.log('PartialPatientBills - Data:', data);
-    console.log('PartialPatientBills - Loading:', loading);
-    console.log('PartialPatientBills - Error:', error);
-  }, [data, loading, error]);
-
   useEffect(() => {
     if (error) {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
-
-  const getTotalPaidToday = () => {
-    return dailyPaymentsData?.reduce((acc, payment) => acc + (payment.amount || 0), 0) || 0;
-  };
-
-  const getDebtReductionToday = () => {
-    return dailyPaymentsData?.reduce((acc, payment) => acc + (payment.amount || 0), 0) || 0;
-  };
 
   return (
     <Page
@@ -129,15 +103,15 @@ const PartialPatientBills = () => {
                 items={[
                   {
                     label: "Total Paid Today",
-                    value: numberFormat(getTotalPaidToday()),
+                    value: numberFormat(summaryData?.total_paid_today || 0),
                   },
                   {
-                    label: "Debt Reduction Today",
-                    value: numberFormat(getDebtReductionToday()),
+                    label: "Total Outstanding Debt",
+                    value: numberFormat(summaryData?.total_debt || 0),
                   },
                   {
-                    label: "Number of Transactions",
-                    value: dailyPaymentsData?.length || 0,
+                    label: "Active Partial Payments",
+                    value: summaryData?.total_partial || 0,
                   },
                 ]}
                 containerProps={{

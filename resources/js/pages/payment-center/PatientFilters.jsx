@@ -157,6 +157,31 @@ const PatientFilters = ({ params, setParams, showViewPeriod, ...rest }) => {
               }
             />
           </Grid>
+          <Grid
+            item
+            md
+            sm={6}
+            xs={12}
+          >
+            <TextField
+              fullWidth
+              label="Phone Number"
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, patient_phone: value }),
+                  1000
+                )
+              }
+            />
+          </Grid>
         </Grid>
       </CardContent>
     </Card>

@@ -61,7 +61,7 @@ class PaymentCenterDashboardController extends Controller
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum('amount') + 
-            // Add cleared bills amount
+            // Cleared bills — use cleared_at to attribute revenue to the day payment completed
             PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -69,9 +69,10 @@ class PaymentCenterDashboardController extends Controller
                 });
             })
             ->where('status', 'Cleared')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount');
+            ->whereDate('cleared_at', '>=', $start_date)
+            ->whereDate('cleared_at', '<=', $end_date)
+            ->get()
+            ->sum(fn($bill) => $bill->amount - $bill->discount);
 
         // Cash payments - actual cash payments
         $data['summary']['cash_payments'] = PatientItemPayment::query()
@@ -150,8 +151,9 @@ class PaymentCenterDashboardController extends Controller
         // Net profit
         $data['summary']['net_profit'] = $data['summary']['total_revenue'] - $data['summary']['total_expenses'];
 
-        // Today's collections
-        $data['summary']['today_collections'] = PatientItemPayment::query()
+        // Today's collections — regular cash payments + fully cleared bills (cleared today)
+        // Partial installment payments are excluded until the bill is fully cleared
+        $todayCashPayments = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -160,11 +162,24 @@ class PaymentCenterDashboardController extends Controller
             ->whereDate('created_at', Carbon::today())
             ->sum('amount');
 
-        // Payment trends (last 7 days)
+        $todayClearedBills = PatientItemBill::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->where('status', 'Cleared')
+            ->whereDate('cleared_at', Carbon::today())
+            ->get()
+            ->sum(fn($bill) => $bill->amount - $bill->discount);
+
+        $data['summary']['today_collections'] = $todayCashPayments + $todayClearedBills;
+
+        // Payment trends (last 7 days) — includes both cash payments and cleared bills
         $data['statistics']['payment_trends'] = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $revenue = PatientItemPayment::query()
+            $cashRevenue = PatientItemPayment::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($query) use ($clinic_id) {
                         $query->where('clinic_id', $clinic_id);
@@ -173,17 +188,40 @@ class PaymentCenterDashboardController extends Controller
                 ->whereDate('created_at', $date)
                 ->sum('amount');
 
+            $clearedRevenue = PatientItemBill::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Cleared')
+                ->whereDate('cleared_at', $date)
+                ->get()
+                ->sum(fn($bill) => $bill->amount - $bill->discount);
+
             $data['statistics']['payment_trends'][] = [
                 'date' => $date,
-                'revenue' => $revenue
+                'revenue' => $cashRevenue + $clearedRevenue
             ];
         }
 
         // Revenue by payment mode (actual data)
+        $clearedBillsAmount = PatientItemBill::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->where('status', 'Cleared')
+            ->whereDate('cleared_at', '>=', $start_date)
+            ->whereDate('cleared_at', '<=', $end_date)
+            ->get()
+            ->sum(fn($bill) => $bill->amount - $bill->discount);
+
         $data['statistics']['revenue_by_payment_mode'] = collect([
             ['payment_mode' => 'Cash', 'total_amount' => $data['summary']['cash_payments']],
             ['payment_mode' => 'Credit', 'total_amount' => $data['summary']['credit_payments']],
-            ['payment_mode' => 'Other', 'total_amount' => $data['summary']['total_revenue'] - $data['summary']['cash_payments'] - $data['summary']['credit_payments']],
+            ['payment_mode' => 'Cleared Bills', 'total_amount' => $clearedBillsAmount],
         ]);
 
         // Top paying patients (real data)

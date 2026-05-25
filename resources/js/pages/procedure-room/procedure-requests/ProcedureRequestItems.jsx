@@ -211,7 +211,7 @@ const ProcedureRequestItems = ({ patient, paymentCacheId }) => {
                     rows={4}
                     defaultValue={item.comments}
                     onChange={(value) => {
-                      let tmp = items;
+                        let tmp = [...items];
                       tmp[index] = { ...item, comments: value };
                       setItems(tmp);
                       setSelectedItems(

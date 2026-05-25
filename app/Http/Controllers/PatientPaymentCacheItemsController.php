@@ -255,11 +255,22 @@ class PatientPaymentCacheItemsController extends Controller
                                     'patient_direction' => 'Direct to Optician',
                                     'created_by' => $user->id,
                                     'require_glass' => 'Yes',
+                                    'sent_to_optician_at' => now(),
+                                    'sent_to_optician_by' => $user->id,
                                 ]);
 
                                 $item->payment_cache->consultation_id = $consultation->id;
                                 $item->payment_cache->save();
                             }
+                        }
+                    } else {
+                        // Consultation already exists - set sent_to_optician for glass items
+                        $consultation = Consultation::find($item->payment_cache->consultation_id);
+                        if ($consultation && $consultation->require_glass === 'Yes' && !$consultation->sent_to_optician_at) {
+                            $consultation->update([
+                                'sent_to_optician_at' => now(),
+                                'sent_to_optician_by' => $user->id,
+                            ]);
                         }
                     }
                 }
@@ -331,11 +342,22 @@ class PatientPaymentCacheItemsController extends Controller
                                 'patient_direction' => 'Direct to Optician',
                                 'created_by' => $user->id,
                                 'require_glass' => 'Yes',
+                                'sent_to_optician_at' => now(),
+                                'sent_to_optician_by' => $user->id,
                             ]);
 
                             $item->payment_cache->consultation_id = $consultation->id;
                             $item->payment_cache->save();
                         }
+                    }
+                } else {
+                    // Consultation already exists - set sent_to_optician for glass items
+                    $consultation = Consultation::find($item->payment_cache->consultation_id);
+                    if ($consultation && $consultation->require_glass === 'Yes' && !$consultation->sent_to_optician_at) {
+                        $consultation->update([
+                            'sent_to_optician_at' => now(),
+                            'sent_to_optician_by' => $user->id,
+                        ]);
                     }
                 }
             }
@@ -404,11 +426,22 @@ class PatientPaymentCacheItemsController extends Controller
                                     'patient_direction' => 'Direct to Optician',
                                     'created_by' => $user->id,
                                     'require_glass' => 'Yes',
+                                    'sent_to_optician_at' => now(),
+                                    'sent_to_optician_by' => $user->id,
                                 ]);
 
                                 $item->payment_cache->consultation_id = $consultation->id;
                                 $item->payment_cache->save();
                             }
+                        }
+                    } else {
+                        // Consultation already exists - set sent_to_optician for glass items
+                        $consultation = Consultation::find($item->payment_cache->consultation_id);
+                        if ($consultation && $consultation->require_glass === 'Yes' && !$consultation->sent_to_optician_at) {
+                            $consultation->update([
+                                'sent_to_optician_at' => now(),
+                                'sent_to_optician_by' => $user->id,
+                            ]);
                         }
                     }
                 }
@@ -474,7 +507,7 @@ class PatientPaymentCacheItemsController extends Controller
             $user = $request->user();
 
             // check if dispensing a glass item and change its consultation status
-            $consultation = Consultation::find($request->consultation_id);
+            $consultation = $payment_cache->consultation;
             if ($consultation && $consultation->patient_direction == 'Direct to Optician') {
                 $consultation->update(['status' => 'Consulted']);
 

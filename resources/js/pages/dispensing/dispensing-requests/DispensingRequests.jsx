@@ -10,6 +10,7 @@ import Filters from "../PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
+import notificationEvents from "../../../utils/notificationEvents";
 
 const DispensingRequests = ({ consultationType, stockItem }) => {
   console.log('DispensingRequests Component Mounted:', { consultationType, stockItem });
@@ -76,6 +77,11 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
 
   useEffect(() => {
     document.title = `Dispensing Requests - ${window.APP_NAME}`;
+  }, []);
+
+  // Refresh notifications on mount to sync badges after dispensing
+  useEffect(() => {
+    notificationEvents.refresh();
   }, []);
 
   // Lock appropriate badge while on this page - removed as notification context is no longer used

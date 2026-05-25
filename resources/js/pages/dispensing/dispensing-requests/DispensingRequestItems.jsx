@@ -81,7 +81,7 @@ const DispensingRequestItems = ({ consultationType, stockItem }) => {
 
   const handlePost = (itemIds = null) => {
     const itemsToDispense = itemIds || selectedItems.map((e) => e.id);
-    originalHandlePost({
+    originalHandlePost("api/patient-payment-cache-items/dispense", {
       payment_cache_id: paymentCacheId,
       items: itemsToDispense,
     });
@@ -336,7 +336,7 @@ const DispensingRequestItems = ({ consultationType, stockItem }) => {
                       fullWidth
                       defaultValue={item.dosage}
                       onChange={(value) => {
-                        let tmp = items;
+                        let tmp = [...items];
                         tmp[index] = { ...item, dosage: value };
                         setItems(tmp);
                         setSelectedItems(
@@ -359,7 +359,7 @@ const DispensingRequestItems = ({ consultationType, stockItem }) => {
                       rows={4}
                       defaultValue={item.comments}
                       onChange={(value) => {
-                        let tmp = items;
+                        let tmp = [...items];
                         tmp[index] = { ...item, comments: value };
                         setItems(tmp);
                         setSelectedItems(
