@@ -124,7 +124,7 @@ class ItemsController extends Controller
                 } elseif ($stockStatus === 'Low Stock') {
                     $data->where('balance', '>', 0)->where('balance', '<=', 5);
                 } elseif ($stockStatus === 'In Stock') {
-                    $data->where('balance', '>', 5);
+                    $data->where('balance', '>', 0);
                 }
             }
 
