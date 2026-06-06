@@ -11,6 +11,7 @@ import JobTitles from "./job-titles/JobTitles";
 import ClinicDetails from "./ClinicDetails";
 import Preferences from "./Preferences";
 import Clinics from "./clinics/Clinics";
+import Collaborators from "./collaborators/Collaborators";
 
 const SettingsRoutes = () => {
   return (
@@ -54,6 +55,10 @@ const SettingsRoutes = () => {
       <Route
         path="/clinics"
         element={window.user.role === "Admin" ? <Clinics /> : null}
+      />
+      <Route
+        path="/collaborators"
+        element={window.user.privileges.settings ? <Collaborators /> : null}
       />
     </Routes>
   );

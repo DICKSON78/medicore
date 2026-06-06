@@ -2,14 +2,18 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import {
+  Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
+  Chip,
   Divider,
   Grid,
   LinearProgress,
   Skeleton,
   Stack,
+  Typography,
 } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
@@ -60,6 +64,18 @@ const PendingPatientItems = () => {
   );
 
   const [selectedItems, setSelectedItems] = useState([]);
+  const [partnerItems, setPartnerItems] = useState({});
+
+  const { data: collaborators, handleFetch: fetchCollaborators } = useFetch(
+    "api/collaborators",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const {
     data: items,
@@ -79,6 +95,24 @@ const PendingPatientItems = () => {
     (response) => response.data.data.data
   );
 
+  // Initialize partnerItems from items that already have is_partner_item set
+  useEffect(() => {
+    if (items && items.length > 0) {
+      const initial = {};
+      items.forEach((item) => {
+        if (item.is_partner_item) {
+          initial[item.id] = {
+            is_partner_item: true,
+            collaborator_name: item.collaborator_name || "",
+          };
+        }
+      });
+      if (Object.keys(initial).length > 0) {
+        setPartnerItems(initial);
+      }
+    }
+  }, [items]);
+
   const { data, loading, error, handlePost, setError } = usePost(
     "api/patient-payment-cache-items/make-cash-payment",
     {
@@ -86,6 +120,7 @@ const PendingPatientItems = () => {
       items: selectedItems.map((e) => e.id),
       discount,
       payment_channel_id: paymentChannel ? paymentChannel.id : null,
+      partner_items: partnerItems,
     }
   );
 
@@ -106,6 +141,7 @@ const PendingPatientItems = () => {
       fetchItems();
 
       setSelectedItems([]);
+      setPartnerItems({});
       discountRef.current.setValue(null);
       paymentChannelRef.current.setValue(null);
       
@@ -261,6 +297,60 @@ const PendingPatientItems = () => {
                   headerName: "Subtotal",
                   valueGetter: (item, index) =>
                     numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                },
+                {
+                  field: "is_partner_item",
+                  headerName: "Partner",
+                  renderCell: (item) => (
+                    <Checkbox
+                      size="small"
+                      checked={partnerItems[item.id]?.is_partner_item || false}
+                      onChange={(e) =>
+                        setPartnerItems({
+                          ...partnerItems,
+                          [item.id]: {
+                            is_partner_item: e.target.checked,
+                            collaborator_id: e.target.checked
+                              ? partnerItems[item.id]?.collaborator_id
+                              : null,
+                            collaborator_name: e.target.checked
+                              ? partnerItems[item.id]?.collaborator_name || ""
+                              : "",
+                          },
+                        })
+                      }
+                    />
+                  ),
+                },
+                {
+                  field: "collaborator_name",
+                  headerName: "Collaborator",
+                  renderCell: (item) =>
+                    partnerItems[item.id]?.is_partner_item ? (
+                      <Box sx={{ minWidth: 180 }}>
+                        <Select
+                          placeholder="Select collaborator"
+                          options={collaborators}
+                          optionsLabel="name"
+                          isOptionEqualToValue={(option, value) => option.id === value.id}
+                          value={
+                            partnerItems[item.id]?.collaborator_id
+                              ? collaborators.find((c) => c.id === partnerItems[item.id].collaborator_id) || null
+                              : null
+                          }
+                          onChange={(value) =>
+                            setPartnerItems({
+                              ...partnerItems,
+                              [item.id]: {
+                                ...partnerItems[item.id],
+                                collaborator_id: value ? value.id : null,
+                                collaborator_name: value ? value.name : "",
+                              },
+                            })
+                          }
+                        />
+                      </Box>
+                    ) : null,
                 },
               ]}
               items={items}

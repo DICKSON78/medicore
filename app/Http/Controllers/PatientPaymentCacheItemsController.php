@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\Collaborator;
 use App\Models\Consultation;
 use App\Models\PatientItemBill;
 use App\Models\PatientItemPayment;
@@ -58,7 +59,8 @@ class PatientPaymentCacheItemsController extends Controller
             'item' => function($query) {
                 $query->select('id', 'name', 'code', 'templates', 'unit_of_measure_id', 'consultation_type_id', 'is_consultation_item', 'is_stock_item', 'balance', 'unit_buying_price', 'status');
             },
-            'item.unit_of_measure', 
+            'item.unit_of_measure',
+            'item.item_type',
             'consultation_type', 
             'payment_mode', 
             'creator', 
@@ -213,10 +215,15 @@ class PatientPaymentCacheItemsController extends Controller
             'items' => 'required|array',
             'items.*' => 'required|integer',
             'discount' => 'nullable|numeric|min:0',
+            'partner_items' => 'nullable|array',
+            'partner_items.*.is_partner_item' => 'sometimes|boolean',
+            'partner_items.*.collaborator_name' => 'sometimes|string|nullable',
+            'partner_items.*.collaborator_id' => 'sometimes|integer|nullable|exists:collaborators,id',
         ]);
 
         $user = $request->user();
         $amount = 0;
+        $partnerItems = $request->json('partner_items') ?? [];
 
         $payment = PatientItemPayment::create([
             'channel_id' => $request->payment_channel_id,
@@ -236,6 +243,17 @@ class PatientPaymentCacheItemsController extends Controller
 
                     $item->item_payment_id = $payment->id;
                     $item->status = 'Paid';
+
+                    if (isset($partnerItems[$request_item]) && !empty($partnerItems[$request_item]['is_partner_item'])) {
+                        $item->is_partner_item = true;
+                        $collabName = $partnerItems[$request_item]['collaborator_name'] ?? null;
+                        $collabId = $partnerItems[$request_item]['collaborator_id'] ?? null;
+                        if (!$collabName && $collabId) {
+                            $collabName = Collaborator::find($collabId)?->name;
+                        }
+                        $item->collaborator_name = $collabName;
+                    }
+
                     $item->save();
 
                     // if item was not created from consultation, i.e. on check-in, create consultation
@@ -483,10 +501,7 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->served_by = $user->id;
                     $item->served_at = Carbon::now();
 
-                    if ($item->item->is_stock_item == 'Yes') {
-                        $item->item->balance -= $item->quantity;
-                        $item->item->save();
-                    }
+                    // Balance decrement removed — balance tracks import quantity only
                 }
 
                 $item->save();

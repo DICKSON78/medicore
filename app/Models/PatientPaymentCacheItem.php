@@ -13,11 +13,12 @@ class PatientPaymentCacheItem extends Model
     protected $fillable = [
         'payment_cache_id', 'item_id', 'medicine_id', 'consultation_type_id', 'consultant_id', 'payment_mode_id',
         'unit_price', 'quantity', 'item_payment_id', 'bill_id', 'created_by', 'dosage', 'comments', 'status',
-        'served_at', 'served_by',
+        'served_at', 'served_by', 'is_partner_item', 'collaborator_name',
     ];
 
     protected $casts = [
         'served_at' => 'datetime:Y-m-d H:i',
+        'is_partner_item' => 'boolean',
     ];
 
     public function payment_cache()
@@ -58,6 +59,11 @@ class PatientPaymentCacheItem extends Model
     public function server()
     {
         return $this->belongsTo(User::class, 'served_by');
+    }
+
+    public function item_payment()
+    {
+        return $this->belongsTo(PatientItemPayment::class, 'item_payment_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

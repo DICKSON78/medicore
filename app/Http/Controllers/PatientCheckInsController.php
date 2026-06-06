@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\Collaborator;
 use App\Models\Item;
 use App\Models\Patient;
 use App\Models\PatientCheckIn;
@@ -113,6 +114,8 @@ class PatientCheckInsController extends Controller
                 'items.*.consultant_id' => 'nullable|exists:users,id',
                 'items.*.payment_mode_id' => 'required|exists:payment_modes,id',
                 'items.*.quantity' => 'required|numeric|min:1',
+                'items.*.is_partner_item' => 'sometimes|boolean',
+                'items.*.collaborator_id' => 'sometimes|integer|nullable|exists:collaborators,id',
             ]);
 
             $user = $request->user();
@@ -179,6 +182,8 @@ class PatientCheckInsController extends Controller
                                 ->first();
 
                             if ($item && isset($item->prices[0])) {
+                                $isPartner = filter_var(Arr::get($input_item, 'is_partner_item', false), FILTER_VALIDATE_BOOLEAN);
+                                $collaboratorId = Arr::get($input_item, 'collaborator_id');
                                 $paymentCacheItem = PatientPaymentCacheItem::create([
                                     'payment_cache_id' => $payment_cache->id,
                                     'item_id' => $item->id,
@@ -188,6 +193,10 @@ class PatientCheckInsController extends Controller
                                     'unit_price' => $item->prices[0]->unit_price,
                                     'quantity' => $input_item['quantity'],
                                     'comments' => Arr::get($input_item, 'comments'),
+                                    'is_partner_item' => $isPartner,
+                                    'collaborator_name' => $isPartner && $collaboratorId
+                                        ? Collaborator::find($collaboratorId)?->name
+                                        : null,
                                     'created_by' => $user->id,
                                 ]);
 

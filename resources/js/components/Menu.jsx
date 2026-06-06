@@ -47,6 +47,7 @@ import {
   TrendingDownRounded as ExpensesIcon,
   WarningRounded as WarningIcon,
   WindowRounded as DepartmentsIcon,
+  HandshakeRounded as CollaboratorsIcon,
 } from "@mui/icons-material";
 import GlassPatientsIcon from "./icons/AddLens";
 
@@ -390,6 +391,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/payment-center/reports/expenses",
+              show: user.privileges.payment_center,
+            },
+            {
+              title: "Partner Frame Payments",
+              icon: <ReportsIcon />,
+              to: "/payment-center/reports/partner-frame-payments",
               show: user.privileges.payment_center,
             },
           ],
@@ -1009,6 +1016,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           icon: <ClinicsIcon />,
           to: "/settings/clinics",
           show: user.privileges.settings && user.role === "Admin",
+        },
+        {
+          title: "Collaborators",
+          icon: <CollaboratorsIcon />,
+          to: "/settings/collaborators",
+          show: user.privileges.settings,
         },
       ]));
     } else {

@@ -2,10 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
+  Box,
   Button,
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
+  Chip,
   Divider,
   FormControlLabel,
   Grid,
@@ -17,6 +20,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircleRounded";
 import DeleteIcon from "@mui/icons-material/CloseRounded";
 
 import Page, { Header as PageHeader } from "../../components/Page";
@@ -97,6 +101,19 @@ const CheckInPatient = () => {
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState();
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isPartnerItem, setIsPartnerItem] = useState(false);
+  const [collaboratorId, setCollaboratorId] = useState();
+
+  const { data: collaborators, handleFetch: fetchCollaborators } = useFetch(
+    "api/collaborators",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
     "api/lens-types",
@@ -209,6 +226,7 @@ const CheckInPatient = () => {
 
   const handleAddItem = () => {
     if (consultantRef.current.validate() && quantityRef.current.validate()) {
+      const collaborator = collaborators.find((c) => c.id === collaboratorId);
       setSelectedItems([
         ...selectedItems,
         {
@@ -222,12 +240,17 @@ const CheckInPatient = () => {
           comments,
           consultant_id: consultant ? consultant.id : null,
           consultant_name: consultant ? consultant.full_name : null,
+          is_partner_item: isPartnerItem,
+          collaborator_id: isPartnerItem ? collaboratorId : null,
+          collaborator_name: isPartnerItem && collaborator ? collaborator.name : null,
         },
       ]);
 
       setSelectedItem(null);
       setQuantity(1);
       setComments(undefined);
+      setIsPartnerItem(false);
+      setCollaboratorId(null);
     }
   };
 
@@ -481,15 +504,30 @@ const CheckInPatient = () => {
                       <FormControlLabel
                         key={e.id}
                         control={
-                          <Radio
-                            size="small"
-                            checked={selectedItem === e}
-                            onChange={(event) => setSelectedItem(e)}
-                          />
-                        }
-                        label={
-                          <Typography variant="body2">{e.name}</Typography>
-                        }
+                            <Radio
+                              size="small"
+                              checked={selectedItem === e}
+                              onChange={(event) => {
+                                setSelectedItem(e);
+                                const isOutOfStockFrame = e.item_type?.name === "Frame" && e.balance <= 0;
+                                setIsPartnerItem(isOutOfStockFrame);
+                                setCollaboratorId(null);
+                              }}
+                            />
+                          }
+                          label={
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Typography variant="body2">{e.name}</Typography>
+                              {e.item_type?.name === "Frame" && e.balance <= 0 ? (
+                                <Chip
+                                  label="Out of Stock"
+                                  size="small"
+                                  color="warning"
+                                  variant="outlined"
+                                />
+                              ) : null}
+                            </Stack>
+                          }
                         sx={{ display: "flex" }}
                       />
                     ))}
@@ -591,7 +629,7 @@ const CheckInPatient = () => {
                         </Grid>
                         <Grid
                           item
-                          md={2}
+                          md={1.5}
                           sm={4}
                           xs={12}
                         >
@@ -607,6 +645,42 @@ const CheckInPatient = () => {
                             }
                           />
                         </Grid>
+                        <Grid
+                          item
+                          md={1}
+                          sm={2}
+                          xs={12}
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isPartnerItem}
+                                onChange={(e) => setIsPartnerItem(e.target.checked)}
+                              />
+                            }
+                            label="Partner"
+                            sx={{ ml: 0 }}
+                          />
+                        </Grid>
+                        {isPartnerItem ? (
+                          <Grid
+                            item
+                            md={3}
+                            sm={6}
+                            xs={12}
+                          >
+                            <Select
+                              label="Collaborator"
+                              fullWidth
+                              required
+                              options={collaborators}
+                              optionsLabel="name"
+                              isOptionEqualToValue={(option, value) => option.id === value.id}
+                              value={collaborators.find((c) => c.id === collaboratorId) || null}
+                              onChange={(value) => setCollaboratorId(value ? value.id : null)}
+                            />
+                          </Grid>
+                        ) : null}
                         <Grid
                           item
                           md={1}
@@ -665,6 +739,19 @@ const CheckInPatient = () => {
                         {
                           field: "comments",
                           headerName: "Comments",
+                        },
+                        {
+                          field: "partner",
+                          headerName: "Partner",
+                          renderCell: (item) =>
+                            item.is_partner_item ? (
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                <CheckCircleIcon color="success" fontSize="small" />
+                                <Typography variant="caption" color="success.main">
+                                  {item.collaborator_name || "Partner"}
+                                </Typography>
+                              </Box>
+                            ) : null,
                         },
                         {
                           field: "actions",

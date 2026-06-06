@@ -6,6 +6,7 @@ import {
   CardActions,
   CardContent,
   CardHeader,
+  Checkbox,
   Divider,
   FormControlLabel,
   Grid,
@@ -15,6 +16,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircleRounded";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 import Select from "../../../components/Select";
@@ -62,6 +64,19 @@ const SelectItems = ({
   const [quantity, setQuantity] = useState(1);
   const [dosage, setDosage] = useState();
   const [comments, setComments] = useState();
+  const [isPartnerItem, setIsPartnerItem] = useState(false);
+  const [collaboratorId, setCollaboratorId] = useState();
+
+  const { data: collaborators, handleFetch: fetchCollaborators } = useFetch(
+    "api/collaborators",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
     "api/lens-types",
@@ -157,6 +172,8 @@ const SelectItems = ({
       setSelectedItem(null);
       setQuantity(1);
       setDosage(null);
+      setIsPartnerItem(false);
+      setCollaboratorId(null);
       fetchConsultationItems();
     }
   }, [dataPost]);
@@ -211,6 +228,8 @@ const SelectItems = ({
         dosage,
         comments,
         consultant_id: consultant ? consultant.id : null,
+        is_partner_item: isPartnerItem,
+        collaborator_id: isPartnerItem ? collaboratorId : null,
       });
     }
   };
@@ -298,7 +317,11 @@ const SelectItems = ({
                       fullWidth
                       clearable
                       options={["Lens", "Frame"]}
-                      onChange={(value) => setItemType(value)}
+                      onChange={(value) => {
+                        setItemType(value);
+                        setIsPartnerItem(false);
+                        setCollaboratorId(null);
+                      }}
                     />
                     {itemType === "Lens" ? (
                       <Select
@@ -334,6 +357,8 @@ const SelectItems = ({
                           onChange={(event) => {
                             if (event.target.checked) {
                               setSelectedItem(e);
+                              setIsPartnerItem(false);
+                              setCollaboratorId(null);
                             }
                           }}
                         />
@@ -454,6 +479,45 @@ const SelectItems = ({
                         />
                       </Grid>
                     ) : null}
+                    {consultationType === "Glass" && itemType === "Frame" ? (
+                      <React.Fragment>
+                        <Grid
+                          item
+                          md={2}
+                          sm={4}
+                          xs={12}
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isPartnerItem}
+                                onChange={(e) => setIsPartnerItem(e.target.checked)}
+                              />
+                            }
+                            label="Partner Frame"
+                          />
+                        </Grid>
+                        {isPartnerItem ? (
+                          <Grid
+                            item
+                            md={4}
+                            sm={8}
+                            xs={12}
+                          >
+                            <Select
+                              label="Collaborator"
+                              fullWidth
+                              required
+                              options={collaborators}
+                              optionsLabel="name"
+                              isOptionEqualToValue={(option, value) => option.id === value.id}
+                              value={collaborators.find((c) => c.id === collaboratorId) || null}
+                              onChange={(value) => setCollaboratorId(value ? value.id : null)}
+                            />
+                          </Grid>
+                        ) : null}
+                      </React.Fragment>
+                    ) : null}
                     <Grid
                       item
                       md={6}
@@ -515,6 +579,20 @@ const SelectItems = ({
                     {
                       field: "comments",
                       headerName: "Comments",
+                    },
+                    {
+                      field: "is_partner_item",
+                      headerName: "Partner",
+                      renderCell: (item) =>
+                        item.is_partner_item ? (
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <CheckCircleIcon color="success" fontSize="small" />
+                            <Typography variant="caption" color="success.main">
+                              {item.collaborator_name || "Partner"}
+                            </Typography>
+                          </Box>
+                        ) : null,
+                      show: consultationType === "Glass",
                     },
                     {
                       field: "actions",

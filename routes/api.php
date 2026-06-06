@@ -28,6 +28,7 @@ use App\Http\Controllers\Marketing\MarketingStrategiesController;
 use App\Http\Controllers\Marketing\ResearchPlansController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\CollaboratorsController;
 use App\Http\Controllers\PatientAttachmentsController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
@@ -244,6 +245,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/expenses', ExpensesController::class);
     $router->apiResource('/expense-payments', ExpensePaymentsController::class);
     $router->apiResource('/preferences', PreferencesController::class);
+    $router->apiResource('/collaborators', CollaboratorsController::class);
 
     $router->get('/messages', [MessagesController::class, '__invoke']);
 
@@ -301,6 +303,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->prefix('reports')->group(function ($router) {
         $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
             $router->get('/cash-collection', 'getCashCollectionReport');
+            $router->get('/partner-frame-payments', 'getPartnerFramePaymentsReport');
         });
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
             $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');

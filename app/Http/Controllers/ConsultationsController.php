@@ -12,6 +12,7 @@ use App\Models\ConsultationFundoscopy;
 use App\Models\ConsultationRefraction;
 use App\Models\ConsultationVisualAcuity;
 use App\Models\Item;
+use App\Models\Collaborator;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use App\Models\SurgeryRecordReport;
@@ -338,6 +339,9 @@ class ConsultationsController extends Controller
             'payment_mode_id' => 'required|exists:payment_modes,id',
             'consultant_id' => 'nullable|exists:users,id',
             'quantity' => 'required|numeric|min:1',
+            'is_partner_item' => 'sometimes|boolean',
+            'collaborator_name' => 'sometimes|string|nullable',
+            'collaborator_id' => 'sometimes|integer|nullable|exists:collaborators,id',
         ]);
 
         $data = null;
@@ -380,6 +384,10 @@ class ConsultationsController extends Controller
                 'quantity' => $request->quantity,
                 'dosage' => $request->dosage,
                 'comments' => $request->comments,
+                'is_partner_item' => $request->is_partner_item ?? false,
+                'collaborator_name' => $request->is_partner_item
+                    ? ($request->collaborator_name ?? Collaborator::find($request->collaborator_id)?->name)
+                    : null,
                 'created_by' => $user->id,
             ]);
             $data->item = $item;
@@ -784,22 +792,7 @@ class ConsultationsController extends Controller
                 'consultant_id' => $user->id,
             ]);
 
-            // Update balances for stock items and medicines if they exist (optimized)
-            $paymentCacheItem = $data->payment_cache_item;
-            if ($paymentCacheItem->item && $paymentCacheItem->item->is_stock_item == 'Yes') {
-                // Use direct database update for better performance
-                DB::table('items')
-                    ->where('id', $paymentCacheItem->item_id)
-                    ->decrement('balance', $paymentCacheItem->quantity);
-            }
-            
-            // Update balance for medicines (optimized)
-            if ($paymentCacheItem->medicine) {
-                // Use direct database update for better performance
-                DB::table('medicines')
-                    ->where('id', $paymentCacheItem->medicine_id)
-                    ->decrement('balance', $paymentCacheItem->quantity);
-            }
+            // Balance decrement removed — balance tracks import quantity only
 
             // Check if patient waiting time should be completed after consultation (optimized)
             try {

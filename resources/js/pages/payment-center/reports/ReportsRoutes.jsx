@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import DailyCashCollection from "./DailyCashCollection";
 import DailyCreditCollection from "./DailyCreditCollection";
 import Expenses from "../../financial-management/reports/Expenses";
+import PartnerFramePayments from "./PartnerFramePayments";
 
 const ReportsRoutes = () => {
   return (
@@ -27,6 +28,10 @@ const ReportsRoutes = () => {
             createdBy={window.user.id}
           />
         }
+      />
+      <Route
+        path="/partner-frame-payments"
+        element={<PartnerFramePayments />}
       />
     </Routes>
   );

@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\PatientItemBill;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCache;
+use App\Models\PatientPaymentCacheItem;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -51,6 +52,9 @@ class PaymentCenterDashboardController extends Controller
             ],
         ];
 
+        // Partner item amounts to exclude from revenue
+        $partnerItemAmount = $this->getPartnerItemAmount($clinic_id, $start_date, $end_date);
+
         // Total revenue from patient payments and cleared bills
         $data['summary']['total_revenue'] = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -60,7 +64,7 @@ class PaymentCenterDashboardController extends Controller
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount') + 
+            ->sum('amount') - $partnerItemAmount +
             // Cleared bills — use cleared_at to attribute revenue to the day payment completed
             PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -153,6 +157,10 @@ class PaymentCenterDashboardController extends Controller
 
         // Today's collections — regular cash payments + fully cleared bills (cleared today)
         // Partial installment payments are excluded until the bill is fully cleared
+        // Partner frame payments are excluded from daily collections
+        $today = Carbon::today()->format('Y-m-d');
+        $todayPartnerItemAmount = $this->getPartnerItemAmount($clinic_id, $today, $today);
+
         $todayCashPayments = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -173,12 +181,14 @@ class PaymentCenterDashboardController extends Controller
             ->get()
             ->sum(fn($bill) => $bill->amount - $bill->discount);
 
-        $data['summary']['today_collections'] = $todayCashPayments + $todayClearedBills;
+        $data['summary']['today_collections'] = $todayCashPayments + $todayClearedBills - $todayPartnerItemAmount;
 
         // Payment trends (last 7 days) — includes both cash payments and cleared bills
         $data['statistics']['payment_trends'] = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $partnerAmount = $this->getPartnerItemAmount($clinic_id, $date, $date);
+
             $cashRevenue = PatientItemPayment::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -201,7 +211,7 @@ class PaymentCenterDashboardController extends Controller
 
             $data['statistics']['payment_trends'][] = [
                 'date' => $date,
-                'revenue' => $cashRevenue + $clearedRevenue
+                'revenue' => ($cashRevenue + $clearedRevenue) - $partnerAmount
             ];
         }
 
@@ -290,5 +300,23 @@ class PaymentCenterDashboardController extends Controller
                 ],
             ], Response::HTTP_OK, 'Dashboard data temporarily unavailable.');
         }
+    }
+
+    private function getPartnerItemAmount($clinic_id, $start_date, $end_date)
+    {
+        return PatientPaymentCacheItem::query()
+            ->where('is_partner_item', true)
+            ->where('status', 'Paid')
+            ->whereHas('item_payment', function ($query) use ($clinic_id, $start_date, $end_date) {
+                $query->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($q2) use ($clinic_id) {
+                        $q2->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
+            })
+            ->get()
+            ->sum(fn($item) => ($item->unit_price * $item->quantity));
     }
 }
