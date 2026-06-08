@@ -294,7 +294,7 @@ const Dashboard = ({ setSmsBalance = () => {} }) => {
                         { x: "Pharmacy", y: data.summary.pharmacy || 0 },
                         { x: "Glass", y: data.summary.glass || 0 },
                         { x: "Procedure", y: data.summary.procedure || 0 },
-                        { x: "Others", y: (data.summary.others || 0) - (data.summary.consultation || 0) },
+                        { x: "Others", y: data.summary.others || 0 },
                       ],
                     }]}
                     type="bar"
