@@ -106,7 +106,10 @@ class PaymentCenterReportsController extends Controller
         $item_payments = PatientItemPayment::with(['channel', 'creator'])
             ->join('patient_payment_cache_items as ppci', function ($join) {
                 $join->on('ppci.item_payment_id', '=', 'patient_item_payments.id')
-                    ->where('ppci.is_partner_item', '!=', true);
+                    ->where(function ($q) {
+                        $q->where('ppci.is_partner_item', '!=', true)
+                          ->orWhereNull('ppci.is_partner_item');
+                    });
             })
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
@@ -118,7 +121,10 @@ class PaymentCenterReportsController extends Controller
             ->join('patient_item_bill_payments as pibp', 'pibp.bill_id', '=', 'pib.id')
             ->join('patient_payment_cache_items as ppci', function ($join) {
                 $join->on('ppci.bill_id', '=', 'pib.id')
-                    ->where('ppci.is_partner_item', '!=', true);
+                    ->where(function ($q) {
+                        $q->where('ppci.is_partner_item', '!=', true)
+                          ->orWhereNull('ppci.is_partner_item');
+                    });
             })
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')

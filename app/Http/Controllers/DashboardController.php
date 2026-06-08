@@ -65,7 +65,9 @@ class DashboardController extends Controller
         ];
 
         $totalCash = PatientItemPayment::query()
-            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
+            ->whereHas('items', fn($q) => $q->where(function($qq) {
+                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            }))
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -76,7 +78,9 @@ class DashboardController extends Controller
             ->sum(DB::raw('amount - discount'));
 
         $totalBills = PatientItemBill::where('status', 'Cleared')
-            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
+            ->whereHas('items', fn($q) => $q->where(function($qq) {
+                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            }))
             ->whereDate('cleared_at', '>=', $start_date)
             ->whereDate('cleared_at', '<=', $end_date)
             ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -89,7 +93,9 @@ class DashboardController extends Controller
         $data['summary']['total_sales'] = $totalCash + $totalBills;
 
         $data['summary']['discount'] = PatientItemPayment::query()
-            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
+            ->whereHas('items', fn($q) => $q->where(function($qq) {
+                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            }))
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -153,7 +159,9 @@ class DashboardController extends Controller
             ->count();
 
         $data['summary']['glass'] = PatientPaymentCacheItem::query()
-            ->where('is_partner_item', '!=', true)
+            ->where(function ($q) {
+                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            })
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -169,7 +177,9 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['pharmacy'] = PatientPaymentCacheItem::query()
-            ->where('is_partner_item', '!=', true)
+            ->where(function ($q) {
+                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            })
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -185,7 +195,9 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['procedure'] = PatientPaymentCacheItem::query()
-            ->where('is_partner_item', '!=', true)
+            ->where(function ($q) {
+                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            })
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -201,7 +213,9 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['others'] = PatientPaymentCacheItem::query()
-            ->where('is_partner_item', '!=', true)
+            ->where(function ($q) {
+                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+            })
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -222,7 +236,9 @@ class DashboardController extends Controller
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->where('it.is_partner_item', '!=', true)
+            ->where(function ($q) {
+                $q->where('it.is_partner_item', '!=', true)->orWhereNull('it.is_partner_item');
+            })
             ->where('consultations.patient_direction', 'Direct to Doctor')
             ->whereIn('it.status', ['Paid', 'Billed', 'Served'])
             ->whereNull('it.bill_id')
@@ -256,7 +272,9 @@ class DashboardController extends Controller
                     [
                         'name' => 'total_sales',
                         'amount' => PatientItemPayment::query()
-                            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
+                            ->whereHas('items', fn($q) => $q->where(function($qq) {
+                                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+                            }))
                             ->when($clinic_id, function ($query) use ($clinic_id) {
                                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                                     $query->where('clinic_id', $clinic_id);
@@ -265,7 +283,9 @@ class DashboardController extends Controller
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
                             ->sum(DB::raw('amount - discount')) + PatientItemBill::where('status', 'Cleared')
-                            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
+                            ->whereHas('items', fn($q) => $q->where(function($qq) {
+                                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+                            }))
                             ->when($clinic_id, function ($query) use ($clinic_id) {
                                 $query->whereHas('clearer', function ($query) use ($clinic_id) {
                                     $query->where('clinic_id', $clinic_id);
