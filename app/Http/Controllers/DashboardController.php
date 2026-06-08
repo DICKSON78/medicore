@@ -7,6 +7,7 @@ use App\Models\Consultation;
 use App\Models\ExpensePayment;
 use App\Models\Patient;
 use App\Models\PatientCheckIn;
+use App\Models\PatientItemBill;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
@@ -74,15 +75,15 @@ class DashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->sum(DB::raw('amount - discount'));
 
-        $totalBills = PatientItemBillPayment::query()
+        $totalBills = PatientItemBill::where('status', 'Cleared')
+            ->whereDate('cleared_at', '>=', $start_date)
+            ->whereDate('cleared_at', '<=', $end_date)
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->whereHas('clearer', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount');
+            ->sum(DB::raw('amount - discount'));
 
         // Subtract partner item amounts (frames sourced from partners, not clinic stock)
         $partnerAmount = PatientPaymentCacheItem::where('is_partner_item', true)
@@ -276,15 +277,33 @@ class DashboardController extends Controller
                             })
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
-                            ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
+                            ->sum(DB::raw('amount - discount')) + PatientItemBill::where('status', 'Cleared')
                             ->when($clinic_id, function ($query) use ($clinic_id) {
-                                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                                $query->whereHas('clearer', function ($query) use ($clinic_id) {
                                     $query->where('clinic_id', $clinic_id);
                                 });
                             })
-                            ->whereDate('created_at', '>=', $start_date)
-                            ->whereDate('created_at', '<=', $end_date)
-                            ->sum('amount'),
+                            ->whereDate('cleared_at', '>=', $start_date)
+                            ->whereDate('cleared_at', '<=', $end_date)
+                            ->sum(DB::raw('amount - discount')) - PatientPaymentCacheItem::where('is_partner_item', true)
+                            ->where('status', 'Paid')
+                            ->where(function ($q) use ($clinic_id, $start_date, $end_date) {
+                                $q->whereHas('item_payment', function ($query) use ($clinic_id, $start_date, $end_date) {
+                                    $query->whereDate('created_at', '>=', $start_date)
+                                          ->whereDate('created_at', '<=', $end_date);
+                                    if ($clinic_id) {
+                                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
+                                    }
+                                })->orWhereHas('bill.payments', function ($query) use ($clinic_id, $start_date, $end_date) {
+                                    $query->whereDate('created_at', '>=', $start_date)
+                                          ->whereDate('created_at', '<=', $end_date);
+                                    if ($clinic_id) {
+                                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
+                                    }
+                                });
+                            })
+                            ->get()
+                            ->sum(fn($item) => ($item->unit_price * $item->quantity)),
                     ],
                     [
                         'name' => 'discount',
