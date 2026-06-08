@@ -61,6 +61,11 @@ class PatientPaymentCacheItem extends Model
         return $this->belongsTo(User::class, 'served_by');
     }
 
+    public function bill()
+    {
+        return $this->belongsTo(PatientItemBill::class, 'bill_id');
+    }
+
     public function item_payment()
     {
         return $this->belongsTo(PatientItemPayment::class, 'item_payment_id');

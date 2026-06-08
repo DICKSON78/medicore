@@ -64,7 +64,7 @@ class DashboardController extends Controller
             ],
         ];
 
-        $data['summary']['total_sales'] = PatientItemPayment::query()
+        $totalCash = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -72,7 +72,9 @@ class DashboardController extends Controller
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
+            ->sum(DB::raw('amount - discount'));
+
+        $totalBills = PatientItemBillPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -81,6 +83,29 @@ class DashboardController extends Controller
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum('amount');
+
+        // Subtract partner item amounts (frames sourced from partners, not clinic stock)
+        $partnerAmount = PatientPaymentCacheItem::where('is_partner_item', true)
+            ->where('status', 'Paid')
+            ->where(function ($q) use ($clinic_id, $start_date, $end_date) {
+                $q->whereHas('item_payment', function ($query) use ($clinic_id, $start_date, $end_date) {
+                    $query->whereDate('created_at', '>=', $start_date)
+                          ->whereDate('created_at', '<=', $end_date);
+                    if ($clinic_id) {
+                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
+                    }
+                })->orWhereHas('bill.payments', function ($query) use ($clinic_id, $start_date, $end_date) {
+                    $query->whereDate('created_at', '>=', $start_date)
+                          ->whereDate('created_at', '<=', $end_date);
+                    if ($clinic_id) {
+                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
+                    }
+                });
+            })
+            ->get()
+            ->sum(fn($item) => ($item->unit_price * $item->quantity));
+
+        $data['summary']['total_sales'] = $totalCash + $totalBills - $partnerAmount;
 
         $data['summary']['discount'] = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
