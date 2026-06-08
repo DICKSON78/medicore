@@ -8,7 +8,6 @@ use App\Models\ExpensePayment;
 use App\Models\Patient;
 use App\Models\PatientCheckIn;
 use App\Models\PatientItemBill;
-use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
@@ -66,6 +65,7 @@ class DashboardController extends Controller
         ];
 
         $totalCash = PatientItemPayment::query()
+            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -76,6 +76,7 @@ class DashboardController extends Controller
             ->sum(DB::raw('amount - discount'));
 
         $totalBills = PatientItemBill::where('status', 'Cleared')
+            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
             ->whereDate('cleared_at', '>=', $start_date)
             ->whereDate('cleared_at', '<=', $end_date)
             ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -85,30 +86,10 @@ class DashboardController extends Controller
             })
             ->sum(DB::raw('amount - discount'));
 
-        // Subtract partner item amounts (frames sourced from partners, not clinic stock)
-        $partnerAmount = PatientPaymentCacheItem::where('is_partner_item', true)
-            ->where('status', 'Paid')
-            ->where(function ($q) use ($clinic_id, $start_date, $end_date) {
-                $q->whereHas('item_payment', function ($query) use ($clinic_id, $start_date, $end_date) {
-                    $query->whereDate('created_at', '>=', $start_date)
-                          ->whereDate('created_at', '<=', $end_date);
-                    if ($clinic_id) {
-                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
-                    }
-                })->orWhereHas('bill.payments', function ($query) use ($clinic_id, $start_date, $end_date) {
-                    $query->whereDate('created_at', '>=', $start_date)
-                          ->whereDate('created_at', '<=', $end_date);
-                    if ($clinic_id) {
-                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
-                    }
-                });
-            })
-            ->get()
-            ->sum(fn($item) => ($item->unit_price * $item->quantity));
-
-        $data['summary']['total_sales'] = $totalCash + $totalBills - $partnerAmount;
+        $data['summary']['total_sales'] = $totalCash + $totalBills;
 
         $data['summary']['discount'] = PatientItemPayment::query()
+            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -172,6 +153,7 @@ class DashboardController extends Controller
             ->count();
 
         $data['summary']['glass'] = PatientPaymentCacheItem::query()
+            ->where('is_partner_item', '!=', true)
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -187,6 +169,7 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['pharmacy'] = PatientPaymentCacheItem::query()
+            ->where('is_partner_item', '!=', true)
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -202,6 +185,7 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['procedure'] = PatientPaymentCacheItem::query()
+            ->where('is_partner_item', '!=', true)
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -217,6 +201,7 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['summary']['others'] = PatientPaymentCacheItem::query()
+            ->where('is_partner_item', '!=', true)
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -237,6 +222,7 @@ class DashboardController extends Controller
                     $query->where('clinic_id', $clinic_id);
                 });
             })
+            ->where('it.is_partner_item', '!=', true)
             ->where('consultations.patient_direction', 'Direct to Doctor')
             ->whereIn('it.status', ['Paid', 'Billed', 'Served'])
             ->whereNull('it.bill_id')
@@ -248,12 +234,12 @@ class DashboardController extends Controller
 
         if ($clinic_id) {
             $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount from expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id inner join users as u on expp.created_by = u.id where u.clinic_id = ? and (date(expp.created_at) between ? and ?) group by exp.category_id', [$clinic_id, $start_date, $end_date]);
-            $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id inner join users as u on pmt.created_by = u.id where u.clinic_id = ? and (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id inner join users as u on pmt.created_by = u.id where u.clinic_id = ? and (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$clinic_id, $start_date, $end_date, $clinic_id, $start_date, $end_date]);
+            $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id inner join users as u on pmt.created_by = u.id where u.clinic_id = ? and (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pibp.channel_id, pc.name, sum(pib.amount - pib.discount) as amount from patient_item_bills as pib inner join patient_item_bill_payments as pibp on pibp.bill_id = pib.id inner join payment_channels as pc on pibp.channel_id = pc.id inner join users as u on pib.cleared_by = u.id where pib.status = \'Cleared\' and u.clinic_id = ? and (date(pib.cleared_at) between ? and ?) group by pibp.channel_id)) as payments group by name', [$clinic_id, $start_date, $end_date, $clinic_id, $start_date, $end_date]);
             $data['statistics']['consultations_by_item'] = DB::select('select it.id, it.name, count(ct.id) as consultations from items as it inner join patient_payment_cache_items as ppci on ppci.item_id = it.id inner join consultations as ct on ct.payment_cache_item_id = ppci.id inner join users as u on ct.created_by = u.id where u.clinic_id = ? and ppci.status IN ("Paid", "Billed", "Served") and (date(ppci.created_at) between ? and ?) and ct.patient_direction = ? and ct.status = ? group by ppci.item_id order by consultations desc', [$clinic_id, $start_date, $end_date, 'Direct to Doctor', 'Consulted']);
             $data['statistics']['top_diagnosis'] = DB::select('select ds.id, ds.name, ds.code, count(cd.id) as consultations from diseases as ds inner join consultation_diagnoses as cd on cd.disease_id = ds.id inner join consultations as ct on cd.consultation_id = ct.id inner join patient_payment_cache_items as ppci on ct.payment_cache_item_id = ppci.id inner join users as u on ct.created_by = u.id where u.clinic_id = ? and ppci.status IN ("Paid", "Billed", "Served") and (date(ppci.created_at) between ? and ?) and ct.patient_direction = ? and ct.status = ? group by cd.disease_id order by consultations desc limit 10', [$clinic_id, $start_date, $end_date, 'Direct to Doctor', 'Consulted']);
         } else {
             $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount from expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
-            $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
+            $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pibp.channel_id, pc.name, sum(pib.amount - pib.discount) as amount from patient_item_bills as pib inner join patient_item_bill_payments as pibp on pibp.bill_id = pib.id inner join payment_channels as pc on pibp.channel_id = pc.id where pib.status = \'Cleared\' and (date(pib.cleared_at) between ? and ?) group by pibp.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
             $data['statistics']['consultations_by_item'] = DB::select('select it.id, it.name, count(ct.id) as consultations from items as it inner join patient_payment_cache_items as ppci on ppci.item_id = it.id inner join consultations as ct on ct.payment_cache_item_id = ppci.id where ppci.status IN ("Paid", "Billed", "Served") and (date(ppci.created_at) between ? and ?) and ct.patient_direction = ? and ct.status = ? group by ppci.item_id order by consultations desc', [$start_date, $end_date, 'Direct to Doctor', 'Consulted']);
             $data['statistics']['top_diagnosis'] = DB::select('select ds.id, ds.name, ds.code, count(cd.id) as consultations from diseases as ds inner join consultation_diagnoses as cd on cd.disease_id = ds.id inner join consultations as ct on cd.consultation_id = ct.id inner join patient_payment_cache_items as ppci on ct.payment_cache_item_id = ppci.id where ppci.status IN ("Paid", "Billed", "Served") and (date(ppci.created_at) between ? and ?) and ct.patient_direction = ? and ct.status = ? group by cd.disease_id order by consultations desc limit 10', [$start_date, $end_date, 'Direct to Doctor', 'Consulted']);
         }
@@ -270,6 +256,7 @@ class DashboardController extends Controller
                     [
                         'name' => 'total_sales',
                         'amount' => PatientItemPayment::query()
+                            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
                             ->when($clinic_id, function ($query) use ($clinic_id) {
                                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                                     $query->where('clinic_id', $clinic_id);
@@ -278,6 +265,7 @@ class DashboardController extends Controller
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
                             ->sum(DB::raw('amount - discount')) + PatientItemBill::where('status', 'Cleared')
+                            ->whereHas('items', fn($q) => $q->where('is_partner_item', '!=', true))
                             ->when($clinic_id, function ($query) use ($clinic_id) {
                                 $query->whereHas('clearer', function ($query) use ($clinic_id) {
                                     $query->where('clinic_id', $clinic_id);
@@ -285,25 +273,7 @@ class DashboardController extends Controller
                             })
                             ->whereDate('cleared_at', '>=', $start_date)
                             ->whereDate('cleared_at', '<=', $end_date)
-                            ->sum(DB::raw('amount - discount')) - PatientPaymentCacheItem::where('is_partner_item', true)
-                            ->where('status', 'Paid')
-                            ->where(function ($q) use ($clinic_id, $start_date, $end_date) {
-                                $q->whereHas('item_payment', function ($query) use ($clinic_id, $start_date, $end_date) {
-                                    $query->whereDate('created_at', '>=', $start_date)
-                                          ->whereDate('created_at', '<=', $end_date);
-                                    if ($clinic_id) {
-                                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
-                                    }
-                                })->orWhereHas('bill.payments', function ($query) use ($clinic_id, $start_date, $end_date) {
-                                    $query->whereDate('created_at', '>=', $start_date)
-                                          ->whereDate('created_at', '<=', $end_date);
-                                    if ($clinic_id) {
-                                        $query->whereHas('creator', fn($qq) => $qq->where('clinic_id', $clinic_id));
-                                    }
-                                });
-                            })
-                            ->get()
-                            ->sum(fn($item) => ($item->unit_price * $item->quantity)),
+                            ->sum(DB::raw('amount - discount')),
                     ],
                     [
                         'name' => 'discount',
