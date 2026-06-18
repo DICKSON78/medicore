@@ -1,35 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
   CardContent,
-  CardHeader,
   Grid,
+  LinearProgress,
   Typography,
-  CircularProgress,
 } from "@mui/material";
 import {
-  InventoryRounded as DispensingIcon,
-  AssignmentRounded as RequestsIcon,
-  LibraryBooksRounded as ReportsIcon,
-  InventoryRounded as StockIcon,
-  InventoryRounded as InventoryIcon,
-  TrendingUpRounded as DispensedIcon,
-  CheckCircleRounded as CompletedIcon,
-  ScheduleRounded as PendingIcon,
+  InventoryRounded,
+  AssignmentRounded,
+  CheckCircleRounded,
+  TrendingUpRounded,
 } from "@mui/icons-material";
 
-import Page from "../../../components/Page";
+import { Header as PageHeader } from "../../../components/Page";
+import InfoCard from "../../dashboard/InfoCard";
+import ChartWrapper from "../../../components/ChartWrapper";
+
+import { useTheme } from "@mui/material/styles";
+import {
+  purple,
+  teal,
+  green,
+  orange,
+} from "@mui/material/colors";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const theme = useTheme();
   const addToast = useToast();
 
-  // Set up date parameters for weekly filtering
-  const [dateParams, setDateParams] = useState({
+  const [dateParams] = useState({
     start_date: getWeekStartDate().toISOString().split('T')[0],
     end_date: getWeekEndDate().toISOString().split('T')[0],
   });
@@ -65,176 +68,125 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Page title="Other Dispensing Dashboard">
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-          <CircularProgress />
-        </Box>
-      </Page>
+      <Box>
+        <LinearProgress />
+      </Box>
     );
   }
 
   return (
-    <Page
-      title="Other Dispensing Dashboard"
-      breadcrumbs={[
-        { title: "Home" },
-        { title: "Other Dispensing" },
-        { title: "Other Dispensing Dashboard" },
-      ]}
-    >
-      <CardHeader
-        title="Other Dispensing Dashboard"
-        titleTypographyProps={{
-          variant: "h4",
-          fontWeight: 700,
-        }}
-        sx={{
-          p: 0,
-          mb: 2,
-        }}
-      />
-      {loading && <div>Loading...</div>}
+    <Box>
+      <PageHeader title="Other Dispensing Dashboard" />
+
       {!loading && data ? (
-        <React.Fragment>
-          {/* Other Dispensing Features Overview */}
-          <Card sx={{ mb: 3 }}>
+        <>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
+            <InfoCard
+              title="Total Dispensed"
+              count={numberFormat(data.summary.total_dispensed || 0)}
+              icon={<InventoryRounded />}
+              color={purple[400]}
+            />
+            <InfoCard
+              title="Pending Requests"
+              count={numberFormat(data.summary.pending_requests || 0)}
+              icon={<AssignmentRounded />}
+              color={orange[400]}
+            />
+            <InfoCard
+              title="Completed Today"
+              count={numberFormat(data.summary.completed_today || 0)}
+              icon={<CheckCircleRounded />}
+              color={green[400]}
+            />
+            <InfoCard
+              title="Items Dispensed"
+              count={numberFormat(data.summary.items_dispensed || 0)}
+              icon={<TrendingUpRounded />}
+              color={teal[400]}
+            />
+          </Grid>
+
+          <Card sx={{ mb: 2 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <DispensingIcon sx={{ fontSize: 28.8, mr: 2, color: 'primary.main' }} />
-                <Box>
-                  <Typography variant="h5" fontWeight="bold" sx={{ mb: 0.5 }}>
-                    Other Dispensing Management
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    General item dispensing, equipment distribution, and supply management
-                  </Typography>
-                </Box>
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#FF9800', color: 'white', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#F57C00' } }} onClick={() => navigate('/other-dispensing/dispensing-requests')}>
-                    <RequestsIcon sx={{ fontSize: 24, mb: 1 }} />
-                    <Typography variant="subtitle2" fontWeight="bold">Dispensing Requests</Typography>
-                    <Typography variant="caption">Process item requests</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#4CAF50', color: 'white', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#388E3C' } }} onClick={() => navigate('/other-dispensing/reports/items-dispensed')}>
-                    <ReportsIcon sx={{ fontSize: 24, mb: 1 }} />
-                    <Typography variant="subtitle2" fontWeight="bold">Items Dispensed</Typography>
-                    <Typography variant="caption">View dispensed items</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#2196F3', color: 'white', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#1976D2' } }} onClick={() => navigate('/other-dispensing/reports/item-balance')}>
-                    <StockIcon sx={{ fontSize: 24, mb: 1 }} />
-                    <Typography variant="subtitle2" fontWeight="bold">Item Balance</Typography>
-                    <Typography variant="caption">Stock balance</Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#9C27B0', color: 'white', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#7B1FA2' } }} onClick={() => navigate('/inventory-management/stock-alerts')}>
-                    <InventoryIcon sx={{ fontSize: 24, mb: 1 }} />
-                    <Typography variant="subtitle2" fontWeight="bold">Stock Alerts</Typography>
-                    <Typography variant="caption">Inventory alerts</Typography>
-                  </Box>
-                </Grid>
-              </Grid>
+              <Typography variant="h6" gutterBottom>Dispensing Trend</Typography>
+              <ChartWrapper
+                options={{
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    foreColor: theme.palette.text.primary,
+                    background: "transparent",
+                    toolbar: { show: false },
+                  },
+                  colors: [teal[400]],
+                  stroke: { show: true, width: 3, curve: "smooth" },
+                  dataLabels: { enabled: false },
+                  grid: { show: false, borderColor: theme.palette.divider },
+                  xaxis: {
+                    axisBorder: { show: false, color: theme.palette.divider },
+                    axisTicks: { show: true, color: theme.palette.divider, height: 6 },
+                  },
+                  yaxis: {
+                    axisBorder: { show: false, color: theme.palette.divider },
+                    axisTicks: { show: true, color: theme.palette.divider, width: 6 },
+                    labels: { formatter: (val) => numberFormat(val) },
+                  },
+                  tooltip: { theme: "dark", fillSeriesColor: true },
+                }}
+                series={[{
+                  name: "Dispensed",
+                  data: (data.statistics.dispensing_trend || []).map((e) => ({
+                    x: e.date,
+                    y: e.total,
+                  })),
+                }]}
+                type="line"
+                height="300"
+              />
             </CardContent>
           </Card>
 
-          <Grid container spacing={4}>
-            <Grid item xs={12} lg={8}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Quick Actions
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }} onClick={() => navigate('/other-dispensing/dispensing-requests')}>
-                        <RequestsIcon sx={{ fontSize: 28.8, color: '#FF9800', mb: 1 }} />
-                        <Typography variant="subtitle2">Process Request</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }} onClick={() => navigate('/other-dispensing/reports/items-dispensed')}>
-                        <ReportsIcon sx={{ fontSize: 28.8, color: '#4CAF50', mb: 1 }} />
-                        <Typography variant="subtitle2">Items Dispensed</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }} onClick={() => navigate('/other-dispensing/reports/item-balance')}>
-                        <StockIcon sx={{ fontSize: 28.8, color: '#2196F3', mb: 1 }} />
-                        <Typography variant="subtitle2">Item Balance</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer', '&:hover': { bgcolor: '#f5f5f5' } }} onClick={() => navigate('/inventory-management/stock-alerts')}>
-                        <InventoryIcon sx={{ fontSize: 28.8, color: '#9C27B0', mb: 1 }} />
-                        <Typography variant="subtitle2">Stock Alerts</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-            
-            <Grid item xs={12} lg={4}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Dispensing Statistics
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#e8f5e8', borderRadius: 2 }}>
-                        <DispensedIcon sx={{ fontSize: 28.8, color: '#4CAF50', mb: 1 }} />
-                        <Typography variant="h4" color="#4CAF50" fontWeight="bold">
-                          {numberFormat(data.summary.total_dispensed || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Total Dispensed</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#fff3e0', borderRadius: 2 }}>
-                        <PendingIcon sx={{ fontSize: 28.8, color: '#FF9800', mb: 1 }} />
-                        <Typography variant="h4" color="#FF9800" fontWeight="bold">
-                          {numberFormat(data.summary.pending_requests || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Pending Requests</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-                        <CompletedIcon sx={{ fontSize: 28.8, color: '#2196F3', mb: 1 }} />
-                        <Typography variant="h4" color="#2196F3" fontWeight="bold">
-                          {numberFormat(data.summary.completed_today || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Completed Today</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, bgcolor: '#fce4ec', borderRadius: 2 }}>
-                        <DispensingIcon sx={{ fontSize: 28.8, color: '#E91E63', mb: 1 }} />
-                        <Typography variant="h4" color="#E91E63" fontWeight="bold">
-                          {numberFormat(data.summary.items_dispensed || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Items Dispensed</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </React.Fragment>
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Top Dispensed Items</Typography>
+              <ChartWrapper
+                options={{
+                  labels: (data.statistics.top_dispensed_items || []).map((e) => e.name || e.item_name),
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    background: "transparent",
+                    toolbar: { show: false },
+                  },
+                  plotOptions: { pie: { donut: {} } },
+                  colors: [teal[400], orange[400], green[400], purple[400]],
+                  stroke: { show: false, width: 3 },
+                  dataLabels: {
+                    style: { fontSize: 10, fontWeight: 400 },
+                    dropShadow: { enabled: false },
+                  },
+                  tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      colors: (data.statistics.top_dispensed_items || []).map(() => theme.palette.text.secondary),
+                      useSeriesColors: false,
+                    },
+                    markers: { width: 14, height: 8, radius: 4 },
+                  },
+                }}
+                series={(data.statistics.top_dispensed_items || []).map((e) => e.count || e.total || 0)}
+                type="donut"
+                height={300}
+              />
+            </CardContent>
+          </Card>
+        </>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
           <Typography variant="h6">No data available.</Typography>
         </Box>
       )}
-    </Page>
+      </Box>
   );
 };
 

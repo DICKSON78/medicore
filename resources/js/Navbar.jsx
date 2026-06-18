@@ -64,8 +64,8 @@ const Navbar = () => {
       type: 'dropdown',
       items: [
         { label: 'Our Services', path: '/services' },
-        { label: 'Shop Eyeware', path: '/shop' },
-        { label: 'Books & Journals', path: '/books' },
+        { label: 'Dental Gallery', path: '/gallery' },
+        { label: 'Patient Information', path: '/patient-info' },
         { label: 'Insurance & Payments', path: '/insurance-payment' },
       ],
     },
@@ -79,7 +79,7 @@ const Navbar = () => {
         { label: 'Our Team', path: '/team' },
       ],
     },
-    { label: 'Eye Health Blog', path: '/blog', type: 'link' },
+    { label: 'Dental Health Blog', path: '/blog', type: 'link' },
     { label: 'Book Appointment', path: '/appointment', type: 'link' },
     { label: 'Contact Us', path: '/contact', type: 'link' },
   ];

@@ -8,6 +8,7 @@ import {
   Box,
   CardHeader,
   Chip,
+  CircularProgress,
   Divider,
   Drawer,
   IconButton,
@@ -26,9 +27,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import {
-  DarkModeRounded as DarkModeIcon,
   ExpandMoreRounded as ChevronDownIcon,
-  LightModeOutlined as LightModeIcon,
   LockRounded as LockIcon,
   LogoutRounded as LogoutIcon,
   MoreVert as MoreIcon,
@@ -40,12 +39,8 @@ import darkTheme from "../themes/dark";
 import Menu from "../components/Menu";
 import Modal from "../components/Modal";
 import ChangePassword from "../pages/auth/ChangePassword";
-import loader from "../../images/loader.svg";
 
 import useFetch from "../hooks/useFetch";
-import { useFilterContext } from "../contexts/FilterContext";
-
-import { numberFormat } from "../helpers";
 
 const drawerWidth = 272;
 
@@ -56,6 +51,24 @@ const drawerOpenedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: "hidden",
+  overflowY: "auto",
+  scrollbarWidth: "thin",
+  scrollbarColor: "rgba(255,255,255,0.2) transparent",
+  "&::-webkit-scrollbar": {
+    width: 7,
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "rgba(0,0,0,0.1)",
+    borderRadius: 4,
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "#00796B",
+    borderRadius: 4,
+    border: "1px solid rgba(255,255,255,0.15)",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    background: "#00796B",
+  },
 });
 
 const drawerClosedMixin = (theme) => ({
@@ -68,14 +81,13 @@ const drawerClosedMixin = (theme) => ({
   whiteSpace: "nowrap",
 });
 
-const Default = ({ setThemeMode, setUser, smsBalance }) => {
+const Default = ({ setUser, smsBalance }) => {
   const notificationsTimer = useRef();
   const modalRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const breakpointDownMedium = useMediaQuery(theme.breakpoints.down("md"));
-  const { currentFilter } = useFilterContext();
   const breakpointUpMedium = useMediaQuery(theme.breakpoints.up("md"));
 
   const { data: user, loading, error } = useFetch(
@@ -90,6 +102,12 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
   const [anchorEl, setAnchorEl] = useState();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [splashLoading, setSplashLoading] = useState(true);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     // Force splash screen to stay for at least 7 seconds
@@ -130,13 +148,6 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
-  };
-
-  const toggleTheme = () => {
-    const themeMode = theme.palette.mode === "light" ? "dark" : "light";
-    window.localStorage.removeItem("theme_mode");
-    window.localStorage.setItem("theme_mode", themeMode);
-    setThemeMode(themeMode);
   };
 
   const handleAccountMenuOpen = (event) => {
@@ -188,69 +199,42 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
                   </IconButton>
                 </Tooltip>
 
-                <Box
-                  component="img"
-                  src="/images/logo.png"
-                  alt="Logo"
-                  width={32}
-                  height={32}
-                  ml={2}
-                />
-
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   fontWeight="bold"
-                  ml={1}
+                  ml={2}
+                  sx={{ letterSpacing: 1 }}
                 >
-                  EYE
+                  MEDICORE
                   <Typography
                     component="span"
                     color="secondary"
-                    variant="h5"
+                    variant="h6"
                     fontWeight="bold"
+                    sx={{ letterSpacing: 1 }}
                   >
-                    CARE
+                    {" "}DENTAL
                   </Typography>
                 </Typography>
 
                 <Box sx={{ flexGrow: 1 }} />
 
-                <Tooltip
-                  title={
-                    theme.palette.mode === "light"
-                      ? "Enable dark mode"
-                      : "Disable dark mode"
-                  }
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1.5}
+                  sx={{ mr: 2 }}
                 >
-                  <IconButton
-                    color="inherit"
-                    sx={{ mr: { xs: 2, sm: 2, md: 1 } }}
-                    onClick={toggleTheme}
+                  <Typography
+                    variant="caption"
+                    color="primary.contrastText"
+                    sx={{ opacity: 0.8, textAlign: 'right', lineHeight: 1.2 }}
                   >
-                    {theme.palette.mode === "light" ? (
-                      <DarkModeIcon />
-                    ) : (
-                      <LightModeIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
-
-                {user.privileges.dashboard &&
-                location.pathname.indexOf("/dashboard") === 0 ? (
-                  <Chip
-                    variant="outlined"
-                    sx={{ mr: { xs: 1, sm: 1, md: 2 } }}
-                    color="primary"
-                    label={
-                      <Typography
-                        variant="body2"
-                        color="primary.contrastText"
-                      >
-                        {`SMS Balance: ${numberFormat(smsBalance)}`}
-                      </Typography>
-                    }
-                  />
-                ) : null}
+                    {now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    <br />
+                    {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
+                </Stack>
 
                 <Chip
                   variant="outlined"
@@ -365,7 +349,7 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
               }}
             >
               <Toolbar />
-              <Box flexGrow={1}>
+              <Box sx={{ px: "15px", py: 2, flexGrow: 1 }}>
                 <Outlet />
               </Box>
             </Box>
@@ -434,36 +418,12 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
       >
         <Box
           display="flex"
-          flexDirection="column"
           height="100vh"
           alignItems="center"
           justifyContent="center"
-          sx={{ pointerEvents: "none", bgcolor: "rgba(0,0,0,0.1)" }}
+          sx={{ bgcolor: "background.default" }}
         >
-          <Box
-            component="img"
-            src="/images/logo.png"
-            alt="Logo"
-            width={128}
-            height="auto"
-            sx={{ pointerEvents: "none", mb: 3 }}
-          />
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            color="primary"
-            gutterBottom
-            sx={{ textShadow: "0px 2px 4px rgba(0,0,0,0.1)" }}
-          >
-            Loading New Kayoka
-          </Typography>
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{ opacity: 0.8 }}
-          >
-            Please wait while we prepare your experience
-          </Typography>
+          <CircularProgress color="primary" />
         </Box>
       </MuiModal>
     </React.Fragment>

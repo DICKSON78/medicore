@@ -83,12 +83,12 @@ class ResetDatabaseAuto extends Command
             // Create clinic
             $this->info('Creating clinic...');
             $clinicId = DB::table('clinics')->insertGetId([
-                'name' => 'Best Vision Eye Care',
+                'name' => 'Medicore Dental Clinic',
                 'phone' => '0678110376',
-                'email' => 'info@bestvision.com',
+                'email' => 'info@medicore-dental.co.tz',
                 'address' => 'Natta, Mwanza',
                 'sms_balance' => '0',
-                'sms_sender_name' => 'BESTVISION',
+                'sms_sender_name' => 'MEDICORE',
                 'logo' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -100,11 +100,11 @@ class ResetDatabaseAuto extends Command
             $departments = [
                 ['name' => 'Administration', 'description' => 'Administrative department'],
                 ['name' => 'Reception', 'description' => 'Patient reception'],
-                ['name' => 'Consultation', 'description' => 'Doctor consultations'],
-                ['name' => 'Optician', 'description' => 'Optical services'],
-                ['name' => 'Laboratory', 'description' => 'Lab services'],
+                ['name' => 'Consultation', 'description' => 'Dental consultations'],
+                ['name' => 'Dental Lab', 'description' => 'Dental laboratory services'],
+                ['name' => 'Radiology', 'description' => 'Dental X-ray and imaging'],
                 ['name' => 'Pharmacy', 'description' => 'Medicine dispensing'],
-                ['name' => 'Surgery', 'description' => 'Surgical procedures'],
+                ['name' => 'Surgery', 'description' => 'Dental surgical procedures'],
                 ['name' => 'Emergency', 'description' => 'Emergency services'],
                 ['name' => 'Marketing', 'description' => 'Marketing department'],
                 ['name' => 'Finance', 'description' => 'Financial management'],
@@ -124,11 +124,11 @@ class ResetDatabaseAuto extends Command
             $this->info('Creating job titles...');
             $jobTitles = [
                 ['name' => 'Administrator', 'description' => 'System administrator'],
-                ['name' => 'Doctor', 'description' => 'Medical doctor'],
-                ['name' => 'Nurse', 'description' => 'Registered nurse'],
+                ['name' => 'Dentist', 'description' => 'Dental doctor'],
+                ['name' => 'Dental Nurse', 'description' => 'Registered dental nurse'],
                 ['name' => 'Receptionist', 'description' => 'Front desk staff'],
-                ['name' => 'Optician', 'description' => 'Optical specialist'],
-                ['name' => 'Technician', 'description' => 'Technical staff'],
+                ['name' => 'Dental Technician', 'description' => 'Dental lab technician'],
+                ['name' => 'Dental Assistant', 'description' => 'Chair-side assistant'],
                 ['name' => 'Pharmacist', 'description' => 'Medicine specialist'],
                 ['name' => 'Manager', 'description' => 'Department manager'],
             ];
@@ -158,7 +158,7 @@ class ResetDatabaseAuto extends Command
                 'gender' => 'Male',
                 'national_id' => null,
                 'phone' => '0000000000',
-                'email' => 'admin@eyecare.com',
+                'email' => 'admin@medicore-dental.co.tz',
                 'username' => 'admin',
                 'password' => Hash::make('admin'),
                 'remember_token' => null,
@@ -171,6 +171,29 @@ class ResetDatabaseAuto extends Command
             $this->info("✅ Admin user created with ID: $adminId");
             $this->info("   Username: admin");
             $this->info("   Password: admin");
+            $this->newLine();
+
+            // Grant admin full privileges
+            $this->info('Granting admin privileges...');
+            DB::table('user_privileges')->updateOrInsert(
+                ['user_id' => $adminId],
+                ['privilege' => json_encode([
+                    'dashboard' => true,
+                    'reception' => true,
+                    'payment_center' => true,
+                    'consultation_room' => true,
+                    'dental_lab' => true,
+                    'medicine_center' => true,
+                    'procedure_room' => true,
+                    'dispensing' => true,
+                    'inventory_management' => true,
+                    'marketing' => true,
+                    'financial_management' => true,
+                    'user_management' => true,
+                    'settings' => true,
+                ])]
+            );
+            $this->info('✅ Admin privileges granted');
             $this->newLine();
 
             // Create payment modes
@@ -241,9 +264,9 @@ class ResetDatabaseAuto extends Command
             // Create preferences
             $this->info('Creating system preferences...');
             $preferences = [
-                ['key' => 'CLINIC_NAME', 'value' => 'Best Vision Eye Care'],
+                ['key' => 'CLINIC_NAME', 'value' => 'Medicore Dental Clinic'],
                 ['key' => 'CLINIC_PHONE', 'value' => '0678110376'],
-                ['key' => 'CLINIC_EMAIL', 'value' => 'info@bestvision.com'],
+                ['key' => 'CLINIC_EMAIL', 'value' => 'info@medicore-dental.co.tz'],
                 ['key' => 'CLINIC_ADDRESS', 'value' => 'Natta, Mwanza'],
                 ['key' => 'SYSTEM_VERSION', 'value' => '1.0.0'],
                 ['key' => 'MAINTENANCE_MODE', 'value' => 'No'],

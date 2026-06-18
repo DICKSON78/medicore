@@ -50,7 +50,7 @@ const Subheader = ({ title, sx }) => {
   return (
     <Box
       sx={{
-        backgroundColor: "#1976d2",
+        backgroundColor: "#00796B",
         color: "white",
         py: 1.5,
         px: 3,
@@ -295,15 +295,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
             {/* Improved History Taking Layout */}
             <Box sx={{ 
-              border: '1px solid #bbdefb', 
+              border: '1px solid #B2DFDB', 
               borderRadius: 2, 
               overflow: 'hidden',
               mb: 2 
             }}>
               <Table sx={{ width: '100%' }}>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#e3f2fd' }}>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>
+                  <TableRow sx={{ backgroundColor: '#E0F2F1' }}>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>
                       CC
                       <Typography
                         component="span"
@@ -314,13 +314,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         *
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>HI</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>FH</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>HI</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>FH</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={chiefComplaintRef}
                         fullWidth
@@ -344,7 +344,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={historyPresentIllnessRef}
                         fullWidth
@@ -370,7 +370,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={familyHistoryRef}
                         fullWidth
@@ -400,22 +400,22 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
             {/* Second Row - GH, FOH, FGH */}
             <Box sx={{ 
-              border: '1px solid #bbdefb', 
+              border: '1px solid #B2DFDB', 
               borderRadius: 2, 
               overflow: 'hidden',
               mb: 2 
             }}>
               <Table sx={{ width: '100%' }}>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#e3f2fd' }}>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>GH</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>FOH</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>FGH</TableCell>
+                  <TableRow sx={{ backgroundColor: '#E0F2F1' }}>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>GH</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>FOH</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>FGH</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={generalHealthRef}
                         fullWidth
@@ -438,7 +438,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={familyOcularHistoryRef}
                         fullWidth
@@ -464,7 +464,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={familyGeneralHistoryRef}
                         fullWidth
@@ -497,22 +497,22 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
             {/* Third Row - Pupils, EOM */}
             <Box sx={{ 
-              border: '1px solid #bbdefb', 
+              border: '1px solid #B2DFDB', 
               borderRadius: 2, 
               overflow: 'hidden',
               mb: 2 
             }}>
               <Table sx={{ width: '100%' }}>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#e3f2fd' }}>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>Pupils</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #bbdefb' }}>EOM</TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb' }}></TableCell>
+                  <TableRow sx={{ backgroundColor: '#E0F2F1' }}>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>Pupils</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>EOM</TableCell>
+                    <TableCell sx={{ border: '1px solid #B2DFDB' }}></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={pupilsRef}
                         fullWidth
@@ -535,7 +535,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb', p: 1 }}>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
                         ref={extraOcularMusclesRef}
                         fullWidth
@@ -561,7 +561,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #bbdefb' }}></TableCell>
+                    <TableCell sx={{ border: '1px solid #B2DFDB' }}></TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -603,7 +603,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Box sx={{ width: '100%', mb: 2, display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#e3f2fd', p: 2, textAlign: 'center' }}>
+                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
                       <Typography variant="h6" fontWeight="bold" color="primary">Diagnosis</Typography>
                     </Box>
                     <CardContent sx={{ p: 2 }}>
@@ -620,7 +620,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 </Box>
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#e3f2fd', p: 2, textAlign: 'center' }}>
+                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
                       <Typography variant="h6" fontWeight="bold" color="primary">Procedure</Typography>
                     </Box>
                     <CardContent sx={{ p: 2 }}>
@@ -637,7 +637,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 </Box>
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#e3f2fd', p: 2, textAlign: 'center' }}>
+                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
                       <Typography variant="h6" fontWeight="bold" color="primary">Medicine</Typography>
                     </Box>
                     <CardContent sx={{ p: 2 }}>
@@ -654,7 +654,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 </Box>
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#e3f2fd', p: 2, textAlign: 'center' }}>
+                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
                       <Typography variant="h6" fontWeight="bold" color="primary">Glass</Typography>
                     </Box>
                     <CardContent sx={{ p: 2 }}>
@@ -673,15 +673,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
             <Subheader title="Remarks" />
             <Box sx={{ 
-              border: '1px solid #bbdefb', 
+              border: '1px solid #B2DFDB', 
               borderRadius: 2, 
               overflow: 'hidden',
               mb: 2 
             }}>
               <Box sx={{ 
-                backgroundColor: '#e3f2fd', 
+                backgroundColor: '#E0F2F1', 
                 p: 2, 
-                borderBottom: '1px solid #bbdefb',
+                borderBottom: '1px solid #B2DFDB',
                 textAlign: 'center'
               }}>
                 <Typography variant="h6" fontWeight="bold" color="primary">
@@ -704,13 +704,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
-                        border: '1px solid #bbdefb',
+                        border: '1px solid #B2DFDB',
                       },
                       '&:hover fieldset': {
-                        border: '1px solid #1976d2',
+                        border: '1px solid #00796B',
                       },
                       '&.Mui-focused fieldset': {
-                        border: '2px solid #1976d2',
+                        border: '2px solid #00796B',
                       },
                     },
                   }}
@@ -720,15 +720,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
             {/* Patient Return Section */}
             <Box sx={{ 
-              border: '1px solid #bbdefb', 
+              border: '1px solid #B2DFDB', 
               borderRadius: 2, 
               overflow: 'hidden',
               mb: 2 
             }}>
               <Box sx={{ 
-                backgroundColor: '#e3f2fd', 
+                backgroundColor: '#E0F2F1', 
                 p: 2, 
-                borderBottom: '1px solid #bbdefb',
+                borderBottom: '1px solid #B2DFDB',
                 textAlign: 'center'
               }}>
                 <Typography variant="h6" fontWeight="bold" color="primary">

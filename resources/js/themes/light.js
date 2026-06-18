@@ -3,24 +3,28 @@ import {
   amber,
   green,
   grey,
-  lightBlue,
   purple,
   red,
+  teal,
 } from "@mui/material/colors";
 
 const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#00225f",
+      main: "#00796B",
+      light: "#009688",
+      dark: "#004D40",
       contrastText: "#fff",
     },
     secondary: {
-      main: "#d71a20",
+      main: "#E65100",
+      light: "#FF8A65",
+      dark: "#BF360C",
       contrastText: "#fff",
     },
     info: {
-      main: lightBlue[600],
+      main: teal[600],
       contrastText: "#fff",
     },
     success: {
@@ -47,10 +51,10 @@ const theme = createTheme({
       secondary: "rgba(0, 0, 0, 0.58)",
     },
     background: {
-      default: "#fafafa",
+      default: "#f5f7f6",
       paper: "#fff",
     },
-    divider: "#e3f2fd",
+    divider: "#e0e0e0",
   },
   typography: {
     fontFamily: "Custom, sans-serif",
@@ -302,7 +306,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "&.expanded": {
-            backgroundColor: alpha(lightBlue[600], 0.18),
+              backgroundColor: alpha(teal[500], 0.18),
           },
         },
       },

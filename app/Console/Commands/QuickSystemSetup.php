@@ -97,29 +97,29 @@ class QuickSystemSetup extends Command
                 [
                     'first_name' => 'Dr. John',
                     'last_name' => 'Smith',
-                    'username' => 'doctor1',
-                    'role' => 'Doctor',
+                    'username' => 'dentist1',
+                    'role' => 'Dentist',
                     'department_id' => 3, // Consultation
-                    'job_title_id' => 2, // Doctor
-                    'designation' => 'Senior Doctor',
+                    'job_title_id' => 2, // Dentist
+                    'designation' => 'Senior Dentist',
                 ],
                 [
                     'first_name' => 'Mary',
                     'last_name' => 'Johnson',
-                    'username' => 'nurse1',
-                    'role' => 'Nurse',
-                    'department_id' => 11, // Nursing
-                    'job_title_id' => 3, // Nurse
-                    'designation' => 'Senior Nurse',
+                    'username' => 'dentalnurse1',
+                    'role' => 'Dental Nurse',
+                    'department_id' => 3, // Consultation
+                    'job_title_id' => 3, // Dental Nurse
+                    'designation' => 'Senior Dental Nurse',
                 ],
                 [
                     'first_name' => 'Robert',
                     'last_name' => 'Wilson',
-                    'username' => 'optician1',
-                    'role' => 'Optician',
-                    'department_id' => 4, // Optician
-                    'job_title_id' => 5, // Optician
-                    'designation' => 'Senior Optician',
+                    'username' => 'dentaltech1',
+                    'role' => 'Dental Technician',
+                    'department_id' => 4, // Dental Lab
+                    'job_title_id' => 4, // Dental Technician
+                    'designation' => 'Senior Dental Technician',
                 ],
                 [
                     'first_name' => 'Sarah',
@@ -157,7 +157,7 @@ class QuickSystemSetup extends Command
                         'gender' => 'Female',
                         'national_id' => null,
                         'phone' => '0000000000',
-                        'email' => $userData['username'] . '@eyecare.com',
+                        'email' => $userData['username'] . '@medicore-dental.co.tz',
                         'username' => $userData['username'],
                         'password' => Hash::make('password123'),
                         'remember_token' => null,
@@ -258,12 +258,12 @@ class QuickSystemSetup extends Command
             // Create consultation types
             $this->info('8. Creating consultation types...');
             $consultationTypes = [
-                ['name' => 'General Consultation', 'description' => 'General eye examination'],
+                ['name' => 'General Consultation', 'description' => 'General dental examination'],
                 ['name' => 'Follow-up', 'description' => 'Follow-up consultation'],
-                ['name' => 'Emergency', 'description' => 'Emergency consultation'],
+                ['name' => 'Emergency', 'description' => 'Emergency dental consultation'],
                 ['name' => 'Surgery Consultation', 'description' => 'Pre-surgery consultation'],
                 ['name' => 'Post-surgery', 'description' => 'Post-surgery follow-up'],
-                ['name' => 'VIP Consultation', 'description' => 'VIP patient consultation'],
+                ['name' => 'Orthodontic Review', 'description' => 'Orthodontic treatment review'],
             ];
 
             foreach ($consultationTypes as $type) {
@@ -280,23 +280,23 @@ class QuickSystemSetup extends Command
             $this->info('✅ Consultation types created');
 
             // Create diseases (without description column)
-            $this->info('9. Creating common eye diseases...');
+            $this->info('9. Creating common dental diseases...');
             $diseases = [
-                'Cataract',
-                'Glaucoma',
-                'Diabetic Retinopathy',
-                'Macular Degeneration',
-                'Refractive Errors',
-                'Conjunctivitis',
-                'Dry Eye Syndrome',
-                'Blepharitis',
-                'Stye',
-                'Corneal Abrasion',
-                'Retinal Detachment',
-                'Uveitis',
-                'Keratoconus',
-                'Amblyopia',
-                'Strabismus',
+                'Dental Caries',
+                'Pulpitis',
+                'Periodontitis',
+                'Gingivitis',
+                'Tooth Abscess',
+                'Impacted Tooth',
+                'Oral Thrush',
+                'Apthous Ulcer',
+                'Halitosis',
+                'Tooth Erosion',
+                'Bruxism',
+                'TMJ Disorder',
+                'Oral Lichen Planus',
+                'Leukoplakia',
+                'Mouth Cancer',
             ];
 
             foreach ($diseases as $disease) {
@@ -408,9 +408,9 @@ class QuickSystemSetup extends Command
             $this->newLine();
             $this->info('Login with: admin / admin');
             $this->info('Additional users created:');
-            $this->info('- doctor1 / password123');
-            $this->info('- nurse1 / password123');
-            $this->info('- optician1 / password123');
+            $this->info('- dentist1 / password123');
+            $this->info('- dentalnurse1 / password123');
+            $this->info('- dentaltech1 / password123');
             $this->info('- reception1 / password123');
             $this->info('- cashier1 / password123');
 

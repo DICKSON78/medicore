@@ -132,7 +132,7 @@ class ResetDatabaseAndCreateAdmin extends Command
                     'name' => 'Default Clinic',
                     'address' => 'Default Address',
                     'phone' => '1234567890',
-                    'email' => 'clinic@eyecare.com',
+                    'email' => 'clinic@medicore-dental.co.tz',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
@@ -174,7 +174,7 @@ class ResetDatabaseAndCreateAdmin extends Command
                 'gender' => 'Male',
                 'national_id' => '123456789',
                 'phone' => '1234567890',
-                'email' => 'admin@eyecare.com',
+                'email' => 'admin@medicore-dental.co.tz',
                 'username' => 'admin',
                 'password' => Hash::make('password'),
                 'role' => 'Admin',
@@ -192,7 +192,7 @@ class ResetDatabaseAndCreateAdmin extends Command
                     ['Password', 'password'],
                     ['Role', 'Admin'],
                     ['Status', 'Active'],
-                    ['Email', 'admin@eyecare.com'],
+                    ['Email', 'admin@medicore-dental.co.tz'],
                 ]
             );
             

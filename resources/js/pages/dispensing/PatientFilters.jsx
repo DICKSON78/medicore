@@ -7,6 +7,7 @@ import SearchIcon from "@mui/icons-material/SearchRounded";
 import DatePicker from "../../components/DatePicker";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
+import SelectUser from "../../components/SelectUser";
 import useFetch from "../../hooks/useFetch";
 
 import { throttle } from "../../helpers";
@@ -18,6 +19,14 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
       status: "Active",
       per_page: 500,
     },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+
+  const { data: items } = useFetch(
+    "api/items",
+    { status: "Active", per_page: 500 },
     true,
     [],
     (response) => response.data.data.data
@@ -137,6 +146,27 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               clearable
               onChange={(value) =>
                 setParams({ ...params, item_payment_mode_id: value })
+              }
+            />
+          </Grid>
+          <Grid item md sm={6} xs={12}>
+            <Select
+              label="Item"
+              fullWidth
+              options={items}
+              optionsLabel="name"
+              optionsValue="id"
+              clearable
+              onChange={(value) => setParams({ ...params, item_id: value })}
+            />
+          </Grid>
+          <Grid item md sm={6} xs={12}>
+            <SelectUser
+              label="Consultant"
+              clearable
+              params={{ designation: "Doctor" }}
+              onChange={(value) =>
+                setParams({ ...params, consultant_id: value?.id })
               }
             />
           </Grid>

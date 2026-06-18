@@ -67,7 +67,7 @@ const Radio = ({ style, checked, label }) => {
           width: 10,
           height: 10,
           borderRadius: 5,
-          border: `1pt solid ${checked ? "#00225f" : "#808080"}`,
+          border: `1pt solid ${checked ? "#004D40" : "#808080"}`,
         }}
       >
         {checked ? (
@@ -76,7 +76,7 @@ const Radio = ({ style, checked, label }) => {
               width: 6,
               height: 6,
               borderRadius: 3,
-              backgroundColor: "#00225f",
+              backgroundColor: "#004D40",
             }}
           />
         ) : null}

@@ -21,6 +21,14 @@ const PatientFilters = ({
   showViewPeriod,
   ...rest
 }) => {
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    { status: "Active", per_page: 500 },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+
   const { data: items } = useFetch(
     "api/items",
     {
@@ -221,6 +229,19 @@ const PatientFilters = ({
               optionsValue="id"
               clearable
               onChange={(value) => setParams({ ...params, item_id: value })}
+            />
+          </Grid>
+          <Grid item md={showViewPeriod ? 2 : 3} sm={6} xs={12}>
+            <Select
+              label="Payment Mode"
+              fullWidth
+              options={paymentModes}
+              optionsLabel="name"
+              optionsValue="id"
+              clearable
+              onChange={(value) =>
+                setParams({ ...params, payment_mode_id: value })
+              }
             />
           </Grid>
           {showDiagnosis ? (

@@ -6,7 +6,7 @@ import { Skeleton } from "@mui/material";
 import Page from "../../components/Page";
 import Modal from "../../components/Modal";
 import PatientDetails from "../reception/patients/PatientDetails";
-import ClinicalNotes from "./clinical-notes/ClinicalNotes";
+import DentalClinicalNotes from "./dental/DentalClinicalNotes";
 import useFetch from "../../hooks/useFetch";
 
 const ConsultationPatientRoutes = () => {
@@ -19,7 +19,7 @@ const ConsultationPatientRoutes = () => {
   const [patient, setPatient] = useState();
 
   const { data: consultation, loading: loadingConsultation } = useFetch(
-    `api/consultations/${consultationId}`,
+    `api/consultations/${consultationId}?with_diagnoses=Yes&with_items=Yes`,
     null,
     true,
     null,
@@ -68,10 +68,9 @@ const ConsultationPatientRoutes = () => {
           <Route
             path="/clinical-notes"
             element={
-              <ClinicalNotes
+              <DentalClinicalNotes
                 patient={patient}
                 consultation={consultation}
-                status={status}
               />
             }
           />

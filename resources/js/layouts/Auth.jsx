@@ -47,7 +47,7 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()} Pharmex by Allos
+            {new Date().getFullYear()} Medicore Dental Clinic
           </Typography>
         </Card>
       </Box>

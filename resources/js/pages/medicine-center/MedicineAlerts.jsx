@@ -116,179 +116,6 @@ const MedicineAlerts = () => {
     }
   };
 
-  const renderOutOfStockTable = () => (
-    <Table
-      loading={medicineLoading}
-      columns={[
-        {
-          field: "index",
-          headerName: "S/N",
-          valueGetter: (item, index) => index + 1,
-        },
-        {
-          field: "name",
-          headerName: "Medicine Name",
-          valueGetter: (item) => item.name,
-        },
-        {
-          field: "code",
-          headerName: "Code",
-          valueGetter: (item) => item.code || 'N/A',
-        },
-        {
-          field: "balance",
-          headerName: "Current Stock",
-          valueGetter: (item) => {
-            const balance = parseFloat(item.balance) || 0;
-            // Display 0 instead of negative values to avoid confusion during inspections
-            return balance < 0 ? 0 : balance;
-          },
-        },
-        {
-          field: "minimum_stock",
-          headerName: "Minimum Stock",
-          valueGetter: (item) => item.minimum_stock || 0,
-        },
-        {
-          field: "unit_buying_price",
-          headerName: "Unit Price",
-          valueGetter: (item) => `Tz${item.unit_buying_price || 0}`,
-        },
-        {
-          field: "status",
-          headerName: "Status",
-          renderCell: (item) => (
-            <Chip
-              label="Out of Stock"
-              color="error"
-              size="small"
-              icon={<ErrorIcon />}
-            />
-          ),
-        },
-      ]}
-      items={medicineData?.out_of_stock || []}
-      itemCount={medicineData?.out_of_stock?.length || 0}
-    />
-  );
-
-  const renderExpiredTable = () => (
-    <Table
-      loading={medicineLoading}
-      columns={[
-        {
-          field: "index",
-          headerName: "S/N",
-          valueGetter: (item, index) => index + 1,
-        },
-        {
-          field: "name",
-          headerName: "Medicine Name",
-          valueGetter: (item) => item.name,
-        },
-        {
-          field: "code",
-          headerName: "Code",
-          valueGetter: (item) => item.code || 'N/A',
-        },
-        {
-          field: "balance",
-          headerName: "Current Stock",
-          valueGetter: (item) => {
-            const balance = parseFloat(item.balance) || 0;
-            // Display 0 instead of negative values to avoid confusion during inspections
-            return balance < 0 ? 0 : balance;
-          },
-        },
-        {
-          field: "expiry_date",
-          headerName: "Expiry Date",
-          valueGetter: (item) => formatDate(item.expiry_date),
-        },
-        {
-          field: "days_expired",
-          headerName: "Days Expired",
-          valueGetter: (item) => {
-            const days = getDaysUntilExpiry(item.expiry_date);
-            return days < 0 ? Math.abs(days) : 0;
-          },
-        },
-        {
-          field: "status",
-          headerName: "Status",
-          renderCell: (item) => (
-            <Chip
-              label="Expired"
-              color="error"
-              size="small"
-              icon={<WarningIcon />}
-            />
-          ),
-        },
-      ]}
-      items={medicineData?.expired || []}
-      itemCount={medicineData?.expired?.length || 0}
-    />
-  );
-
-  const renderExpiringSoonTable = () => (
-    <Table
-      loading={medicineLoading}
-      columns={[
-        {
-          field: "index",
-          headerName: "S/N",
-          valueGetter: (item, index) => index + 1,
-        },
-        {
-          field: "name",
-          headerName: "Medicine Name",
-          valueGetter: (item) => item.name,
-        },
-        {
-          field: "code",
-          headerName: "Code",
-          valueGetter: (item) => item.code || 'N/A',
-        },
-        {
-          field: "balance",
-          headerName: "Current Stock",
-          valueGetter: (item) => item.balance || 0,
-        },
-        {
-          field: "expiry_date",
-          headerName: "Expiry Date",
-          valueGetter: (item) => formatDate(item.expiry_date),
-        },
-        {
-          field: "days_until_expiry",
-          headerName: "Days Until Expiry",
-          valueGetter: (item) => {
-            const days = getDaysUntilExpiry(item.expiry_date);
-            return days > 0 ? days : 0;
-          },
-        },
-        {
-          field: "status",
-          headerName: "Status",
-          renderCell: (item) => {
-            const status = getExpiryStatus(item.expiry_date);
-            return (
-              <Chip
-                label={status.status === 'out_of_stock' ? 'Out of stock' : 'Warning'}
-                color={status.color}
-                size="small"
-                icon={<InfoIcon />}
-              />
-            );
-          },
-        },
-      ]}
-      items={medicineData?.expiring_soon || []}
-      itemCount={medicineData?.expiring_soon?.length || 0}
-    />
-  );
-
   return (
     <Page
       breadcrumbs={[
@@ -758,31 +585,87 @@ const MedicineAlerts = () => {
             </Grid>
           </Grid>
 
-          {/* Detailed Tables */}
+          {/* Combined Table */}
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom>Detailed Reports</Typography>
-            
-            {/* Out of Stock Table */}
-            <Card sx={{ mb: 3 }}>
-              <CardHeader title="Out of Stock Medicines - Detailed List" />
-              <CardContent>
-                {renderOutOfStockTable()}
-              </CardContent>
-            </Card>
-
-            {/* Expired Table */}
-            <Card sx={{ mb: 3 }}>
-              <CardHeader title="Expired Medicines - Detailed List" />
-              <CardContent>
-                {renderExpiredTable()}
-              </CardContent>
-            </Card>
-
-            {/* Expiring Soon Table */}
             <Card>
-              <CardHeader title="Expiring Soon Medicines - Detailed List" />
+              <CardHeader title="All Medicine Alerts" />
               <CardContent>
-                {renderExpiringSoonTable()}
+                <Table
+                  loading={medicineLoading}
+                  columns={[
+                    { field: "index", headerName: "S/N", valueGetter: (item, index) => index + 1 },
+                    { field: "name", headerName: "Medicine Name", valueGetter: (item) => item.name },
+                    { field: "code", headerName: "Code", valueGetter: (item) => item.code || "N/A" },
+                    {
+                      field: "balance",
+                      headerName: "Current Stock",
+                      valueGetter: (item) => {
+                        const balance = parseFloat(item.balance) || 0;
+                        return balance < 0 ? 0 : balance;
+                      },
+                    },
+                    {
+                      field: "minimum_stock",
+                      headerName: "Min Stock",
+                      valueGetter: (item) => item.minimum_stock || item.minimum_stock === 0 ? item.minimum_stock : "N/A",
+                    },
+                    {
+                      field: "unit_buying_price",
+                      headerName: "Unit Price",
+                      valueGetter: (item) => `Tz${item.unit_buying_price || 0}`,
+                    },
+                    { field: "expiry_date", headerName: "Expiry Date", valueGetter: (item) => formatDate(item.expiry_date) },
+                    {
+                      field: "days",
+                      headerName: "Days",
+                      valueGetter: (item) => {
+                        const days = getDaysUntilExpiry(item.expiry_date);
+                        if (days === null) return "N/A";
+                        if (days < 0) return `${Math.abs(days)} days expired`;
+                        return `${days} days`;
+                      },
+                    },
+                    {
+                      field: "status",
+                      headerName: "Status",
+                      renderCell: (item) => {
+                        const balance = parseFloat(item.balance) || 0;
+                        const days = getDaysUntilExpiry(item.expiry_date);
+                        if (balance <= 0) {
+                          return <Chip label="Out of Stock" color="error" size="small" icon={<ErrorIcon />} />;
+                        }
+                        if (days < 0) {
+                          return <Chip label="Expired" color="error" size="small" icon={<WarningIcon />} />;
+                        }
+                        if (days <= 30) {
+                          return <Chip label="Expiring Soon" color="warning" size="small" icon={<InfoIcon />} />;
+                        }
+                        return <Chip label="Low Stock" color="warning" size="small" />;
+                      },
+                    },
+                    {
+                      field: "type",
+                      headerName: "Type",
+                      renderCell: (item) => {
+                        const balance = parseFloat(item.balance) || 0;
+                        const days = getDaysUntilExpiry(item.expiry_date);
+                        if (balance <= 0) return <Chip label="Out of Stock" color="error" size="small" variant="outlined" />;
+                        if (days < 0) return <Chip label="Expired" color="error" size="small" variant="outlined" />;
+                        return <Chip label="Expiring Soon" color="warning" size="small" variant="outlined" />;
+                      },
+                    },
+                  ]}
+                  items={[
+                    ...(medicineData?.out_of_stock || []),
+                    ...(medicineData?.expired || []),
+                    ...(medicineData?.expiring_soon || []),
+                  ]}
+                  itemCount={
+                    (medicineData?.out_of_stock?.length || 0) +
+                    (medicineData?.expired?.length || 0) +
+                    (medicineData?.expiring_soon?.length || 0)
+                  }
+                />
               </CardContent>
             </Card>
           </Box>

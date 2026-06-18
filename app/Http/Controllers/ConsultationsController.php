@@ -11,6 +11,10 @@ use App\Models\ConsultationFunctionalTest;
 use App\Models\ConsultationFundoscopy;
 use App\Models\ConsultationRefraction;
 use App\Models\ConsultationVisualAcuity;
+use App\Models\DentalOralExamination;
+use App\Models\DentalCharting;
+use App\Models\DentalTreatmentRecord;
+use App\Models\DentalRadiograph;
 use App\Models\Item;
 use App\Models\Collaborator;
 use App\Models\PatientPaymentCache;
@@ -446,6 +450,7 @@ class ConsultationsController extends Controller
                     $query->with(['item', 'payment_mode', 'consultant', 'server']);
                 }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
                 'to_optician_sender',
+                'dental_oral_examination', 'dental_charting', 'dental_treatment_records', 'dental_radiographs',
             ]);
 
             if ($with_diagnoses == 'Yes') {
@@ -661,7 +666,7 @@ class ConsultationsController extends Controller
     {
         try {
             $request->validate([
-                'what' => 'required|in:Consultation,Visual Acuity,External Examination,Functional Test,Refraction,Fundoscopy'
+                'what' => 'required|in:Consultation,Visual Acuity,External Examination,Functional Test,Refraction,Fundoscopy,Dental Oral Examination,Dental Charting,Dental Treatment Record,Dental Radiograph'
             ]);
 
             $user = $request->user();
@@ -730,6 +735,54 @@ class ConsultationsController extends Controller
                         $input['created_by'] = $user->id;
                         ConsultationFundoscopy::create($input);
                     }
+                }
+                break;
+                case 'Dental Oral Examination': {
+                    if ($data->dental_oral_examination) {
+                        $data->dental_oral_examination->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        DentalOralExamination::create($input);
+                    }
+                }
+                break;
+                case 'Dental Charting': {
+                    $chartingData = $request->except('what');
+                    $chartingData['consultation_id'] = $id;
+                    $chartingData['created_by'] = $user->id;
+                    if (isset($chartingData['tooth_number'])) {
+                        $existing = DentalCharting::where('consultation_id', $id)
+                            ->where('tooth_number', $chartingData['tooth_number'])
+                            ->first();
+                        if ($existing) {
+                            $existing->update($chartingData);
+                        } else {
+                            DentalCharting::create($chartingData);
+                        }
+                    }
+                }
+                break;
+                case 'Dental Treatment Record': {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    DentalTreatmentRecord::create($input);
+                }
+                break;
+                case 'Dental Radiograph': {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    if (!isset($input['patient_id'])) {
+                        try {
+                            $input['patient_id'] = $data->payment_cache_item->payment_cache->check_in->patient_id;
+                        } catch (\Exception $e) {
+                            // patient_id required
+                        }
+                    }
+                    DentalRadiograph::create($input);
                 }
                 break;
             }

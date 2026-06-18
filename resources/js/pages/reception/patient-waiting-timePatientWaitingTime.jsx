@@ -11,7 +11,6 @@ import {
   Typography,
   Tooltip,
   Box,
-  Container,
   Paper,
   TableContainer,
   Table as MuiTable,
@@ -45,22 +44,8 @@ import { useFetch, usePost, useToast } from "../../hooks";
 import { formatError } from "../../helpers";
 
 // Simple Page component
-const Page = ({ children, breadcrumbs }) => {
-  return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
-      {breadcrumbs && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {breadcrumbs.map((crumb, index) => (
-            <span key={index}>
-              {crumb.title}
-              {index < breadcrumbs.length - 1 && " > "}
-            </span>
-          ))}
-        </Typography>
-      )}
-      {children}
-    </Container>
-  );
+const Page = ({ children }) => {
+  return <>{children}</>;
 };
 
 // Simple Header component

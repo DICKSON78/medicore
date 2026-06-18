@@ -8,6 +8,12 @@ use App\Http\Controllers\ConsultationsController;
 use App\Http\Controllers\ConsultationTypesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
+use App\Http\Controllers\DentalAppointmentsController;
+use App\Http\Controllers\DentalChartingController;
+use App\Http\Controllers\DentalLabOrdersController;
+use App\Http\Controllers\DentalOralExaminationsController;
+use App\Http\Controllers\DentalRadiographsController;
+use App\Http\Controllers\DentalTreatmentRecordsController;
 use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
 use App\Http\Controllers\ExpenseCategoriesController;
@@ -212,6 +218,39 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/surgery-record-reports', SurgeryRecordReportsController::class);
     $router->apiResource('/cataract-surgery-records', CataractSurgeryRecordsController::class);
 
+    // Dental module routes
+    $router->apiResource('/dental-oral-examinations', DentalOralExaminationsController::class);
+    $router->controller(DentalChartingController::class)->prefix('dental-charting')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->get('/{id}', 'show');
+        $router->post('/', 'store');
+        $router->post('/bulk', 'bulkStore');
+        $router->put('/{id}', 'update');
+        $router->delete('/{id}', 'destroy');
+        $router->get('/consultation/{consultationId}', 'getByConsultation');
+    });
+    $router->apiResource('/dental-treatment-records', DentalTreatmentRecordsController::class);
+    $router->controller(DentalLabOrdersController::class)->prefix('dental-lab-orders')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->get('/{id}', 'show');
+        $router->post('/', 'store');
+        $router->put('/{id}', 'update');
+        $router->post('/{id}/mark-delivered', 'markDelivered');
+        $router->post('/{id}/mark-inserted', 'markInserted');
+        $router->delete('/{id}', 'destroy');
+    });
+    $router->apiResource('/dental-radiographs', DentalRadiographsController::class);
+    $router->controller(DentalAppointmentsController::class)->prefix('dental-appointments')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->get('/today', 'getToday');
+        $router->get('/by-date-range', 'getByDateRange');
+        $router->get('/{id}', 'show');
+        $router->post('/', 'store');
+        $router->put('/{id}', 'update');
+        $router->post('/{id}/mark-status', 'markStatus');
+        $router->delete('/{id}', 'destroy');
+    });
+
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
     $router->apiResource('/stocktakes', StocktakesController::class);
     $router->post('/stocktakes/{id}/apply', [StocktakesController::class, 'apply']);
@@ -264,6 +303,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/dashboard', [ConsultationRoomDashboardController::class, '__invoke']);
     });
     
+    $router->prefix('dental-lab')->group(function ($router) {
+        $router->get('/dashboard', [\App\Http\Controllers\DentalLabDashboardController::class, '__invoke']);
+    });
+    
     $router->prefix('optician-center')->group(function ($router) {
         $router->get('/dashboard', [OpticianCenterDashboardController::class, '__invoke']);
     });
@@ -308,6 +351,17 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
             $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');
             $router->get('/item-balance', 'getItemBalanceReport');
+        });
+        $router->controller(\App\Http\Controllers\Reports\DentalReportsController::class)->prefix('dental')->group(function ($router) {
+            $router->get('/morbidity', 'morbidityReport');
+            $router->get('/procedure-summary', 'procedureSummary');
+            $router->get('/dhis2-summary', 'dhis2Summary');
+        });
+        $router->controller(\App\Http\Controllers\Reports\MoHReportsController::class)->prefix('moh')->group(function ($router) {
+            $router->get('/monthly-opd', 'monthlyOpd');
+            $router->get('/pharmaceutical-consumption', 'pharmaceuticalConsumption');
+            $router->get('/revenue-summary', 'revenueSummary');
+            $router->get('/ipd-report', 'ipdReport');
         });
     });
 });

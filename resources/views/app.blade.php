@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Primary Meta Tags -->
-    <title>Best Vision Eyecare - Clear Vision for a Brighter Future | Eye Care Clinic in Tanzania</title>
-    <meta name="title" content="Best Vision Eyecare - Clear Vision for a Brighter Future | Eye Care Clinic in Mwanza, Tanzania">
-    <meta name="description" content="Best Vision Eyecare - Your trusted partner for clear vision and comprehensive eye health. Expert eye exams, contact lens fitting, pediatric eye care, and more.">
-    <meta name="keywords" content="eye care, optometrist, eye exam, contact lenses, eye clinic, Mwanza Tanzania, vision care, eye health, pediatric eye care, dry eye treatment, eyewear, best vision eyecare">
-    <meta name="author" content="Best Vision Eyecare">
+    <title>Medicore Dental Clinic - Your Smile, Our Priority | Dental Clinic in Tanzania</title>
+    <meta name="title" content="Medicore Dental Clinic - Your Smile, Our Priority | Dental Clinic in Mwanza, Tanzania">
+    <meta name="description" content="Medicore Dental Clinic - Your trusted partner for comprehensive dental health. Expert general dentistry, oral surgery, orthodontics, and more.">
+    <meta name="keywords" content="dental clinic, dentist, oral health, dental care, teeth cleaning, root canal, tooth extraction, dental clinic Mwanza Tanzania, orthodontics, dental implants, Medicore Dental">
+    <meta name="author" content="Medicore Dental Clinic">
     <meta name="robots" content="index, follow">
     <meta name="language" content="English">
     <meta name="revisit-after" content="7 days">
@@ -18,22 +18,22 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://bestvisioneyecare.com/">
-    <meta property="og:title" content="Best Vision Eyecare - Clear Vision for a Brighter Future">
-    <meta property="og:description" content="Your trusted partner for clear vision and comprehensive eye health in Natta-Mwanza, Tanzania. Expert eye exams, contact lens fitting, and more.">
+    <meta property="og:url" content="https://medicore-dental.co.tz/">
+    <meta property="og:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
+    <meta property="og:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania. Expert general dentistry, oral surgery, orthodontics, and more.">
     <meta property="og:image" content="{{ asset('images/logo.png') }}">
-    <meta property="og:site_name" content="Best Vision Eyecare">
+    <meta property="og:site_name" content="Medicore Dental Clinic">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://bestvisioneyecare.com/">
-    <meta property="twitter:title" content="Best Vision Eyecare - Clear Vision for a Brighter Future">
-    <meta property="twitter:description" content="Your trusted partner for clear vision and comprehensive eye health in Natta-Mwanza, Tanzania.">
+    <meta property="twitter:url" content="https://medicore-dental.co.tz/">
+    <meta property="twitter:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
+    <meta property="twitter:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania.">
     <meta property="twitter:image" content="{{ asset('images/logo.png') }}">
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://bestvisioneyecare.com{{ request()->path() === '/' ? '' : '/' . request()->path() }}">
+    <link rel="canonical" href="https://medicore-dental.co.tz{{ request()->path() === '/' ? '' : '/' . request()->path() }}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
@@ -45,11 +45,11 @@
     {
       "@context": "https://schema.org",
       "@type": "MedicalBusiness",
-      "name": "Best Vision Eyecare",
-      "description": "Your trusted partner for clear vision and comprehensive eye health in Natta-Mwanza, Tanzania",
-      "url": "https://bestvisioneyecare.com",
-      "logo": "https://bestvisioneyecare.com/images/logo.png",
-      "image": "https://bestvisioneyecare.com/images/logo.png",
+      "name": "Medicore Dental Clinic",
+      "description": "Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania",
+      "url": "https://medicore-dental.co.tz",
+      "logo": "https://medicore-dental.co.tz/images/logo.png",
+      "image": "https://medicore-dental.co.tz/images/logo.png",
       "telephone": "+255678110376",
       "address": {
         "@type": "PostalAddress",
@@ -76,14 +76,16 @@
         "closes": "17:00"
       },
       "priceRange": "$$",
-      "medicalSpecialty": "Optometry",
+      "medicalSpecialty": "Dentistry",
       "serviceType": [
-        "Comprehensive Eye Exam",
-        "Contact Lens Fitting",
-        "Pediatric Eye Care",
-        "Dry Eye Treatment",
-        "Emergency Eye Care",
-        "Eyewear Consultation"
+        "General Dentistry",
+        "Oral Surgery",
+        "Root Canal Treatment",
+        "Teeth Cleaning & Scaling",
+        "Orthodontics",
+        "Dental Crowns & Bridges",
+        "Pediatric Dentistry",
+        "Dental Implants"
       ]
     }
     </script>

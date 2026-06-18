@@ -21,7 +21,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
 import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
 import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomRoutes";
-import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
+import DentalLabRoutes from "../pages/dental-lab/DentalLabRoutes";
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
 import DispensingMainRoutes from "../pages/dispensing/DispensingMainRoutes";
@@ -29,9 +29,12 @@ import OtherDispensingRoutes from "../pages/other-dispensing/OtherDispensingRout
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
 import MarketingRoutes from "../pages/marketing/MarketingRoutes";
 import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
+import DentalMorbidityReport from "../pages/reports/dental/DentalMorbidityReport";
+import DentalAppointments from "../pages/appointments/DentalAppointments";
 import UserManagementRoutes from "../pages/user-management/UserManagementRoutes";
 import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
+import MohReportsRoutes from "../pages/moh-reports/MohReportsRoutes";
 
 const App = () => {
   const [themeMode, setThemeMode] = useState(
@@ -84,7 +87,6 @@ const App = () => {
               path="/"
               element={
                 <DefaultLayout
-                  setThemeMode={setThemeMode}
                   setUser={setUser}
                   smsBalance={smsBalance}
                 />
@@ -93,11 +95,7 @@ const App = () => {
               <React.Fragment>
                 <Route
                   path="dashboard"
-                  element={
-                    user?.privileges?.dashboard ? (
-                      <Dashboard setSmsBalance={setSmsBalance} />
-                    ) : null
-                  }
+                  element={<Dashboard setSmsBalance={setSmsBalance} />}
                 />
                 <Route
                   path="patient-records/*"
@@ -127,11 +125,11 @@ const App = () => {
                 />
                 <Route
                   path="optician-center/*"
-                  element={
-                    user?.privileges?.optician_center ? (
-                      <OpticianCenterRoutes />
-                    ) : null
-                  }
+                  element={null}
+                />
+                <Route
+                  path="dental-lab/*"
+                  element={<DentalLabRoutes />}
                 />
                 <Route
                   path="medicine-center/*"
@@ -143,15 +141,7 @@ const App = () => {
                 />
                 <Route
                   path="dispensing/*"
-                  element={
-                    <>
-                      {user?.privileges?.dispensing ? (
-                        <DispensingMainRoutes />
-                      ) : (
-                        <div>No dispensing privileges</div>
-                      )}
-                    </>
-                  }
+                  element={<DispensingMainRoutes />}
                 />
                 <Route
                   path="procedure-room/*"
@@ -204,6 +194,22 @@ const App = () => {
                   element={
                     user?.privileges?.settings ? <SettingsRoutes /> : null
                   }
+                />
+                <Route
+                  path="reports/dental-morbidity"
+                  element={
+                    user?.privileges?.consultation_room ? (
+                      <DentalMorbidityReport />
+                    ) : null
+                  }
+                />
+                <Route
+                  path="dental-appointments"
+                  element={<DentalAppointments />}
+                />
+                <Route
+                  path="moh-reports/*"
+                  element={<MohReportsRoutes />}
                 />
               </React.Fragment>
             </Route>

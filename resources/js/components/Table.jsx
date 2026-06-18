@@ -278,7 +278,7 @@ const Table = ({
 
   return (
     <Box sx={{ width: '100%', overflowX: "auto" }}>
-      <MuiTable {...(footerItems ? { className: "has-footer" } : null)} sx={{ width: '100%' }}>
+      <MuiTable {...(footerItems ? { className: "has-footer" } : null)} sx={{ width: '100%', tableLayout: 'fixed' }}>
         <TableHead>{renderTableHeadRow()}</TableHead>
         <TableBody>
           {loading ? (

@@ -6,15 +6,15 @@ import { useLocation } from 'react-router-dom';
  * Usage: <SEO title="Page Title" description="Page description" />
  */
 const SEO = ({
-  title = 'BestVision Eyecare - Premier Eye Care Clinic in Tanzania',
-  description = 'BestVision Eyecare is the leading eye care clinic in Natta-Mwanza, Tanzania. We offer comprehensive eye examinations, diagnosis & treatment of eye disorders, spectacles dispensing, contact lens fitting, and community eye outreach programs.',
-  keywords = 'eye care Tanzania, optometrist Natta-Mwanza, eye examination, eye clinic, contact lens fitting, spectacles Tanzania, eye treatment, BestVision Eyecare',
+  title = 'Medicore Dental Clinic - Premier Dental Clinic in Tanzania',
+  description = 'Medicore Dental Clinic is the leading dental clinic in Natta-Mwanza, Tanzania. We offer comprehensive dental examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, extractions, root canal treatment, and community oral health programs.',
+  keywords = 'dental clinic Tanzania, dentist Natta-Mwanza, dental examination, teeth cleaning, root canal, tooth extraction, orthodontics, Medicore Dental',
   image = '/logo.png',
   type = 'website',
   noindex = false,
 }) => {
   const location = useLocation();
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.bestvisioneyecare.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.medicore-dental.co.tz';
   const fullUrl = `${baseUrl}${location.pathname}`;
   const imageUrl = image.startsWith('http') ? image : `${baseUrl}${image}`;
 
@@ -37,7 +37,7 @@ const SEO = ({
     updateMetaTag('description', description);
     updateMetaTag('keywords', keywords);
     updateMetaTag('robots', noindex ? 'noindex, nofollow' : 'index, follow');
-    updateMetaTag('author', 'BestVision Eyecare');
+    updateMetaTag('author', 'Medicore Dental Clinic');
     updateMetaTag('language', 'English');
     updateMetaTag('revisit-after', '7 days');
     updateMetaTag('theme-color', '#667eea');
@@ -50,7 +50,7 @@ const SEO = ({
     updateMetaTag('og:image', imageUrl, 'property');
     updateMetaTag('og:image:width', '1200', 'property');
     updateMetaTag('og:image:height', '630', 'property');
-    updateMetaTag('og:site_name', 'SIKAF Eye Care', 'property');
+    updateMetaTag('og:site_name', 'Medicore Dental Clinic', 'property');
     updateMetaTag('og:locale', 'en_US', 'property');
 
     // Twitter Card Tags - MUST use 'name' attribute, not 'property'
@@ -67,7 +67,7 @@ const SEO = ({
     updateMetaTag('ICBM', '-6.7924, 39.2083');
 
     // Business Information
-    updateMetaTag('contact', 'info@sikafeyecare.co.tz');
+    updateMetaTag('contact', 'info@medicore-dental.co.tz');
     updateMetaTag('phone', '+255 678 110 376');
     updateMetaTag('address', 'Natta-Mwanza, Tanzania');
 
@@ -93,21 +93,21 @@ const SEO = ({
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       '@id': fullUrl,
-      name: 'SIKAF Eye Care',
+      name: 'Medicore Dental Clinic',
       description: description,
       url: baseUrl,
       telephone: '+255678110376',
-      email: 'info@sikafeyecare.co.tz',
+      email: 'info@medicore-dental.co.tz',
       address: {
         '@type': 'PostalAddress',
         streetAddress: 'Natta-Mwanza, Tanzania',
-        addressLocality: 'Dar es Salaam',
+        addressLocality: 'Mwanza',
         addressCountry: 'TZ',
       },
       geo: {
         '@type': 'GeoCoordinates',
-        latitude: '-6.7924',
-        longitude: '39.2083',
+        latitude: '-2.5164',
+        longitude: '32.9176',
       },
       openingHoursSpecification: {
         '@type': 'OpeningHoursSpecification',
@@ -119,14 +119,17 @@ const SEO = ({
       priceRange: '$$',
       areaServed: {
         '@type': 'City',
-        name: 'Dar es Salaam',
+        name: 'Mwanza',
       },
       service: [
-        'Eye Examinations',
-        'Eye Disorder Treatment',
-        'Spectacles Dispensing',
-        'Contact Lens Fitting',
-        'Community Eye Outreach',
+        'General Dentistry',
+        'Oral Surgery',
+        'Root Canal Treatment',
+        'Teeth Cleaning & Scaling',
+        'Orthodontics',
+        'Dental Crowns & Bridges',
+        'Pediatric Dentistry',
+        'Dental Implants',
       ],
     };
 

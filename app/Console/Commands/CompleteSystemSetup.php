@@ -53,9 +53,9 @@ class CompleteSystemSetup extends Command
             $departments = [
                 ['name' => 'Administration', 'description' => 'Administrative department'],
                 ['name' => 'Reception', 'description' => 'Patient reception and registration'],
-                ['name' => 'Consultation', 'description' => 'Doctor consultations and examinations'],
-                ['name' => 'Optician', 'description' => 'Optical services and lens fitting'],
-                ['name' => 'Laboratory', 'description' => 'Lab tests and diagnostics'],
+                ['name' => 'Consultation', 'description' => 'Dental consultations and examinations'],
+                ['name' => 'Dental Lab', 'description' => 'Dental laboratory services and prosthetics'],
+                ['name' => 'Radiology', 'description' => 'Dental imaging and diagnostic X-rays'],
                 ['name' => 'Pharmacy', 'description' => 'Medicine dispensing and inventory'],
                 ['name' => 'Surgery', 'description' => 'Surgical procedures and operations'],
                 ['name' => 'Emergency', 'description' => 'Emergency medical services'],
@@ -82,11 +82,11 @@ class CompleteSystemSetup extends Command
             $this->info('3. Creating comprehensive job titles...');
             $jobTitles = [
                 ['name' => 'Administrator', 'description' => 'System administrator'],
-                ['name' => 'Doctor', 'description' => 'Medical doctor'],
-                ['name' => 'Nurse', 'description' => 'Registered nurse'],
+                ['name' => 'Dentist', 'description' => 'Dental doctor'],
+                ['name' => 'Dental Nurse', 'description' => 'Registered dental nurse'],
                 ['name' => 'Receptionist', 'description' => 'Front desk staff'],
-                ['name' => 'Optician', 'description' => 'Optical specialist'],
-                ['name' => 'Technician', 'description' => 'Technical staff'],
+                ['name' => 'Dental Technician', 'description' => 'Dental lab technician'],
+                ['name' => 'Dental Assistant', 'description' => 'Chair-side assistant'],
                 ['name' => 'Pharmacist', 'description' => 'Medicine specialist'],
                 ['name' => 'Manager', 'description' => 'Department manager'],
                 ['name' => 'Cashier', 'description' => 'Payment processing staff'],
@@ -114,29 +114,29 @@ class CompleteSystemSetup extends Command
                 [
                     'first_name' => 'Dr. John',
                     'last_name' => 'Smith',
-                    'username' => 'doctor1',
-                    'role' => 'Doctor',
+                    'username' => 'dentist1',
+                    'role' => 'Dentist',
                     'department_id' => 3, // Consultation
-                    'job_title_id' => 2, // Doctor
-                    'designation' => 'Senior Doctor',
+                    'job_title_id' => 2, // Dentist
+                    'designation' => 'Senior Dentist',
                 ],
                 [
                     'first_name' => 'Mary',
                     'last_name' => 'Johnson',
-                    'username' => 'nurse1',
-                    'role' => 'Nurse',
-                    'department_id' => 11, // Nursing
-                    'job_title_id' => 3, // Nurse
-                    'designation' => 'Senior Nurse',
+                    'username' => 'dentalnurse1',
+                    'role' => 'Dental Nurse',
+                    'department_id' => 3, // Consultation
+                    'job_title_id' => 3, // Dental Nurse
+                    'designation' => 'Senior Dental Nurse',
                 ],
                 [
                     'first_name' => 'Robert',
                     'last_name' => 'Wilson',
-                    'username' => 'optician1',
-                    'role' => 'Optician',
-                    'department_id' => 4, // Optician
-                    'job_title_id' => 5, // Optician
-                    'designation' => 'Senior Optician',
+                    'username' => 'dentaltech1',
+                    'role' => 'Dental Technician',
+                    'department_id' => 4, // Dental Lab
+                    'job_title_id' => 4, // Dental Technician
+                    'designation' => 'Senior Dental Technician',
                 ],
                 [
                     'first_name' => 'Sarah',
@@ -144,7 +144,7 @@ class CompleteSystemSetup extends Command
                     'username' => 'reception1',
                     'role' => 'Receptionist',
                     'department_id' => 2, // Reception
-                    'job_title_id' => 4, // Receptionist
+                    'job_title_id' => 5, // Receptionist
                     'designation' => 'Senior Receptionist',
                 ],
             ];
@@ -165,7 +165,7 @@ class CompleteSystemSetup extends Command
                         'gender' => 'Female',
                         'national_id' => null,
                         'phone' => '0000000000',
-                        'email' => $userData['username'] . '@eyecare.com',
+                        'email' => $userData['username'] . '@medicore-dental.co.tz',
                         'username' => $userData['username'],
                         'password' => Hash::make('password123'),
                         'remember_token' => null,
@@ -281,12 +281,12 @@ class CompleteSystemSetup extends Command
             // Create consultation types
             $this->info('8. Creating consultation types...');
             $consultationTypes = [
-                ['name' => 'General Consultation', 'description' => 'General eye examination'],
+                ['name' => 'General Consultation', 'description' => 'General dental examination'],
                 ['name' => 'Follow-up', 'description' => 'Follow-up consultation'],
-                ['name' => 'Emergency', 'description' => 'Emergency consultation'],
+                ['name' => 'Emergency', 'description' => 'Emergency dental consultation'],
                 ['name' => 'Surgery Consultation', 'description' => 'Pre-surgery consultation'],
                 ['name' => 'Post-surgery', 'description' => 'Post-surgery follow-up'],
-                ['name' => 'VIP Consultation', 'description' => 'VIP patient consultation'],
+                ['name' => 'Orthodontic Review', 'description' => 'Orthodontic treatment review'],
             ];
 
             foreach ($consultationTypes as $type) {
@@ -303,23 +303,23 @@ class CompleteSystemSetup extends Command
             $this->info('✅ Consultation types created');
 
             // Create diseases
-            $this->info('9. Creating common eye diseases...');
+            $this->info('9. Creating common dental diseases...');
             $diseases = [
-                'Cataract',
-                'Glaucoma',
-                'Diabetic Retinopathy',
-                'Macular Degeneration',
-                'Refractive Errors',
-                'Conjunctivitis',
-                'Dry Eye Syndrome',
-                'Blepharitis',
-                'Stye',
-                'Corneal Abrasion',
-                'Retinal Detachment',
-                'Uveitis',
-                'Keratoconus',
-                'Amblyopia',
-                'Strabismus',
+                'Dental Caries',
+                'Pulpitis',
+                'Periodontitis',
+                'Gingivitis',
+                'Tooth Abscess',
+                'Impacted Tooth',
+                'Oral Thrush',
+                'Apthous Ulcer',
+                'Halitosis',
+                'Tooth Erosion',
+                'Bruxism',
+                'TMJ Disorder',
+                'Oral Lichen Planus',
+                'Leukoplakia',
+                'Mouth Cancer',
             ];
 
             foreach ($diseases as $disease) {
@@ -327,7 +327,6 @@ class CompleteSystemSetup extends Command
                     ['name' => $disease],
                     [
                         'name' => $disease,
-                        'description' => 'Eye condition: ' . $disease,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]
@@ -338,9 +337,9 @@ class CompleteSystemSetup extends Command
             // Create comprehensive preferences
             $this->info('10. Creating comprehensive system preferences...');
             $preferences = [
-                ['key' => 'CLINIC_NAME', 'value' => 'Best Vision Eye Care'],
+                ['key' => 'CLINIC_NAME', 'value' => 'Medicore Dental Clinic'],
                 ['key' => 'CLINIC_PHONE', 'value' => '0678110376'],
-                ['key' => 'CLINIC_EMAIL', 'value' => 'info@bestvision.com'],
+                ['key' => 'CLINIC_EMAIL', 'value' => 'info@medicore-dental.co.tz'],
                 ['key' => 'CLINIC_ADDRESS', 'value' => 'Natta, Mwanza'],
                 ['key' => 'SYSTEM_VERSION', 'value' => '1.0.0'],
                 ['key' => 'MAINTENANCE_MODE', 'value' => 'No'],

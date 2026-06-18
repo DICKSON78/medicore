@@ -12,11 +12,10 @@ import {
   Divider,
 } from '@mui/material';
 import {
-  Visibility as EyeIcon,
   Healing as TreatmentIcon,
-  ShoppingBag as SpectaclesIcon,
-  Contacts as ContactLensIcon,
   Groups as OutreachIcon,
+  WaterDrop as WaterDropIcon,
+  ChildCare as ChildCareIcon,
   ArrowForward as ArrowForwardIcon,
   CheckCircle as CheckIcon,
   Person as PersonIcon,
@@ -36,7 +35,7 @@ gsap.registerPlugin(ScrollTrigger);
 const colors = {
   primary: '#1E88E5',
   primaryLight: '#4FC3F7',
-  primaryDark: '#1565c0',
+  primaryDark: '#004D40',
   secondary: '#00ACC1',
   secondaryLight: '#4dd0e1',
   secondaryDark: '#0097a7',
@@ -63,109 +62,109 @@ const Services = () => {
 
   const services = [
     {
-      id: 'eye-examinations',
-      icon: EyeIcon,
-      title: 'Comprehensive Eye Examination',
-      description: 'Our comprehensive eye examination service utilizes state-of-the-art diagnostic equipment and advanced techniques to provide a thorough assessment of your vision health. Our experienced optometrists conduct detailed evaluations to detect early signs of eye diseases, assess visual acuity, test eye coordination, and evaluate overall eye health. Each examination is tailored to your individual needs, age, and medical history, ensuring personalized care recommendations that support optimal vision throughout your life.',
+      id: 'general-dentistry',
+      icon: TreatmentIcon,
+      title: 'General Dentistry & Check-ups',
+      description: 'Our comprehensive dental examination service utilizes state-of-the-art diagnostic equipment and advanced techniques to provide a thorough assessment of your oral health. Our experienced dentists conduct detailed evaluations to detect early signs of dental diseases, assess tooth health, evaluate gums, and assess overall oral health. Each examination is tailored to your individual needs, age, and medical history, ensuring personalized care recommendations that support optimal oral health throughout your life.',
       features: [
-        'Complete vision assessment and refraction',
-        'Advanced retinal examination with imaging',
-        'Comprehensive glaucoma screening and testing',
-        'Color vision and depth perception evaluation',
-        'Eye pressure measurement (tonometry)',
-        'Binocular vision and eye coordination testing',
-        'Peripheral vision field testing',
-        'Pupil response and eye movement assessment',
+        'Complete oral examination and assessment',
+        'Digital dental X-rays and imaging',
+        'Professional teeth cleaning and scaling',
+        'Cavity detection and treatment planning',
+        'Gum health evaluation',
+        'Oral cancer screening',
+        'Bite and occlusion assessment',
+        'Personalized oral hygiene advice',
       ],
       image: '/images/services-vision-testing.jpeg',
       color: '#1E88E5',
     },
     {
-      id: 'binocular-vision',
-      icon: EyeIcon,
-      title: 'Binocular Vision Assessment',
-      description: 'Our binocular vision assessment service evaluates how well your eyes work together as a team. This comprehensive evaluation includes testing eye alignment, depth perception, eye coordination, and the ability to maintain comfortable vision during extended tasks. We assess conditions such as strabismus (eye misalignment), amblyopia (lazy eye), convergence insufficiency, and other binocular vision disorders. Our experienced optometrists use specialized techniques and equipment to identify vision problems that may affect reading, learning, and daily activities, providing personalized treatment plans to improve visual comfort and performance.',
+      id: 'oral-surgery',
+      icon: TreatmentIcon,
+      title: 'Oral Surgery & Extractions',
+      description: 'Our oral surgery service provides expert care for tooth extractions, wisdom tooth removal, and other surgical procedures. Our skilled surgeons use modern techniques and appropriate anaesthesia to ensure patient comfort. We manage simple to complex cases including impacted teeth, surgical extractions, and pre-prosthetic surgery. Post-operative care instructions and follow-up appointments ensure optimal healing and recovery.',
       features: [
-        'Eye alignment and coordination testing',
-        'Depth perception and stereopsis evaluation',
-        'Convergence and divergence assessment',
-        'Accommodation and focusing ability testing',
-        'Visual tracking and eye movement evaluation',
-        'Treatment for binocular vision disorders',
-        'Vision therapy programs when needed',
-        'Follow-up care and progress monitoring',
+        'Simple and surgical tooth extractions',
+        'Wisdom tooth (3rd molar) removal',
+        'Impacted tooth management',
+        'Pre-prosthetic surgery',
+        'Biopsy of oral lesions',
+        'Surgical exposure of impacted teeth',
+        'Management of dental infections',
+        'Post-operative care and monitoring',
       ],
-      image: '/images/services-vision-testing.jpeg',
+      image: '/images/gallery-staff-at-work.jpeg',
       color: '#764ba2',
     },
     {
-      id: 'eye-disorders',
+      id: 'root-canal',
       icon: TreatmentIcon,
-      title: 'Diagnose, Manage and Treat Disorders of the Eyes',
-      description: 'Our clinic specializes in the expert diagnosis and comprehensive management of various eye conditions and diseases. Our team of qualified optometrists uses cutting-edge diagnostic technology to identify conditions such as cataracts, diabetic retinopathy, macular degeneration, glaucoma, dry eye syndrome, and other ocular diseases. We develop personalized treatment plans that may include prescription medications, lifestyle modifications, specialized eye drops, and when necessary, timely referrals to specialist ophthalmologists for surgical intervention or advanced care.',
+      title: 'Root Canal Treatment (Endodontics)',
+      description: 'Our root canal treatment service specializes in saving infected or damaged teeth through advanced endodontic procedures. Using modern techniques and equipment, we remove infected pulp tissue, clean and shape the root canals, and seal them to prevent reinfection. Root canal treatment relieves pain, preserves your natural tooth, and restores proper function, avoiding the need for extraction.',
       features: [
-        'Advanced diagnostic tools and imaging',
-        'Personalized treatment protocol development',
-        'Chronic disease management and monitoring',
-        'Prescription medication management',
-        'Specialist referral coordination',
-        'Regular follow-up care and progress tracking',
-        'Emergency eye care services',
-        'Post-operative care and management',
+        'Pulp and nerve treatment',
+        'Infected root canal management',
+        'Pain relief and emergency treatment',
+        'Tooth preservation procedures',
+        'Post-treatment crown restoration',
+        'Retreatment of failed root canals',
+        'Digital radiography for precision',
+        'Follow-up care and monitoring',
       ],
-      image: '/images/gallery-staff-at-work.jpeg',
+      image: '/images/services-glasses-frames.jpeg',
       color: '#f093fb',
     },
     {
-      id: 'clinical-refraction',
-      icon: EyeIcon,
-      title: 'Clinical Refraction',
-      description: 'Clinical refraction is a precise procedure performed by our experienced optometrists to determine your exact eyeglass or contact lens prescription. Using advanced phoropters and computerized equipment, we measure how light focuses on your retina to identify refractive errors such as nearsightedness (myopia), farsightedness (hyperopia), astigmatism, and presbyopia. Our thorough refraction process includes both objective and subjective testing methods, ensuring accurate prescription measurements that provide optimal visual clarity and comfort for all your daily activities.',
+      id: 'scaling-polishing',
+      icon: WaterDropIcon,
+      title: 'Teeth Cleaning, Scaling & Polishing',
+      description: 'Our professional dental cleaning service removes plaque, tartar (calculus), and surface stains from your teeth. Using ultrasonic scalers and hand instruments, we thoroughly clean above and below the gum line. Scaling and polishing helps prevent gum disease, freshens breath, and leaves your teeth feeling smooth and clean. Regular professional cleaning is essential for maintaining optimal oral health.',
       features: [
-        'Objective and subjective refraction testing',
-        'Accurate prescription measurement',
-        'Refractive error diagnosis and correction',
-        'Presbyopia assessment and management',
-        'Astigmatism evaluation and correction',
-        'Prescription verification and optimization',
-        'Specialized testing for complex cases',
-        'Regular prescription updates and adjustments',
+        'Ultrasonic scaling and debridement',
+        'Supra and sub-gingival cleaning',
+        'Root planing for gum disease',
+        'Stain removal and polishing',
+        'Gum health assessment',
+        'Personalized oral hygiene instruction',
+        'Recall and maintenance scheduling',
+        'Sensitive teeth management',
       ],
       image: '/images/services-vision-testing.jpeg',
       color: '#4facfe',
     },
     {
-      id: 'prescribe-provide',
-      icon: SpectaclesIcon,
-      title: 'Prescribe and Provide Eye Glasses, Ophthalmic, Medication and Contact Lenses',
-      description: 'We provide comprehensive prescription and dispensing services for all your vision correction needs. Our services include prescribing and providing high-quality eyeglasses with a wide selection of designer frames and premium lenses, ophthalmic medications for various eye conditions, and professional contact lens fitting and supply. Our certified opticians ensure accurate prescription execution, proper frame fitting, and optimal lens selection. We also provide expert guidance on medication usage, contact lens care, and ongoing support to ensure the best possible vision outcomes and eye health.',
+      id: 'restorative-dentistry',
+      icon: TreatmentIcon,
+      title: 'Crowns, Bridges, Dentures & Implants',
+      description: 'Our restorative dentistry services provide comprehensive solutions for damaged, decayed, or missing teeth. We offer dental crowns to restore individual teeth, fixed bridges to replace missing teeth, complete and partial dentures for full arch restoration, and dental implants for permanent tooth replacement. Using high-quality materials and precise techniques, we restore function, aesthetics, and confidence in your smile.',
       features: [
-        'Eyeglass prescription and dispensing',
-        'Wide selection of designer frames and premium lenses',
-        'Ophthalmic medication prescription and supply',
-        'Contact lens prescription and fitting',
-        'Professional frame fitting and adjustment',
-        'Prescription lens options and upgrades',
-        'Medication guidance and usage instructions',
-        'Ongoing support and follow-up care',
+        'Dental crowns (PFM, Zirconia, E-max)',
+        'Fixed bridge restorations',
+        'Complete and partial dentures',
+        'Dental implant placement and restoration',
+        'Denture repairs, relines, and adjustments',
+        'Inlay and onlay restorations',
+        'Smile makeover consultations',
+        'Follow-up care and maintenance',
       ],
       image: '/images/services-glasses-frames.jpeg',
       color: '#43e97b',
     },
     {
-      id: 'outreach',
+      id: 'pediatric-preventive',
       icon: OutreachIcon,
-      title: 'Outreach Program',
-      description: 'We are deeply committed to improving eye health awareness and accessibility in our community through comprehensive outreach initiatives. Our programs include free eye screenings at community events, educational workshops on eye health and disease prevention, mobile clinic services for underserved areas, and partnerships with schools for vision screening programs. We also participate in community health fairs, provide services to senior care facilities, and offer corporate wellness eye care programs. Our goal is to make quality eye care accessible to everyone, regardless of their circumstances.',
+      title: 'Pediatric & Preventive Dentistry',
+      description: 'We are deeply committed to improving oral health awareness in our community through comprehensive preventive programs and children\'s dental services. Our services include gentle dental care for children, fluoride applications, fissure sealants, and educational programs for proper oral hygiene. We conduct school outreach programs, community health education, and provide accessible preventive care to promote lifelong oral health for everyone.',
       features: [
-        'Free community eye screening programs',
-        'Educational workshops and health seminars',
-        'Mobile clinic services for remote areas',
-        'School vision screening programs',
-        'Community health fair participation',
-        'Senior care facility visitations',
-        'Corporate wellness eye care programs',
-        'Accessible care initiatives for underserved populations',
+        'Children\'s dental check-ups and treatment',
+        'Fluoride varnish application',
+        'Fissure sealants for cavity prevention',
+        'Oral health education and demonstrations',
+        'School dental screening programs',
+        'Dietary advice for dental health',
+        'Community outreach initiatives',
+        'Preventive care for all ages',
       ],
       image: '/images/appointment-receptionist.jpeg',
       color: '#ff6b6b',
@@ -173,31 +172,31 @@ const Services = () => {
   ];
 
   const serviceCategories = [
-    'Comprehensive Eye Examination',
-    'Binocular Vision Assessment',
-    'Diagnosis & Treatment',
-    'Clinical Refraction',
-    'Eyeglasses & Contact Lenses',
-    'Ophthalmic Medications',
-    'Emergency Services',
-    'Outreach Programs',
+    'General Dentistry',
+    'Oral Surgery',
+    'Root Canal Treatment',
+    'Teeth Cleaning & Scaling',
+    'Crowns & Bridges',
+    'Dentures & Implants',
+    'Pediatric Dentistry',
+    'Preventive Programs',
   ];
 
   const recentServices = [
-    { title: 'Advanced Retinal Imaging Technology', image: '/images/services-vision-testing.jpeg' },
-    { title: 'Custom Frame Fitting Consultation', image: '/images/services-glasses-frames.jpeg' },
-    { title: 'Professional Eye Care Team', image: '/images/gallery-staff-at-work.jpeg' },
+    { title: 'Modern Dental Imaging Technology', image: '/images/services-vision-testing.jpeg' },
+    { title: 'Teeth Whitening Consultation', image: '/images/services-glasses-frames.jpeg' },
+    { title: 'Professional Dental Care Team', image: '/images/gallery-staff-at-work.jpeg' },
   ];
 
   const popularTags = [
-    'Eye Examinations',
-    'Vision Care',
-    'Eye Health',
-    'Ophthalmology',
-    'Optometry',
-    'BestVision',
+    'Dental Check-ups',
+    'Oral Health',
+    'Teeth Cleaning',
+    'Dentistry',
+    'Root Canal',
+    'Medicore',
     'Tanzania',
-    'Eye Care',
+    'Dental Care',
   ];
 
   useEffect(() => {
@@ -273,9 +272,9 @@ const Services = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa !important', pt: { xs: '56px', sm: '64px' } }}>
       <SEO 
-        title="Our Services - BestVision Eyecare | Comprehensive Eye Care Solutions in Tanzania"
-        description="BestVision Eyecare offers comprehensive eye care services including eye examinations, diagnosis & treatment of eye disorders, spectacles dispensing, contact lens fitting, and community eye outreach programs in Dar es Salaam, Tanzania."
-        keywords="eye care services Tanzania, eye examinations Dar es Salaam, eye disorder treatment, spectacles dispensing, contact lens fitting, eye clinic services, BestVision Eyecare services"
+        title="Our Services - Medicore Dental Clinic | Comprehensive Dental Care Solutions in Tanzania"
+        description="Medicore Dental Clinic offers comprehensive dental care services including oral examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, root canal treatment, crowns, bridges, dentures, and community oral health programs in Natta-Mwanza, Tanzania."
+        keywords="dental care services Tanzania, dentist Mwanza, oral examination, teeth cleaning, root canal, tooth extraction, dental crowns, dental clinic services, Medicore Dental services"
       />
       <Navbar />
       
@@ -319,7 +318,7 @@ const Services = () => {
                     opacity: 1,
                   }}
                 >
-                  Professional Eye Care
+                  Professional Dental Care
                 </Typography>
                 <Typography
                   className="hero-animate"
@@ -351,7 +350,7 @@ const Services = () => {
                     opacity: 1,
                   }}
                 >
-                  At BestVision Eyecare, we provide comprehensive, patient-centered eye care services designed to preserve and enhance your vision. Our experienced team of optometrists utilizes state-of-the-art technology and evidence-based practices to deliver exceptional care tailored to your unique needs.
+                    At Medicore Dental Clinic, we provide comprehensive, patient-centered dental care services designed to preserve and enhance your oral health. Our experienced team of dentists utilizes state-of-the-art technology and evidence-based practices to deliver exceptional care tailored to your unique needs.
                 </Typography>
                 <Typography
                   className="hero-animate"
@@ -363,7 +362,7 @@ const Services = () => {
                     opacity: 1,
                   }}
                 >
-                  From routine eye examinations to specialized treatment of eye disorders, professional eyewear dispensing, contact lens fitting, and community health initiatives, we are committed to supporting optimal eye health for individuals and families throughout Tanzania.
+                    From routine dental check-ups to specialized treatments including oral surgery, root canal therapy, restorative dentistry, and community health initiatives, we are committed to supporting optimal oral health for individuals and families throughout Tanzania.
                 </Typography>
               </Box>
             </Grid>
@@ -382,7 +381,7 @@ const Services = () => {
                     opacity: 1,
                   }}
                 >
-                  Our comprehensive range of services includes advanced diagnostic capabilities, personalized treatment plans, premium eyewear solutions, and accessible community programs, all delivered with professionalism, compassion, and the highest standards of clinical excellence.
+                    Our comprehensive range of services includes advanced diagnostic capabilities, personalized treatment plans, modern restorative solutions, and accessible community programs, all delivered with professionalism, compassion, and the highest standards of clinical excellence.
                 </Typography>
                 <Box
                   className="hero-animate"
@@ -407,22 +406,22 @@ const Services = () => {
                     </Typography>
                     <Box component="ul" sx={{ m: 0, pl: 2.5, color: '#4A4A4A' }}>
                       <Typography component="li" variant="body2" sx={{ mb: 1, fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Comprehensive eye examination
+                        Comprehensive dental examination
                       </Typography>
                       <Typography component="li" variant="body2" sx={{ mb: 1, fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Binocular vision assessment
+                        Teeth cleaning, scaling & polishing
                       </Typography>
                       <Typography component="li" variant="body2" sx={{ mb: 1, fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Diagnose, manage and treat disorders of the eyes
+                        Diagnose, manage and treat oral diseases
                       </Typography>
                       <Typography component="li" variant="body2" sx={{ mb: 1, fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Clinical refraction
+                        Root canal treatment
                       </Typography>
                       <Typography component="li" variant="body2" sx={{ mb: 1, fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Prescribe and provide eye glasses, ophthalmic, medication and contact lenses
+                        Crowns, bridges, dentures & implants
                       </Typography>
                       <Typography component="li" variant="body2" sx={{ fontSize: { xs: '0.85rem', md: '0.95rem' }, lineHeight: 1.7 }}>
-                        Outreach Program
+                        Outreach & Prevention Programs
                       </Typography>
                     </Box>
                   </Stack>
@@ -462,7 +461,7 @@ const Services = () => {
                 color: `${colors.darkCharcoal} !important`,
               }}
             >
-              Comprehensive Eye Care Services
+              Comprehensive Dental Care Services
             </Typography>
             <Typography
               variant="body1"
@@ -473,7 +472,7 @@ const Services = () => {
                 mx: 'auto',
               }}
             >
-              Explore our range of professional services designed to support your vision health
+               Explore our range of professional services designed to support your oral health
             </Typography>
           </Box>
           <Grid container spacing={{ xs: 2, md: 3 }}>
@@ -898,7 +897,7 @@ const Services = () => {
                 opacity: 1,
               }}
             >
-              Experience world-class eye care with our expert team. Book your appointment today and take the first step towards better vision and optimal eye health.
+               Experience world-class dental care with our expert team. Book your appointment today and take the first step towards better oral health and a beautiful smile.
             </Typography>
             <Stack 
               className="cta-animate"
@@ -920,7 +919,7 @@ const Services = () => {
                   borderRadius: '8px',
                   textTransform: 'none',
                   '&:hover': {
-                    bgcolor: '#1565c0',
+                    bgcolor: '#004D40',
                   },
                 }}
               >

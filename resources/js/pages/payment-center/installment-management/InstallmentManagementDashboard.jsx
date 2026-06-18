@@ -138,7 +138,7 @@ const InstallmentManagementDashboard = () => {
           <Card sx={{ bgcolor: 'background.default' }}>
             <CardContent>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: '#2196f3', mb: 1 }}>
+                <Typography variant="h4" sx={{ color: '#00796B', mb: 1 }}>
                   📊
                 </Typography>
                 <Typography variant="h6" gutterBottom>

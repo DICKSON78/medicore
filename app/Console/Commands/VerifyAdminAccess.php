@@ -61,7 +61,7 @@ class VerifyAdminAccess extends Command
 
             // Show privileges by category
             $categories = [
-                'Core Access' => ['reception', 'medicine_center', 'optician_center', 'consultation_room', 'procedure_room', 'other_dispensing'],
+                'Core Access' => ['reception', 'medicine_center', 'dental_lab', 'consultation_room', 'procedure_room', 'other_dispensing'],
                 'Management' => ['user_management', 'patient_management', 'doctor_management', 'nurse_management', 'staff_management', 'clinic_management'],
                 'Financial' => ['financial_management', 'payment_center', 'financial_reports'],
                 'System' => ['settings', 'system_administration', 'backup_management', 'database_management', 'security_management'],

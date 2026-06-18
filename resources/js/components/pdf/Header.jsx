@@ -42,8 +42,8 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 4,
-        borderTop: "1pt solid #00225f",
-        borderBottom: "1pt solid #d71a20",
+        borderTop: "1pt solid #004D40",
+        borderBottom: "1pt solid #E65100",
         marginBottom: 16,
         ...(dense && {
           flexDirection: "column",

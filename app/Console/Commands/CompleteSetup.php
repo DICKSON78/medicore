@@ -61,9 +61,9 @@ class CompleteSetup extends Command
             // Create preferences
             $this->info('3. Creating system preferences...');
             $preferences = [
-                ['key' => 'CLINIC_NAME', 'value' => 'Best Vision Eye Care'],
+                ['key' => 'CLINIC_NAME', 'value' => 'Medicore Dental Clinic'],
                 ['key' => 'CLINIC_PHONE', 'value' => '0678110376'],
-                ['key' => 'CLINIC_EMAIL', 'value' => 'info@bestvision.com'],
+                ['key' => 'CLINIC_EMAIL', 'value' => 'info@medicore-dental.co.tz'],
                 ['key' => 'CLINIC_ADDRESS', 'value' => 'Natta, Mwanza'],
                 ['key' => 'SYSTEM_VERSION', 'value' => '1.0.0'],
                 ['key' => 'MAINTENANCE_MODE', 'value' => 'No'],

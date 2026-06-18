@@ -15,6 +15,8 @@ class Consultation extends Model
         'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils',
         'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'remarks', 'created_by',
         'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by',
+        'extra_oral_examination', 'tmj_examination', 'lymph_nodes',
+        'oral_hygiene_status', 'tobacco_use', 'alcohol_use',
     ];
 
     protected $casts = [
@@ -74,6 +76,36 @@ class Consultation extends Model
     public function doctor_tasks()
     {
         return $this->hasMany(DoctorTask::class, 'consultation_id');
+    }
+
+    public function dental_oral_examination()
+    {
+        return $this->hasOne(DentalOralExamination::class, 'consultation_id');
+    }
+
+    public function dental_charting()
+    {
+        return $this->hasMany(DentalCharting::class, 'consultation_id');
+    }
+
+    public function dental_treatment_records()
+    {
+        return $this->hasMany(DentalTreatmentRecord::class, 'consultation_id');
+    }
+
+    public function dental_lab_orders()
+    {
+        return $this->hasMany(DentalLabOrder::class, 'consultation_id');
+    }
+
+    public function dental_radiographs()
+    {
+        return $this->hasMany(DentalRadiograph::class, 'consultation_id');
+    }
+
+    public function dental_appointments()
+    {
+        return $this->hasMany(DentalAppointment::class, 'consultation_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

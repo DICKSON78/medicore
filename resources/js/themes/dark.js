@@ -304,7 +304,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "&.expanded": {
-            backgroundColor: alpha(lightBlue[600], 0.08),
+              backgroundColor: alpha(lightBlue[600], 0.08),
           },
         },
       },

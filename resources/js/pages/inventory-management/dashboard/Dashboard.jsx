@@ -1,55 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
   CardContent,
-  CardHeader,
   Grid,
-  Typography,
-  CircularProgress,
   IconButton,
+  LinearProgress,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import {
   InventoryRounded as InventoryIcon,
-  AddRounded as AddItemIcon,
-  AssessmentRounded as StocktakingIcon,
-  LibraryBooksRounded as ReportsIcon,
   WarningRounded as LowStockIcon,
   TrendingUpRounded as StockInIcon,
   TrendingDownRounded as StockOutIcon,
-  RefreshRounded as RefreshIcon,
+  FilterAltRounded as FilterIcon,
 } from "@mui/icons-material";
 import {
-  blue,
-  cyan,
   green,
   orange,
   purple,
   teal,
-  pink,
-  lime,
 } from "@mui/material/colors";
 
-import Page from "../../../components/Page";
+import Modal from "../../../components/Modal";
+import { Header as PageHeader } from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
+import Filters from "../../dashboard/Filters";
+import ChartWrapper from "../../../components/ChartWrapper";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
+import { useTheme } from "@mui/material/styles";
 
 const Dashboard = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const addToast = useToast();
 
-  // Set up date parameters for weekly filtering
-  const [dateParams, setDateParams] = useState({
+  const modalRef = useRef();
+
+  const [params, setParams] = useState({
     start_date: getWeekStartDate().toISOString().split('T')[0],
     end_date: getWeekEndDate().toISOString().split('T')[0],
   });
 
-  const { data, loading, error, handleFetch } = useFetch(
+  const { data, loading, error } = useFetch(
     "api/inventory-management/dashboard",
-    dateParams,
+    params,
     true,
     {
       summary: {
@@ -71,68 +69,42 @@ const Dashboard = () => {
     document.title = `Inventory Management Dashboard - ${window.APP_NAME}`;
   }, []);
 
-  // Auto-refresh when page becomes visible (user returns from other pages)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        handleFetch();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [handleFetch]);
-
   useEffect(() => {
     if (error) {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error, addToast]);
 
-  const handleRefresh = () => {
-    handleFetch();
-    addToast({ message: "Dashboard refreshed", severity: "success" });
+  const openFiltersModal = () => {
+    const component = (
+      <Filters
+        modal={modalRef.current}
+        params={params}
+        setParams={setParams}
+      />
+    );
+
+    modalRef.current.open("Filter", component, "sm");
   };
 
-  if (loading) {
-    return (
-      <Page title="Inventory Management Dashboard">
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-          <CircularProgress />
-        </Box>
-      </Page>
-    );
-  }
+  const stockInTotal = (data.statistics.stock_movement_trend || []).reduce((acc, e) => acc + (e.stock_in || 0), 0);
+  const stockOutTotal = (data.statistics.stock_movement_trend || []).reduce((acc, e) => acc + (e.stock_out || 0), 0);
 
   return (
-    <Page
-      title="Inventory Management Dashboard"
-      breadcrumbs={[
-        { title: "Home" },
-        { title: "Inventory Management" },
-        { title: "Inventory Management Dashboard" },
-      ]}
-    >
-      <CardHeader
+    <Box>
+      <PageHeader
         title="Inventory Management Dashboard"
-        titleTypographyProps={{
-          variant: "h4",
-          fontWeight: 700,
-        }}
-        action={
-          <Tooltip title="Refresh Dashboard">
-            <IconButton onClick={handleRefresh} disabled={loading}>
-              <RefreshIcon />
+        trailing={
+          <Tooltip title="Show filters">
+            <IconButton onClick={openFiltersModal}>
+              <FilterIcon />
             </IconButton>
           </Tooltip>
         }
-        sx={{
-          p: 0,
-          mb: 2,
-        }}
       />
-      {!loading && data ? (
-        <React.Fragment>
+      {loading && <LinearProgress />}
+      {data ? (
+        <>
           <Grid
             container
             spacing={{ xs: 2, sm: 2, md: 3 }}
@@ -149,7 +121,7 @@ const Dashboard = () => {
               title="Low Stock Items"
               count={numberFormat(data.summary?.low_stock_items || 0)}
               icon={<LowStockIcon />}
-              color={blue[400]}
+              color={theme.palette.warning.main}
               onClick={() => navigate('/inventory-management/stock-alerts')}
             />
             <InfoCard
@@ -168,107 +140,105 @@ const Dashboard = () => {
             />
           </Grid>
 
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 2, md: 3 }}
-            justifyContent="stretch"
-            sx={{
-              "& .MuiCard-root": {
-                minHeight: "100%",
-              },
-            }}
-          >
-            <Grid item md={6} sm={12} xs={12}>
-              <Card>
+          <Card sx={{ mb: 2 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Quick Actions
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/inventory-management/stocktaking')}>
-                        <StocktakingIcon sx={{ fontSize: 28.8, color: '#4CAF50', mb: 1 }} />
-                        <Typography variant="subtitle2">Stocktaking</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/inventory-management/stock-alerts')}>
-                        <LowStockIcon sx={{ fontSize: 28.8, color: '#FF9800', mb: 1 }} />
-                        <Typography variant="subtitle2">Stock Alerts</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/inventory-management/reports/stock-management/item-balance')}>
-                        <ReportsIcon sx={{ fontSize: 28.8, color: '#2196F3', mb: 1 }} />
-                        <Typography variant="subtitle2">Item Balance</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/inventory-management/reports/stock-alerts')}>
-                        <InventoryIcon sx={{ fontSize: 28.8, color: '#9C27B0', mb: 1 }} />
-                        <Typography variant="subtitle2">Stock Reports</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
+                  <Typography variant="h6" gutterBottom>Stock Movement Trend</Typography>
+                  <ChartWrapper
+                    options={{
+                      chart: {
+                        fontFamily: theme.typography.fontFamily,
+                        foreColor: theme.palette.text.primary,
+                        background: "transparent",
+                        toolbar: { show: false },
+                      },
+                      colors: [teal[400], orange[400]],
+                      stroke: { show: true, width: [3, 3], curve: "smooth" },
+                      dataLabels: { enabled: false },
+                      grid: { show: false, borderColor: theme.palette.divider },
+                      xaxis: {
+                        axisBorder: { show: false, color: theme.palette.divider },
+                        axisTicks: { show: true, color: theme.palette.divider, height: 6 },
+                      },
+                      yaxis: {
+                        axisBorder: { show: false, color: theme.palette.divider },
+                        axisTicks: { show: true, color: theme.palette.divider, width: 6 },
+                        labels: { formatter: (val) => numberFormat(val) },
+                      },
+                      tooltip: { theme: "dark", fillSeriesColor: true },
+                      legend: {
+                        markers: { width: 14, height: 8, radius: 4 },
+                      },
+                    }}
+                    series={[
+                      {
+                        name: "Stock In",
+                        data: (data.statistics.stock_movement_trend || []).map((e) => ({
+                          x: e.date,
+                          y: e.stock_in || 0,
+                        })),
+                      },
+                      {
+                        name: "Stock Out",
+                        data: (data.statistics.stock_movement_trend || []).map((e) => ({
+                          x: e.date,
+                          y: e.stock_out || 0,
+                        })),
+                      },
+                    ]}
+                    type="line"
+                    height="272"
+                  />
                 </CardContent>
               </Card>
-            </Grid>
-            
-            <Grid item md={6} sm={12} xs={12}>
-              <Card>
+
+          <Card sx={{ mb: 2 }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Inventory Statistics
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <StockInIcon sx={{ fontSize: 28.8, color: '#4CAF50', mb: 1 }} />
-                        <Typography variant="h6" color="#4CAF50" fontWeight="bold">
-                          {numberFormat(data.summary.total_items || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Total Items</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <LowStockIcon sx={{ fontSize: 28.8, color: '#FF9800', mb: 1 }} />
-                        <Typography variant="h6" color="#FF9800" fontWeight="bold">
-                          {numberFormat(data.summary.low_stock_items || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Low Stock Items</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <StockOutIcon sx={{ fontSize: 28.8, color: '#2196F3', mb: 1 }} />
-                        <Typography variant="h6" color="#2196F3" fontWeight="bold">
-                          {numberFormat(data.summary.stock_in_today || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Stock In Today</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <AddItemIcon sx={{ fontSize: 28.8, color: '#E91E63', mb: 1 }} />
-                        <Typography variant="h6" color="#E91E63" fontWeight="bold">
-                          {numberFormat(data.summary.stock_out_today || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Stock Out Today</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
+                  <Typography variant="h6" gutterBottom>Stock Movement Overview</Typography>
+                    <ChartWrapper
+                      options={{
+                        labels: ["Stock In", "Stock Out"],
+                        chart: {
+                          fontFamily: theme.typography.fontFamily,
+                          background: "transparent",
+                          toolbar: { show: false },
+                        },
+                        plotOptions: {
+                          pie: {
+                            donut: {
+                              size: "50%",
+                            },
+                          },
+                        },
+                        colors: [teal[400], orange[400]],
+                        stroke: { show: true, width: 3, colors: [theme.palette.background.paper, theme.palette.background.paper] },
+                        dataLabels: {
+                          style: { fontWeight: "400", fontSize: "9px" },
+                          dropShadow: { enabled: false },
+                        },
+                        tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                        legend: {
+                          position: "bottom",
+                          labels: {
+                            colors: [theme.palette.text.secondary, theme.palette.text.secondary],
+                            useSeriesColors: false,
+                          },
+                          markers: { width: 14, height: 8, radius: 4 },
+                        },
+                      }}
+                      series={[stockInTotal, stockOutTotal]}
+                      type="donut"
+                      height={288}
+                    />
                 </CardContent>
               </Card>
-            </Grid>
-          </Grid>
-        </React.Fragment>
+        </>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
           <Typography variant="h6">No data available.</Typography>
         </Box>
       )}
-    </Page>
+      <Modal ref={modalRef} />
+    </Box>
   );
 };
 

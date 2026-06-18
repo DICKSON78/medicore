@@ -62,7 +62,7 @@ class InvestigatePatientWaitingTimes extends Command
                 $this->line("  - Status: {$consultation->status}");
                 $this->line("  - Require Glass: " . ($consultation->require_glass ?: 'Not set'));
                 $this->line("  - Patient to Return: " . ($consultation->patient_to_return ?: 'Not set'));
-                $this->line("  - Sent to Optician: " . ($consultation->sent_to_optician_at ?: 'Not set'));
+                $this->line("  - Sent to Dental Lab: " . ($consultation->sent_to_dental_lab_at ?: 'Not set'));
                 
                 if ($consultation->payment_cache_item && $consultation->payment_cache_item->payment_cache) {
                     $paymentCache = $consultation->payment_cache_item->payment_cache;

@@ -6,6 +6,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Descriptions from "../../../components/Descriptions";
 import SurgeryRecordReport from "./templates/SurgeryRecordReport";
 import CataractSurgeryRecord from "./templates/CataractSurgeryRecord";
+import DentalTreatmentTemplate from "./templates/DentalTreatmentTemplate";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat } from "../../../helpers";
@@ -65,6 +66,15 @@ const ProcedureRequestItemRoutes = ({ patient }) => {
               path="/cataract-surgery-record"
               element={
                 <CataractSurgeryRecord
+                  patient={patient}
+                  paymentCacheitem={data}
+                />
+              }
+            />
+            <Route
+              path="/dental-treatment-record"
+              element={
+                <DentalTreatmentTemplate
                   patient={patient}
                   paymentCacheitem={data}
                 />

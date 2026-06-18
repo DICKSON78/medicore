@@ -52,7 +52,7 @@ class FixPrivilegeSystem extends Command
             
             $allPrivileges = [
                 'dashboard', 'reception', 'payment_center', 'consultation_room',
-                'optician_center', 'medicine_center', 'procedure_room',
+                'dental_lab', 'medicine_center', 'procedure_room',
                 'inventory_management', 'marketing', 'financial_management',
                 'user_management', 'settings', 'patient_management',
                 'doctor_management', 'nurse_management', 'staff_management',

@@ -413,138 +413,130 @@ const CheckInPatient = () => {
             <PageHeader title="Check-In Patient" />
             <Divider />
             <CardContent>
-            <Grid
-              container
-              spacing={2}
-              mb={2}
-            >
-              <Grid
-                item
-                md={3.5}
-                sm={12}
-                xs={12}
-              >
-                <Select
-                  ref={paymentModeRef}
-                  label="Payment Mode"
-                  fullWidth
-                  required
-                  options={paymentModes}
-                  optionsLabel="name"
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  value={paymentMode}
-                  onChange={(value) => setPaymentMode(value)}
-                />
-              </Grid>
-              <Grid
-                item
-                md={3}
-                sm={12}
-                xs={12}
-              >
-                <SelectUser
-                  ref={consultantRef}
-                  label="Consultant"
-                  clearable
-                  params={{ designation: "Doctor" }}
-                  onChange={(value) => setConsultant(value)}
-                />
-              </Grid>
-            </Grid>
-
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={3.5}
-                sm={12}
-                xs={12}
-              >
-                <Card variant="outlined">
-                  <CardHeader
-                    title="Select Item"
-                    action={
-                      <SearchTextField
-                        onChange={(value) =>
-                          throttle(() => setItemName(value), 1000)
-                        }
-                      />
-                    }
-                    className="no-action-margin"
-                  />
-                  <Divider />
-                  <CardContent sx={{ bgcolor: "background.default" }}>
+            <Card variant="outlined" sx={{ bgcolor: "background.default", mb: 2, borderRadius: 2 }}>
+              <CardContent>
+                <Grid container spacing={2}>
+                  <Grid item md={3} sm={6} xs={12}>
                     <Select
-                      placeholder="Item Type"
+                      ref={paymentModeRef}
+                      label="Payment Mode"
+                      fullWidth
+                      required
+                      options={paymentModes}
+                      optionsLabel="name"
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      value={paymentMode}
+                      onChange={(value) => setPaymentMode(value)}
+                    />
+                  </Grid>
+                  <Grid item md={3} sm={6} xs={12}>
+                    <SelectUser
+                      ref={consultantRef}
+                      label="Consultant"
+                      clearable
+                      params={{ designation: "Doctor" }}
+                      onChange={(value) => setConsultant(value)}
+                    />
+                  </Grid>
+                  <Grid item md={3} sm={6} xs={12}>
+                    <Select
+                      label="Select Item"
+                      fullWidth
+                      clearable
+                      options={items}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value?.id
+                      }
+                      value={items.find((e) => selectedItem?.id === e.id) || null}
+                      onChange={(value) => {
+                        setSelectedItem(value);
+                        const isOutOfStockFrame = value?.item_type?.name === "Frame" && value?.balance <= 0;
+                        setIsPartnerItem(isOutOfStockFrame);
+                        setCollaboratorId(null);
+                      }}
+                    />
+                  </Grid>
+                  <Grid item md={3} sm={6} xs={12}>
+                    <Select
+                      label="Item Type"
                       fullWidth
                       clearable
                       options={itemTypes}
                       onChange={(value) => setItemType(value)}
                     />
-                    {itemType === "Lens" ? (
+                  </Grid>
+                  {itemType === "Lens" ? (
+                    <Grid item md={3} sm={6} xs={12}>
                       <Select
-                        placeholder="Lens Type"
+                        label="Lens Type"
                         fullWidth
                         clearable
                         options={lensTypes}
                         optionsLabel="name"
                         optionsValue="id"
                         onChange={(value) => setLensTypeId(value)}
-                        containerProps={{ mt: 2 }}
                       />
-                    ) : null}
-                  </CardContent>
+                    </Grid>
+                  ) : null}
+                  <Grid item xs={12}>
+                    <SearchTextField
+                      label="Search Item"
+                      onChange={(value) =>
+                        throttle(() => setItemName(value), 1000)
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            <Grid container spacing={2}>
+              <Grid item md={3.5} sm={12} xs={12}>
+                <Card variant="outlined" sx={{ borderRadius: 2 }}>
+                  <CardHeader title="Select Item" />
                   <Divider />
-                  <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
-                    {items.map((e) => (
-                      <FormControlLabel
-                        key={e.id}
-                        control={
-                            <Radio
-                              size="small"
-                              checked={selectedItem === e}
-                              onChange={(event) => {
-                                setSelectedItem(e);
-                                const isOutOfStockFrame = e.item_type?.name === "Frame" && e.balance <= 0;
-                                setIsPartnerItem(isOutOfStockFrame);
-                                setCollaboratorId(null);
-                              }}
-                            />
-                          }
-                          label={
-                            <Stack direction="row" alignItems="center" spacing={1}>
-                              <Typography variant="body2">{e.name}</Typography>
-                              {e.item_type?.name === "Frame" && e.balance <= 0 ? (
-                                <Chip
-                                  label="Out of Stock"
-                                  size="small"
-                                  color="warning"
-                                  variant="outlined"
-                                />
-                              ) : null}
-                            </Stack>
-                          }
-                        sx={{ display: "flex" }}
-                      />
-                    ))}
+                  <CardContent>
+                    <Stack direction="row" flexWrap="wrap" useFlexGap>
+                      {items.map((e) => (
+                        <FormControlLabel
+                          key={e.id}
+                          control={
+                              <Radio
+                                size="small"
+                                checked={selectedItem === e}
+                                onChange={(event) => {
+                                  setSelectedItem(e);
+                                  const isOutOfStockFrame = e.item_type?.name === "Frame" && e.balance <= 0;
+                                  setIsPartnerItem(isOutOfStockFrame);
+                                  setCollaboratorId(null);
+                                }}
+                              />
+                            }
+                            label={
+                              <Stack direction="row" alignItems="center" spacing={1}>
+                                <Typography variant="body2">{e.name}</Typography>
+                                {e.item_type?.name === "Frame" && e.balance <= 0 ? (
+                                  <Chip
+                                    label="Out of Stock"
+                                    size="small"
+                                    color="warning"
+                                    variant="outlined"
+                                  />
+                                ) : null}
+                              </Stack>
+                            }
+                        />
+                      ))}
+                    </Stack>
                   </CardContent>
                 </Card>
               </Grid>
-
-              <Grid
-                item
-                md={8.5}
-                sm={12}
-                xs={12}
-              >
-                <Card
-                  variant="outlined"
-                  sx={{ mb: 1 }}
-                >
+              <Grid item md={8.5} sm={12} xs={12}>
+                <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardHeader title="Added Items" />
                   <Divider />
                   <CardContent>

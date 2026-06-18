@@ -97,23 +97,24 @@ const Footer = () => {
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about' },
     { label: 'Services', path: '/services' },
-    { label: 'Eyeware', path: '/gallery' },
+    { label: 'Gallery', path: '/gallery' },
     { label: 'Testimonials', path: '/testimonials' },
     { label: 'Contact', path: '/contact' },
   ];
 
   const services = [
-    { label: 'Comprehensive Eye Examinations', path: '/services' },
-    { label: 'Diagnosis & Treatment of Eye Disorders', path: '/services' },
-    { label: 'Spectacles Dispensing', path: '/services' },
-    { label: 'Contact Lens Fitting & Dispensing', path: '/services' },
-    { label: 'Community Eye Outreach Programs', path: '/services' },
+    { label: 'General Dentistry', path: '/services' },
+    { label: 'Oral Surgery & Extractions', path: '/services' },
+    { label: 'Root Canal Treatment', path: '/services' },
+    { label: 'Teeth Cleaning & Scaling', path: '/services' },
+    { label: 'Crowns, Bridges & Dentures', path: '/services' },
+    { label: 'Orthodontics & Braces', path: '/services' },
   ];
 
   const socialLinks = [
-    { icon: <FacebookIcon />, label: 'Facebook', url: 'https://www.facebook.com/sikafeyecare' },
-    { icon: <InstagramIcon />, label: 'Instagram', url: 'https://www.instagram.com/sikaf_eye_care?igsh=dGc1YWJhM2FwN3k2&utm_source=qr' },
-    { icon: <TikTokIcon />, label: 'TikTok', url: 'https://www.tiktok.com/@sikafeyecare' },
+    { icon: <FacebookIcon />, label: 'Facebook', url: 'https://www.facebook.com/medicoredental' },
+    { icon: <InstagramIcon />, label: 'Instagram', url: 'https://www.instagram.com/medicore_dental?igsh=dGc1YWJhM2FwN3k2&utm_source=qr' },
+    { icon: <TikTokIcon />, label: 'TikTok', url: 'https://www.tiktok.com/@medicoredental' },
     { icon: <YouTubeIcon />, label: 'YouTube', url: 'https://youtube.com' },
     { icon: <WhatsAppIcon />, label: 'WhatsApp', url: 'https://wa.me/255678110376' },
   ];
@@ -195,7 +196,7 @@ const Footer = () => {
                 },
               }}
             >
-              SIKAF Eye Care
+              Medicore Dental Clinic
             </Typography>
             <Typography
               variant="body2"
@@ -206,7 +207,7 @@ const Footer = () => {
                 lineHeight: 1.5,
               }}
             >
-              Best Eye Care Clinic in Tanzania
+              Premier Dental Clinic in Tanzania
             </Typography>
 
             {/* Contact Information */}
@@ -274,7 +275,7 @@ const Footer = () => {
               </Box>
               <Box
                 component="a"
-                href="mailto:info@sikafeyecare.co.tz"
+                href="mailto:info@medicore-dental.co.tz"
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -288,7 +289,7 @@ const Footer = () => {
               >
                 <EmailIcon sx={{ color: colors.primaryOrange, fontSize: '18px', flexShrink: 0 }} />
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
-                  info@sikafeyecare.co.tz
+                  info@medicore-dental.co.tz
                 </Typography>
               </Box>
             </Stack>
@@ -528,7 +529,7 @@ const Footer = () => {
               textAlign: { xs: 'center', sm: 'left' },
             }}
           >
-            © {new Date().getFullYear()} SIKAF Eye Care. All rights reserved.
+            © {new Date().getFullYear()} Medicore Dental Clinic. All rights reserved.
           </Typography>
 
           <Stack

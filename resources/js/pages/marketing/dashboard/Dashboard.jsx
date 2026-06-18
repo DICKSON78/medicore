@@ -4,16 +4,14 @@ import {
   Box,
   Card,
   CardContent,
-  CardHeader,
-  Divider,
   Grid,
   IconButton,
+  LinearProgress,
   Tooltip,
   Typography,
 } from "@mui/material";
 import {
   EventNoteRounded as AppointmentsIcon,
-  EventNoteRounded,
   Person2Rounded as PersonIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
@@ -23,15 +21,13 @@ import {
   NorthEastRounded as ViewMoreIcon,
   PhoneInTalkRounded as CommunicationLogsIcon,
   SendRounded as MarketingStrategiesIcon,
-  SendRounded,
   TaskRounded as DailyActivitiesIcon,
   LibraryBooksRounded as ReportsIcon,
   SettingsRounded as SettingsIcon,
 } from "@mui/icons-material";
 
-import Page from "../../../components/Page";
 import Modal from "../../../components/Modal";
-import LoadingSkeleton from "./LoadingSkeleton";
+import { Header as PageHeader } from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
@@ -69,7 +65,7 @@ const Dashboard = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch(
+  const { data, loading, error } = useFetch(
     "api/marketing/dashboard",
     {
       ...params,
@@ -106,95 +102,55 @@ const Dashboard = () => {
     modalRef.current.open("Filter", component, "sm");
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "warning";
-      case "Completed":
-        return "success";
-    }
-
-    return "neutral";
-  };
-
   return (
-    <Page
-      title="Marketing Dashboard"
-      breadcrumbs={[
-        { title: "Home" },
-        { title: "Marketing Management" },
-        { title: "Marketing Dashboard" },
-      ]}
-      sx={{
-        maxWidth: '100%',
-        mx: 0,
-        px: { xs: 1, sm: 2, md: 3 }
-      }}
-    >
-      <CardHeader
+    <Box>
+      <PageHeader
         title="Marketing Dashboard"
-        action={
+        trailing={
           <Tooltip title="Show filters">
             <IconButton onClick={openFiltersModal}>
               <FilterIcon />
             </IconButton>
           </Tooltip>
         }
-        titleTypographyProps={{
-          variant: "h4",
-          fontWeight: 700,
-        }}
-        sx={{
-          p: 0,
-          mb: 2,
-        }}
       />
-      {loading && <LoadingSkeleton />}
-      {!loading && data ? (
-        <React.Fragment>
-          <Box sx={{ width: '100%', maxWidth: '100%' }}>
-            {/* First Row - 4 Cards */}
+      {loading && <LinearProgress />}
+      {data && (
+        <>
+          {/* First Row - 4 Cards */}
             <Grid
               container
               spacing={{ xs: 1, sm: 2, md: 3 }}
               sx={{ mb: 4, width: '100%' }}
             >
-              <Grid item xs={12} sm={6} md={3}>
-                <InfoCard
-                  title="Patients Registered"
-                  count={data.summary.total_patients_registered}
-                  icon={<PersonIcon />}
-                  color={blue[400]}
-                  onClick={() => navigate("/reception/patients")}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <InfoCard
-                  title="Marketing Activities"
-                  count={numberFormat(data.summary.total_marketing_activities)}
-                  icon={<DailyActivitiesIcon />}
-                  color={purple[400]}
-                  onClick={() => navigate('/marketing/daily-activities')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <InfoCard
-                  title="Ideas Generated"
-                  count={numberFormat(data.summary.total_ideas)}
-                  icon={<IdeaDevelopmentIcon />}
-                  color={lightBlue[400]}
-                  onClick={() => navigate('/marketing/idea-development')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <InfoCard
-                  title="Outreach Programmes"
-                  count={numberFormat(data.summary.total_outreach_programmes)}
-                  icon={<OutreachProgrammesIcon />}
-                  color={yellow[600]}
-                  onClick={() => navigate('/marketing/outreach-programmes')}
-                />
-              </Grid>
+              <InfoCard
+                title="Patients Registered"
+                count={data.summary.total_patients_registered}
+                icon={<PersonIcon />}
+                color={blue[400]}
+                onClick={() => navigate("/reception/patients")}
+              />
+              <InfoCard
+                title="Marketing Activities"
+                count={numberFormat(data.summary.total_marketing_activities)}
+                icon={<DailyActivitiesIcon />}
+                color={purple[400]}
+                onClick={() => navigate('/marketing/daily-activities')}
+              />
+              <InfoCard
+                title="Ideas Generated"
+                count={numberFormat(data.summary.total_ideas)}
+                icon={<IdeaDevelopmentIcon />}
+                color={lightBlue[400]}
+                onClick={() => navigate('/marketing/idea-development')}
+              />
+              <InfoCard
+                title="Outreach Programmes"
+                count={numberFormat(data.summary.total_outreach_programmes)}
+                icon={<OutreachProgrammesIcon />}
+                color={yellow[600]}
+                onClick={() => navigate('/marketing/outreach-programmes')}
+              />
             </Grid>
 
             {/* Second Row - 3 Cards */}
@@ -203,45 +159,32 @@ const Dashboard = () => {
               spacing={{ xs: 1, sm: 2, md: 3 }}
               sx={{ mb: 4, width: '100%' }}
             >
-              <Grid item xs={12} sm={6} md={4}>
-                <InfoCard
-                  title="Communication Logs"
-                  count={numberFormat(data.summary.total_communication_logs)}
-                  icon={<CommunicationLogsIcon />}
-                  color={teal[400]}
-                  onClick={() => navigate('/marketing/communication-logs')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <InfoCard
-                  title="Marketing Strategies"
-                  count={numberFormat(data.summary.total_marketing_strategies || 0)}
-                  icon={<MarketingStrategiesIcon />}
-                  color={orange[400]}
-                  onClick={() => navigate('/marketing/strategies')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <InfoCard
-                  title="Research Plans"
-                  count={numberFormat(data.summary.total_research_plans || 0)}
-                  icon={<MarketResearchIcon />}
-                  color={green[400]}
-                  onClick={() => navigate('/marketing/research-plans')}
-                />
-              </Grid>
+              <InfoCard
+                title="Communication Logs"
+                count={numberFormat(data.summary.total_communication_logs)}
+                icon={<CommunicationLogsIcon />}
+                color={teal[400]}
+                onClick={() => navigate('/marketing/communication-logs')}
+              />
+              <InfoCard
+                title="Marketing Strategies"
+                count={numberFormat(data.summary.total_marketing_strategies || 0)}
+                icon={<MarketingStrategiesIcon />}
+                color={orange[400]}
+                onClick={() => navigate('/marketing/strategies')}
+              />
+              <InfoCard
+                title="Research Plans"
+                count={numberFormat(data.summary.total_research_plans || 0)}
+                icon={<MarketResearchIcon />}
+                color={green[400]}
+                onClick={() => navigate('/marketing/research-plans')}
+              />
             </Grid>
 
-            {/* Charts Section - Full Width */}
-            <Grid
-              container
-              spacing={{ xs: 1, sm: 2, md: 3 }}
-              sx={{ mt: 2, width: '100%', maxWidth: '100%' }}
-            >
-              <Grid item xs={12} md={6} lg={6} xl={6}>
-                <Card sx={{ height: '100%', width: '100%', minHeight: '500px' }}>
-                  <CardHeader title="Marketing Activities Overview" />
-                  <Divider />
+          <Card sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>Marketing Activities Overview</Typography>
                   <ChartWrapper
                     options={{
                       chart: {
@@ -341,14 +284,12 @@ const Dashboard = () => {
                     type="line"
                     height="500"
                   />
+                  </CardContent>
                 </Card>
-              </Grid>
-              
-              {/* Information Source Line Chart */}
-              <Grid item xs={12} md={6} lg={6} xl={6}>
-                <Card sx={{ height: '100%', width: '100%', minHeight: '500px' }}>
-                  <CardHeader title="Information Source Analysis" />
-                  <Divider />
+
+          <Card sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>Information Source Analysis</Typography>
                   <ChartWrapper
                     options={{
                       chart: {
@@ -437,14 +378,11 @@ const Dashboard = () => {
                     type="line"
                     height="500"
                   />
+                  </CardContent>
                 </Card>
-              </Grid>
-            </Grid>
-          </Box>
-        </React.Fragment>
-      ) : null}
+        </>)}
       <Modal ref={modalRef} />
-    </Page>
+    </Box>
   );
 };
 
