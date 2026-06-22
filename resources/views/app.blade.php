@@ -21,7 +21,6 @@
     <meta property="og:url" content="https://medicore-dental.co.tz/">
     <meta property="og:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
     <meta property="og:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania. Expert general dentistry, oral surgery, orthodontics, and more.">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
     <meta property="og:site_name" content="Medicore Dental Clinic">
     <meta property="og:locale" content="en_US">
 
@@ -30,15 +29,8 @@
     <meta property="twitter:url" content="https://medicore-dental.co.tz/">
     <meta property="twitter:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
     <meta property="twitter:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania.">
-    <meta property="twitter:image" content="{{ asset('images/logo.png') }}">
-
     <!-- Canonical URL -->
     <link rel="canonical" href="https://medicore-dental.co.tz{{ request()->path() === '/' ? '' : '/' . request()->path() }}">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -48,8 +40,6 @@
       "name": "Medicore Dental Clinic",
       "description": "Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania",
       "url": "https://medicore-dental.co.tz",
-      "logo": "https://medicore-dental.co.tz/images/logo.png",
-      "image": "https://medicore-dental.co.tz/images/logo.png",
       "telephone": "+255678110376",
       "address": {
         "@type": "PostalAddress",

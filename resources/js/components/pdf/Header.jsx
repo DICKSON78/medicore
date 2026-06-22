@@ -1,18 +1,17 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
 
-// Resolve logo source for PDF (prefer clinic-uploaded logo; fallback to public logo)
+// Resolve logo source for PDF (use clinic-uploaded logo if set)
 const getLogoSrc = () => {
   try {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const clinicLogo = window?.user?.clinic?.logo;
     if (clinicLogo && typeof clinicLogo === 'string') {
-      // Accept absolute URLs or relative paths stored in DB
       return clinicLogo.startsWith('http') ? clinicLogo : `${origin}${clinicLogo}`;
     }
-    return `${origin}/images/logo.png`;
+    return null;
   } catch (_) {
-    return '/images/logo.png';
+    return null;
   }
 };
 

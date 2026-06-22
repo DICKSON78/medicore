@@ -1,19 +1,19 @@
-# Deployment Notes for Best Vision Eyecare
+# Deployment Notes for Medicore Dental Clinic
 
 ## Domain Configuration
-- **Domain**: bestvisioneyecare.com
-- **URL**: http://bestvisioneyecare.com
-- **SSL**: Disabled (use HTTP for development)
+- **Domain**: medicore-dental.co.tz
+- **URL**: https://medicore-dental.co.tz
+- **SSL**: Enabled
 
 ## Environment Variables (.env)
 Update your `.env` file with the following:
 
 ```env
-APP_NAME=Laravel
+APP_NAME=Medicore
 APP_ENV=production
 APP_KEY=base64:DZTfsicMYMbKIHEOlmivnXJzNF0ZgpjPFD6krXowe0o=
 APP_DEBUG=false
-APP_URL=http://bestvisioneyecare.com
+APP_URL=https://medicore-dental.co.tz
 
 # Database configuration
 DB_CONNECTION=mysql
@@ -75,12 +75,8 @@ DB_PASSWORD=Allos@2026
    php artisan view:cache
    ```
 
-## Favicon
-- Favicon is located at: `public/favicon.ico`
-- Already configured in `resources/views/app.blade.php`
-
 ## Login Access
-- Login page is accessible at: `https://newkayoka.com/login`
+- Login page is accessible at: `https://medicore-dental.co.tz/login`
 - Login button has been removed from the public navbar
 - Users can manually navigate to `/login` if needed
 
