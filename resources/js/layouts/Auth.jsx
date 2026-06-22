@@ -27,10 +27,10 @@ const Auth = () => {
             <Typography
               variant="h3"
               fontWeight="bold"
-              color="primary"
               sx={{ my: 4 }}
             >
-              MEDCORE
+              <span style={{ color: "#4caf50" }}>MEDI</span>
+              <span style={{ color: "#f44336" }}>CORE</span>
             </Typography>
           </Box>
           <Outlet />
