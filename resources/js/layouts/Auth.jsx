@@ -29,7 +29,7 @@ const Auth = () => {
               fontWeight="bold"
               sx={{ my: 4 }}
             >
-              <span style={{ color: "#4caf50" }}>MEDI</span>
+              <span style={{ color: "#009688" }}>MEDI</span>
               <span style={{ color: "#f44336" }}>CORE</span>
             </Typography>
           </Box>
