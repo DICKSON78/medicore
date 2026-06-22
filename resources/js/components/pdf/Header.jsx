@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
 const Header = ({ fixed, title, subtitle, dense }) => {
   const getAddressLine = () => {
-    let contacts = [window.user.clinic.name];
+    let contacts = ["Medicore"];
 
     if (window.user.clinic.address) {
       contacts.push(window.user.clinic.address);
