@@ -1,19 +1,5 @@
 import React from "react";
-import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
-
-// Resolve logo source for PDF (use clinic-uploaded logo if set)
-const getLogoSrc = () => {
-  try {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const clinicLogo = window?.user?.clinic?.logo;
-    if (clinicLogo && typeof clinicLogo === 'string') {
-      return clinicLogo.startsWith('http') ? clinicLogo : `${origin}${clinicLogo}`;
-    }
-    return null;
-  } catch (_) {
-    return null;
-  }
-};
+import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
 const Header = ({ fixed, title, subtitle, dense }) => {
   const getAddressLine = () => {
@@ -51,16 +37,10 @@ const Header = ({ fixed, title, subtitle, dense }) => {
       }}
     >
       <View style={{ width: 112 }}>
-        <Image
-          src={getLogoSrc()}
-          style={{
-            width: 80,
-            height: "auto",
-            ...(dense && {
-              margin: "0 auto",
-            }),
-          }}
-        />
+        <Text style={{ fontSize: 16, fontWeight: "bold", fontFamily: "Custom" }}>
+          <Text style={{ color: "#009688" }}>MEDI</Text>
+          <Text style={{ color: "#f44336" }}>CORE</Text>
+        </Text>
       </View>
       <View style={{ flex: 1 }}>
         <Text
