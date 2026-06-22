@@ -129,14 +129,12 @@ const LensStock = () => {
   };
 
   const getStockStatus = (item) => {
-    const balance = parseFloat(item.balance) || 0;
-    const dispensed = parseInt(item.dispensed_count) || 0;
-    const totalStock = balance - dispensed;
+    const stock = parseFloat(item.balance) || 0;
     
-    if (totalStock <= 0) {
+    if (stock <= 0) {
       return <Chip label="Out of Stock" size="small" color="error" variant="outlined" />;
     }
-    if (totalStock <= 5) {
+    if (stock <= 5) {
       return <Chip label="Low Stock" size="small" color="warning" variant="outlined" />;
     }
     return <Chip label="In Stock" size="small" color="success" variant="outlined" />;
@@ -144,9 +142,9 @@ const LensStock = () => {
 
   // Summary stats
   const items = Array.isArray(data.data) ? data.data : [];
-  const outOfStock = items.filter(i => (parseFloat(i.balance) || 0) - (parseInt(i.dispensed_count) || 0) <= 0).length;
+  const outOfStock = items.filter(i => (parseFloat(i.balance) || 0) <= 0).length;
   const lowStock = items.filter(i => {
-    const total = (parseFloat(i.balance) || 0) - (parseInt(i.dispensed_count) || 0);
+    const total = parseFloat(i.balance) || 0;
     return total > 0 && total <= 5;
   }).length;
 
@@ -282,13 +280,14 @@ const LensStock = () => {
                     );
                   }
                   const balance = parseFloat(item.balance) || 0;
-                  return numberFormat(balance < 0 ? 0 : balance);
+                  const dispensed = parseInt(item.dispensed_count) || 0;
+                  return numberFormat((balance + dispensed) < 0 ? 0 : (balance + dispensed));
                 },
               },
               {
                 field: "dispensed_count",
-                headerName: "Rx Dispensed per Day",
-                tableCellProps: { sx: { width: 160 } },
+                headerName: "Dispensed",
+                tableCellProps: { sx: { width: 120 } },
                 valueGetter: (item) => {
                   const dispensed = parseInt(item.dispensed_count) || 0;
                   return numberFormat(dispensed);
@@ -298,11 +297,9 @@ const LensStock = () => {
                 field: "remain_stock",
                 headerName: "Remain Stock",
                 tableCellProps: { sx: { width: 120 } },
-                valueGetter: (item) => {
+                renderCell: (item) => {
                   const balance = parseFloat(item.balance) || 0;
-                  const dispensed = parseInt(item.dispensed_count) || 0;
-                  const remain = balance - dispensed;
-                  return numberFormat(remain < 0 ? 0 : remain);
+                  return numberFormat(balance < 0 ? 0 : balance);
                 },
               },
               {

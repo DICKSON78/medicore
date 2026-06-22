@@ -45,8 +45,10 @@ class ItemsController extends Controller
             $end_date = $request->end_date;
 
             $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])
-                ->withCount(['dispensations as dispensed_count' => function ($query) use ($date, $end_date) {
-                    if ($date && $end_date) {
+                ->withCount(['dispensations as dispensed_count' => function ($query) use ($date, $end_date, $include_all_stock) {
+                    if ($include_all_stock === 'Yes') {
+                        // Show all-time dispensations for stock management pages
+                    } elseif ($date && $end_date) {
                         $query->whereBetween('created_at', [$date, $end_date]);
                     } elseif ($date) {
                         $query->whereDate('created_at', $date);

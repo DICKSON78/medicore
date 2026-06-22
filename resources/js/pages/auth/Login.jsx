@@ -57,22 +57,20 @@ const LogIn = () => {
 
       const isGranted = (v) => v === true || v === 1 || v === "1" || v === "true" || v === "Yes" || v === "yes";
 
-      const defaultRoute = (() => {
+      const defaultRoute = isGranted(p.dashboard) ? "/dashboard" : (() => {
         const candidates = [
-          isGranted(p.dashboard) ? "/dashboard" : null,
-          isGranted(p.reception) ? "/reception/dashboard" : null,
-          isGranted(p.payment_center) ? "/payment-center/dashboard" : null,
-          isGranted(p.consultation_room) ? "/consultation-room/dashboard" : null,
-          isGranted(p.dental_lab) ? "/dental-lab/dashboard" : null,
-          isGranted(p.medicine_center) ? "/medicine-center/medicines" : null,
-          isGranted(p.procedure_room) ? "/procedure-room/dashboard" : null,
-          isGranted(p.inventory_management) ? "/inventory-management/dashboard" : null,
-          isGranted(p.marketing) ? "/marketing/dashboard" : null,
-          isGranted(p.financial_management) ? "/financial-management/dashboard" : null,
+          isGranted(p.reception) ? "/dashboard" : null,
+          isGranted(p.payment_center) ? "/dashboard" : null,
+          isGranted(p.consultation_room) ? "/dashboard" : null,
+          isGranted(p.dental_lab) ? "/dashboard" : null,
+          isGranted(p.medicine_center) ? "/dashboard" : null,
+          isGranted(p.procedure_room) ? "/dashboard" : null,
+          isGranted(p.inventory_management) ? "/dashboard" : null,
+          isGranted(p.marketing) ? "/dashboard" : null,
+          isGranted(p.financial_management) ? "/dashboard" : null,
           isGranted(p.user_management) ? "/user-management/users" : null,
           isGranted(p.settings) ? "/settings/preferences" : null,
         ].filter(Boolean);
-        // Fallback: if no privileges found, send back to login (no dashboard access)
         return candidates[0] || "/login";
       })();
 

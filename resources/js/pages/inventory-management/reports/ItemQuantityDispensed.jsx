@@ -224,8 +224,7 @@ const ItemQuantityDispensed = () => {
             field: "balance",
             headerName: "Current Balance",
             valueGetter: (item, index) => {
-              const balance = parseFloat(item.item.balance) || 0;
-              // Display 0 instead of negative values to avoid confusion during inspections
+              const balance = parseFloat(item.balance) || 0;
               return numberFormat(balance < 0 ? 0 : balance);
             },
           },
@@ -233,24 +232,16 @@ const ItemQuantityDispensed = () => {
             field: "new_balance",
             headerName: "Remaining Stock",
             valueGetter: (item, index) => {
-              const currentBalance = parseFloat(item.item.balance) || 0;
-              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
-              const newBalance = currentBalance - dispensedQuantity;
-              
-              // Display 0 instead of negative values to avoid confusion during inspections
-              return numberFormat(newBalance < 0 ? 0 : newBalance);
+              const remaining = parseFloat(item.new_balance) || 0;
+              return numberFormat(remaining < 0 ? 0 : remaining);
             },
           },
           {
             field: "total_balance",
             headerName: "Final Stock Level",
             valueGetter: (item, index) => {
-              const currentBalance = parseFloat(item.item.balance) || 0;
-              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
-              const newBalance = currentBalance - dispensedQuantity;
-              
-              // Display 0 instead of negative values to avoid confusion during inspections
-              return numberFormat(newBalance < 0 ? 0 : newBalance);
+              const remaining = parseFloat(item.new_balance) || 0;
+              return numberFormat(remaining < 0 ? 0 : remaining);
             },
           },
           {
@@ -264,32 +255,22 @@ const ItemQuantityDispensed = () => {
           { value: "TOTAL", span: 5, index: 0 },
           {
             reducer: (acc, item, index) => {
-              const balance = parseFloat(item.item.balance) || 0;
-              // Use 0 for negative balances to avoid confusion during inspections
-              const effectiveBalance = balance < 0 ? 0 : balance;
-              return acc + effectiveBalance;
+              const balance = parseFloat(item.balance) || 0;
+              return acc + (balance < 0 ? 0 : balance);
             },
             index: 5,
           },
           {
             reducer: (acc, item, index) => {
-              const currentBalance = parseFloat(item.item.balance) || 0;
-              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
-              const newBalance = currentBalance - dispensedQuantity;
-              // Use 0 for negative balances to avoid confusion during inspections
-              const effectiveBalance = newBalance < 0 ? 0 : newBalance;
-              return acc + effectiveBalance;
+              const remaining = parseFloat(item.new_balance) || 0;
+              return acc + (remaining < 0 ? 0 : remaining);
             },
             index: 6,
           },
           {
             reducer: (acc, item, index) => {
-              const currentBalance = parseFloat(item.item.balance) || 0;
-              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
-              const newBalance = currentBalance - dispensedQuantity;
-              // Use 0 for negative balances to avoid confusion during inspections
-              const effectiveBalance = newBalance < 0 ? 0 : newBalance;
-              return acc + effectiveBalance;
+              const remaining = parseFloat(item.new_balance) || 0;
+              return acc + (remaining < 0 ? 0 : remaining);
             },
             index: 7,
           },

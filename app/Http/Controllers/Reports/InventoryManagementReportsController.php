@@ -84,11 +84,15 @@ class InventoryManagementReportsController extends Controller
             $data = $data->paginate($per_page);
             // Ensure balance-like fields exist for frontend reducers (defensive)
             $data->getCollection()->transform(function ($row) {
-                $row->balance = isset($row->balance) && $row->balance !== null ? $row->balance : 0;
-                $row->new_balance = isset($row->new_balance) && $row->new_balance !== null ? $row->new_balance : 0;
+                // item is already eager-loaded via with(['item'])
+                $itemBalance = $row->item ? max(0, $row->item->balance) : 0;
+                // balance = total stock before this period's dispensations
+                $row->balance = $itemBalance + max(0, $row->quantity_dispensed);
+                // new_balance / remaining = current actual stock after all deductions
+                $row->new_balance = $itemBalance;
                 // Common aliases different UIs might reference
-                $row->current_balance = isset($row->current_balance) && $row->current_balance !== null ? $row->current_balance : $row->balance;
-                $row->available_balance = isset($row->available_balance) && $row->available_balance !== null ? $row->available_balance : $row->balance;
+                $row->current_balance = $row->balance;
+                $row->available_balance = $row->new_balance;
                 return $row;
             });
             return $this->sendResponse($data, Response::HTTP_OK, 'Success.');

@@ -501,7 +501,9 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->served_by = $user->id;
                     $item->served_at = Carbon::now();
 
-                    // Balance decrement removed — balance tracks import quantity only
+                    if ($item->item && $item->item->is_stock_item === 'Yes') {
+                        $item->item->decrement('balance', $item->quantity);
+                    }
                 }
 
                 $item->save();

@@ -6,9 +6,6 @@ import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 
-// Use clinic logo from public folder for reliable serving
-const publicLogoUrl = "/images/logo.png";
-
 const Auth = () => {
   return (
     <Container
@@ -27,15 +24,14 @@ const Auth = () => {
             display="flex"
             justifyContent="center"
           >
-            <Box
-              component="img"
-              src={publicLogoUrl}
-              alt="Logo"
-              sx={{
-                height: 192,
-                width: "auto",
-              }}
-            />
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              color="primary"
+              sx={{ my: 4 }}
+            >
+              MEDCORE
+            </Typography>
           </Box>
           <Outlet />
         </Card>
