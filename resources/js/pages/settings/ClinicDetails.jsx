@@ -7,6 +7,7 @@ import {
   Grid,
   LinearProgress,
   Stack,
+  Typography,
 } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
@@ -25,12 +26,20 @@ const ClinicDetails = () => {
   const phoneRef = useRef();
   const emailRef = useRef();
   const addressRef = useRef();
+  const tinRef = useRef();
+  const vrnRef = useRef();
+  const efdRef = useRef();
+  const footerRef = useRef();
 
   const [formData, setFormData] = useState({
     name: window.user.clinic.name,
     phone: window.user.clinic.phone,
     email: window.user.clinic.email,
     address: window.user.clinic.address,
+    tin: window.user.clinic.tin || "",
+    vrn: window.user.clinic.vrn || "",
+    efd_serial: window.user.clinic.efd_serial || "",
+    receipt_footer: window.user.clinic.receipt_footer || "",
   });
 
   const { data, loading, error, handlePatch } = usePatch(
@@ -45,6 +54,7 @@ const ClinicDetails = () => {
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
+      window.user.clinic = { ...window.user.clinic, ...data.data };
     }
   }, [data]);
 
@@ -73,74 +83,87 @@ const ClinicDetails = () => {
         <Divider />
         <CardContent>
           <Form ref={formRef}>
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
+            <Typography variant="subtitle2" sx={{ mb: 1, color: "primary.main" }}>
+              General Information
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item md={4} sm={6} xs={12}>
                 <TextField
                   ref={nameRef}
                   label="Clinic Name"
-                  fullWidth
-                  required
+                  fullWidth required
                   defaultValue={formData.name}
-                  onChange={(value) =>
-                    setFormData({ ...formData, name: value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, name: value })}
                 />
               </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
+              <Grid item md={4} sm={6} xs={12}>
                 <TextField
                   ref={phoneRef}
                   label="Phone Number"
-                  fullWidth
-                  required
+                  fullWidth required
                   defaultValue={formData.phone}
-                  onChange={(value) =>
-                    setFormData({ ...formData, phone: value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, phone: value })}
                 />
               </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
+              <Grid item md={4} sm={6} xs={12}>
                 <TextField
                   ref={emailRef}
                   label="Email"
                   fullWidth
                   defaultValue={formData.email}
-                  onChange={(value) =>
-                    setFormData({ ...formData, email: value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, email: value })}
                 />
               </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
+              <Grid item md={4} sm={6} xs={12}>
                 <TextField
                   ref={addressRef}
                   label="Address"
                   fullWidth
                   defaultValue={formData.address}
-                  onChange={(value) =>
-                    setFormData({ ...formData, address: value })
-                  }
+                  onChange={(value) => setFormData({ ...formData, address: value })}
+                />
+              </Grid>
+            </Grid>
+
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle2" sx={{ mb: 1, color: "primary.main" }}>
+              TRA Tax Compliance
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item md={4} sm={6} xs={12}>
+                <TextField
+                  ref={tinRef}
+                  label="TIN (Taxpayer ID Number)"
+                  fullWidth
+                  defaultValue={formData.tin}
+                  onChange={(value) => setFormData({ ...formData, tin: value })}
+                />
+              </Grid>
+              <Grid item md={4} sm={6} xs={12}>
+                <TextField
+                  ref={vrnRef}
+                  label="VRN (VAT Registration Number)"
+                  fullWidth
+                  defaultValue={formData.vrn}
+                  onChange={(value) => setFormData({ ...formData, vrn: value })}
+                />
+              </Grid>
+              <Grid item md={4} sm={6} xs={12}>
+                <TextField
+                  ref={efdRef}
+                  label="EFD Serial Number"
+                  fullWidth
+                  defaultValue={formData.efd_serial}
+                  onChange={(value) => setFormData({ ...formData, efd_serial: value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  ref={footerRef}
+                  label="Receipt Footer Text"
+                  fullWidth multiline rows={2}
+                  defaultValue={formData.receipt_footer}
+                  onChange={(value) => setFormData({ ...formData, receipt_footer: value })}
                 />
               </Grid>
             </Grid>
@@ -148,19 +171,8 @@ const ClinicDetails = () => {
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          justifyContent="flex-end"
-          flexWrap="wrap"
-          p={2}
-        >
-          <Button
-            disabled={loading}
-            variant="contained"
-            onClick={handleSubmit}
-          >
+        <Stack direction="row" spacing={2} alignItems="center" justifyContent="flex-end" flexWrap="wrap" p={2}>
+          <Button disabled={loading} variant="contained" onClick={handleSubmit}>
             Save
           </Button>
         </Stack>

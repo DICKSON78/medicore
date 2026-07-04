@@ -16,10 +16,9 @@ import {
   FingerprintRounded as ImpressionsIcon,
   LocalShippingRounded as DeliveriesIcon,
   ErrorOutlineRounded as OverdueIcon,
-  CheckCircleOutlineRounded as CompletedIcon,
   LocalShippingRounded as DeliveredIcon,
 } from "@mui/icons-material";
-import { purple, teal, orange, green, cyan, pink, red, blue, indigo } from "@mui/material/colors";
+import { purple, teal, orange, green, cyan, pink, red, blue } from "@mui/material/colors";
 
 import Modal from "../../../components/Modal";
 import { Header as PageHeader } from "../../../components/Page";
@@ -95,13 +94,6 @@ const Dashboard = () => {
               icon={<DeliveredIcon />}
               color={blue[400]}
               onClick={() => navigate("/dental-lab/lab-orders?status=Delivered")}
-            />
-            <InfoCard
-              title="Inserted"
-              count={numberFormat(stats.inserted_orders || 0)}
-              icon={<CompletedIcon />}
-              color={indigo[400]}
-              onClick={() => navigate("/dental-lab/lab-orders?status=Inserted")}
             />
             <InfoCard
               title="Today Impressions"

@@ -92,6 +92,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const refractionRef = useRef();
   const fundoscopyRef = useRef();
   const patientToReturnDateRef = useRef();
+  const patientToReturnTimeRef = useRef();
   const remarksRef = useRef();
 
 
@@ -105,6 +106,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     to_return_date: consultation.to_return_date
       ? new Date(consultation.to_return_date)
       : null,
+    to_return_time: consultation.to_return_time || null,
   });
 
   const {
@@ -597,9 +599,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
               consultation={consultation}
             />
 
-            <Subheader title="Diagnosis & Management" />
+            <Subheader title="Diagnosis & Treatment Plan" />
             
-            {/* 2x2 strict layout using CSS grid to guarantee two columns */}
             <Box sx={{ width: '100%', mb: 2, display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
@@ -621,50 +622,17 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <Box>
                   <Card variant="outlined" sx={{ width: '100%' }}>
                     <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
-                      <Typography variant="h6" fontWeight="bold" color="primary">Procedure</Typography>
+                      <Typography variant="h6" fontWeight="bold" color="primary">Treatment Plan</Typography>
                     </Box>
                     <CardContent sx={{ p: 2 }}>
                       <ConsultationItemsCard
                         title=""
-                        consultationType="Procedure"
+                        consultationType={null}
                         loading={loadingItems}
                         items={items}
                         consultation={consultation}
                         onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
-                      />
-                    </CardContent>
-                  </Card>
-                </Box>
-                <Box>
-                  <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
-                      <Typography variant="h6" fontWeight="bold" color="primary">Medicine</Typography>
-                    </Box>
-                    <CardContent sx={{ p: 2 }}>
-                      <ConsultationItemsCard
-                        title=""
-                        consultationType="Pharmacy"
-                        loading={loadingItems}
-                        items={items}
-                        consultation={consultation}
-                        onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
-                      />
-                    </CardContent>
-                  </Card>
-                </Box>
-                <Box>
-                  <Card variant="outlined" sx={{ width: '100%' }}>
-                    <Box sx={{ backgroundColor: '#E0F2F1', p: 2, textAlign: 'center' }}>
-                      <Typography variant="h6" fontWeight="bold" color="primary">Glass</Typography>
-                    </Box>
-                    <CardContent sx={{ p: 2 }}>
-                      <ConsultationItemsCard
-                        title=""
-                        consultationType="Glass"
-                        loading={loadingItems}
-                        items={items}
-                        consultation={consultation}
-                        onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                        showAllTypes
                       />
                     </CardContent>
                   </Card>
@@ -766,7 +734,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     />
                   </Grid>
                   {formData.patient_to_return === "Yes" && (
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={3}>
                       <DatePicker
                         ref={patientToReturnDateRef}
                         fullWidth
@@ -779,6 +747,22 @@ const ClinicalNotes = ({ patient, consultation }) => {
                             setFormData({ ...formData, to_return_date: value });
                             autoSave("to_return_date", formatDateForDb(value));
                           }
+                        }}
+                      />
+                    </Grid>
+                  )}
+                  {formData.patient_to_return === "Yes" && (
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        ref={patientToReturnTimeRef}
+                        label="Return Time"
+                        type="time"
+                        fullWidth
+                        horizontal
+                        value={formData.to_return_time || ""}
+                        onChange={(value) => {
+                          setFormData({ ...formData, to_return_time: value });
+                          autoSave("to_return_time", value);
                         }}
                       />
                     </Grid>

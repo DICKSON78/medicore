@@ -16,7 +16,7 @@ class DentalLabOrdersController extends Controller
         $request->validate([
             'per_page' => 'sometimes|integer|min:0',
             'page' => 'sometimes|integer|min:1',
-            'status' => 'sometimes|string',
+            'status' => 'nullable|string',
             'consultation_id' => 'sometimes|exists:consultations,id',
         ]);
 
@@ -81,6 +81,24 @@ class DentalLabOrdersController extends Controller
     public function update(Request $request, $id)
     {
         $data = DentalLabOrder::findOrFail($id);
+
+        $request->validate([
+            'consultation_id' => 'sometimes|exists:consultations,id',
+            'order_type' => 'sometimes|string',
+            'description' => 'nullable|string',
+            'material' => 'nullable|string',
+            'shade' => 'nullable|string',
+            'tooth_number' => 'nullable|integer',
+            'teeth_involved' => 'nullable|array',
+            'impression_date' => 'nullable|date_format:Y-m-d',
+            'delivery_date' => 'nullable|date_format:Y-m-d',
+            'lab_notes' => 'nullable|string',
+            'lab_name' => 'nullable|string',
+            'cost' => 'nullable|numeric',
+            'technician_charges' => 'nullable|numeric',
+            'status' => 'nullable|string|in:Ordered,In Progress,Ready,Delivered',
+        ]);
+
         $data->update($request->all());
         return $this->sendResponse($data, Response::HTTP_OK, 'Updated successfully.');
     }
@@ -93,16 +111,6 @@ class DentalLabOrdersController extends Controller
             'delivery_date' => now()->format('Y-m-d'),
         ]);
         return $this->sendResponse($data, Response::HTTP_OK, 'Marked as delivered.');
-    }
-
-    public function markInserted($id)
-    {
-        $data = DentalLabOrder::findOrFail($id);
-        $data->update([
-            'status' => 'Inserted',
-            'insertion_date' => now()->format('Y-m-d'),
-        ]);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Marked as inserted.');
     }
 
     public function destroy($id)

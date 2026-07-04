@@ -18,7 +18,6 @@ const statusColors = {
   "In Progress": "info",
   Ready: "success",
   Delivered: "secondary",
-  Inserted: "primary",
 };
 
 const LabOrders = () => {
@@ -104,6 +103,11 @@ const LabOrders = () => {
       valueGetter: (item) => item.cost ? Number(item.cost).toLocaleString() : "-",
     },
     {
+      field: "technician_charges",
+      headerName: "Tech Charges (TZS)",
+      valueGetter: (item) => item.technician_charges ? Number(item.technician_charges).toLocaleString() : "-",
+    },
+    {
       field: "impression_date",
       headerName: "Impression",
       valueGetter: (item) => item.impression_date ? formatDate(item.impression_date) : "-",
@@ -168,7 +172,6 @@ const LabOrders = () => {
                 { label: "In Progress", value: "In Progress" },
                 { label: "Ready", value: "Ready" },
                 { label: "Delivered", value: "Delivered" },
-                { label: "Inserted", value: "Inserted" },
               ]}
               onChange={(e) => setParams({ ...params, status: e.target.value })}
               size="small"

@@ -44,7 +44,6 @@ use App\Http\Controllers\PatientPaymentCacheController;
 use App\Http\Controllers\PatientPaymentCacheItemsController;
 use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\PatientWaitingTimesController;
-use App\Http\Controllers\DoctorTasksController;
 use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\PreferencesController;
@@ -52,13 +51,18 @@ use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\Reports\InventoryManagementReportsController;
 use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\StocktakesController;
+use App\Http\Controllers\StockOutController;
+use App\Http\Controllers\StockMovementsController;
 use App\Http\Controllers\SurgeryRecordReportsController;
+use App\Http\Controllers\NhifClaimsController;
+use App\Http\Controllers\CancerRecordsController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
 use App\Http\Controllers\StockAlertsController;
 use App\Http\Controllers\MedicineTakingController;
 use App\Http\Controllers\MedicinesController;
+use App\Http\Controllers\PrescriptionsController;
 use App\Http\Controllers\PatientNotificationsController;
 use App\Http\Controllers\MedicineCenterDashboardController;
 use App\Http\Controllers\OtherDispensingDashboardController;
@@ -145,16 +149,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/{id}/move-to-department', [PatientWaitingTimesController::class, 'moveToDepartment']);
     });
     
-    // Doctor Tasks
-    $router->prefix('doctor-tasks')->group(function ($router) {
-        $router->get('/', [DoctorTasksController::class, 'index']);
-        $router->get('/statistics', [DoctorTasksController::class, 'statistics']);
-        $router->get('/doctor/{doctorId}', [DoctorTasksController::class, 'doctorTasks']);
-        $router->post('/', [DoctorTasksController::class, 'store']);
-        $router->post('/{id}/start', [DoctorTasksController::class, 'startTask']);
-        $router->post('/{id}/complete', [DoctorTasksController::class, 'completeTask']);
-    });
-    
     $router->get('/dashboard', [DashboardController::class, '__invoke']);
     $router->get('/notifications', [NotificationsController::class, '__invoke']);
     $router->get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications']);
@@ -230,13 +224,13 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/consultation/{consultationId}', 'getByConsultation');
     });
     $router->apiResource('/dental-treatment-records', DentalTreatmentRecordsController::class);
+    $router->apiResource('/prescriptions', PrescriptionsController::class);
     $router->controller(DentalLabOrdersController::class)->prefix('dental-lab-orders')->group(function ($router) {
         $router->get('/', 'index');
         $router->get('/{id}', 'show');
         $router->post('/', 'store');
         $router->put('/{id}', 'update');
         $router->post('/{id}/mark-delivered', 'markDelivered');
-        $router->post('/{id}/mark-inserted', 'markInserted');
         $router->delete('/{id}', 'destroy');
     });
     $router->apiResource('/dental-radiographs', DentalRadiographsController::class);
@@ -254,6 +248,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
     $router->apiResource('/stocktakes', StocktakesController::class);
     $router->post('/stocktakes/{id}/apply', [StocktakesController::class, 'apply']);
+    $router->post('/stock-out', [StockOutController::class, 'store']);
+    $router->get('/stock-out/reasons', [StockOutController::class, 'reasons']);
+    $router->get('/stock-movements', [StockMovementsController::class, 'index']);
+    $router->get('/stock-movements/summary', [StockMovementsController::class, 'summary']);
     
     // Stock Alerts
     $router->prefix('stock-alerts')->group(function ($router) {
@@ -285,6 +283,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/expense-payments', ExpensePaymentsController::class);
     $router->apiResource('/preferences', PreferencesController::class);
     $router->apiResource('/collaborators', CollaboratorsController::class);
+    $router->apiResource('/nhif-claims', NhifClaimsController::class);
+    $router->apiResource('/cancer-records', CancerRecordsController::class);
 
     $router->get('/messages', [MessagesController::class, '__invoke']);
 
@@ -362,6 +362,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->get('/pharmaceutical-consumption', 'pharmaceuticalConsumption');
             $router->get('/revenue-summary', 'revenueSummary');
             $router->get('/ipd-report', 'ipdReport');
+            $router->get('/cancer-report', 'cancerReport');
+            $router->get('/birth-death-notification', 'birthDeathNotification');
         });
     });
 });

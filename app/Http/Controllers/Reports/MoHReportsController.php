@@ -338,4 +338,97 @@ class MoHReportsController extends Controller
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
+
+    public function cancerReport(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        $start = $request->start_date;
+        $end = $request->end_date;
+        $user = $request->user();
+
+        $query = \App\Models\CancerRecord::with('patient');
+        if ($user && !$user->is_admin) {
+            $query->where('clinic_id', $user->clinic_id);
+        }
+        $query->whereDate('diagnosis_date', '>=', $start)
+              ->whereDate('diagnosis_date', '<=', $end);
+
+        $records = $query->get();
+        $totalCases = $records->count();
+
+        $byType = $records->groupBy('cancer_type')->map(function ($items, $type) {
+            return ['type' => $type, 'count' => $items->count()];
+        })->values();
+
+        $byAgeGender = [];
+        $ageGroups = ['0-4' => 0, '5-14' => 0, '15-24' => 0, '25-44' => 0, '45-64' => 0, '65+' => 0];
+
+        foreach ($records as $r) {
+            $age = $r->patient ? Carbon::parse($r->patient->date_of_birth)->age : null;
+            if ($age !== null) {
+                if ($age <= 4) $ageGroups['0-4']++;
+                elseif ($age <= 14) $ageGroups['5-14']++;
+                elseif ($age <= 24) $ageGroups['15-24']++;
+                elseif ($age <= 44) $ageGroups['25-44']++;
+                elseif ($age <= 64) $ageGroups['45-64']++;
+                else $ageGroups['65+']++;
+            }
+        }
+
+        $byAnatomicalSite = $records->groupBy('anatomical_site')->map(function ($items, $site) {
+            return ['site' => $site ?: 'Unspecified', 'count' => $items->count()];
+        })->values();
+
+        $data = [
+            'report_period' => ['start_date' => $start, 'end_date' => $end],
+            'total_cases' => $totalCases,
+            'by_cancer_type' => $byType,
+            'by_age_group' => $ageGroups,
+            'by_anatomical_site' => $byAnatomicalSite,
+            'records' => $records,
+        ];
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+    }
+
+    public function birthDeathNotification(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        $start = $request->start_date;
+        $end = $request->end_date;
+        $user = $request->user();
+
+        $patients = \App\Models\Patient::query();
+        if ($user && !$user->is_admin) {
+            $patients->where('clinic_id', $user->clinic_id);
+        }
+
+        $registered = (clone $patients)->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)->count();
+
+        $byGender = (clone $patients)->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
+            ->selectRaw("gender, COUNT(*) as count")
+            ->groupBy('gender')
+            ->pluck('count', 'gender');
+
+        $data = [
+            'report_period' => ['start_date' => $start, 'end_date' => $end],
+            'total_birth_notifications' => 0,
+            'total_death_notifications' => 0,
+            'new_patient_registrations' => $registered,
+            'by_gender' => $byGender,
+            'note' => 'Birth and death notification tracking requires dedicated vital registration module. Current data reflects new patient registrations.',
+        ];
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+    }
 }

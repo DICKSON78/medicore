@@ -20,7 +20,6 @@ use App\Models\Collaborator;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use App\Models\SurgeryRecordReport;
-use App\Models\DoctorTask;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -511,6 +510,7 @@ class ConsultationsController extends Controller
             $request->validate([
                 'patient_to_return' => 'sometimes|required|in:Yes,No',
                 'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
+                'to_return_time' => 'nullable|date_format:H:i',
                 'status' => 'sometimes|required|in:Pending,Consulted',
                 'require_glass' => 'sometimes|required|in:Yes,No',
                 'send_to_optician' => 'sometimes|required|in:Yes,No',
@@ -541,23 +541,6 @@ class ConsultationsController extends Controller
                         }
                     }
 
-                    // Create doctor task from completed consultation
-                    try {
-                        $doctorTask = \App\Models\DoctorTask::createFromConsultation($data);
-                        if ($doctorTask) {
-                            \Log::info('Doctor task created from consultation completion', [
-                                'consultation_id' => $data->id,
-                                'task_id' => $doctorTask->id,
-                                'doctor_id' => $doctorTask->doctor_id,
-                                'patient_id' => $doctorTask->patient_id
-                            ]);
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to create doctor task from consultation', [
-                            'consultation_id' => $data->id,
-                            'error' => $e->getMessage()
-                        ]);
-                    }
                 } catch (\Exception $e) {
                     \Log::error('Failed to check patient waiting time status', [
                         'consultation_id' => $data->id,
@@ -677,6 +660,7 @@ class ConsultationsController extends Controller
                     $request->validate([
                         'patient_to_return' => 'sometimes|required|in:Yes,No',
                         'to_return_date' => 'nullable|date_format:Y-m-d',
+                        'to_return_time' => 'nullable|date_format:H:i',
                         'require_glass' => 'sometimes|required|in:Yes,No',
                     ]);
                     $data->update($request->except('what'));
@@ -809,13 +793,14 @@ class ConsultationsController extends Controller
             $request->validate([
                 'patient_to_return' => 'nullable|in:Yes,No',
                 'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
+                'to_return_time' => 'nullable|date_format:H:i',
                 'require_glass' => 'nullable|in:Yes,No',
                 'info_source_id' => 'nullable|exists:information_sources,id',
             ]);
 
             $user = $request->user();
             $data = Consultation::findOrFail($id);
-            $input = $request->only('chief_complaint', 'history_present_illness', 'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils', 'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'remarks', 'require_glass');
+            $input = $request->only('chief_complaint', 'history_present_illness', 'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils', 'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'require_glass');
             $input['status'] = 'Consulted';
 
             $data->update($input);

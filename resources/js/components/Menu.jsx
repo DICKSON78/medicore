@@ -25,6 +25,7 @@ import {
   HourglassBottomRounded as WaitingIcon,
   InfoRounded as InfoIcon,
   Inventory2Rounded as ItemsIcon,
+  InventoryRounded as InventoryIcon,
   LightbulbRounded as IdeaDevelopmentIcon,
   LibraryBooksRounded as ReportsIcon,
   LocalActivityRounded as OutreachProgrammesIcon,
@@ -41,7 +42,6 @@ import {
   SendRounded as MarketingStrategiesIcon,
   SettingsRounded as SettingsIcon,
   StarRounded as VipIcon,
-  TaskAltRounded as DoctorTaskIcon,
   TaskRounded as DailyActivitiesIcon,
   TimerRounded as WaitingTimeIcon,
   TrendingDownRounded as ExpensesIcon,
@@ -364,6 +364,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.payment_center,
         },
         {
+          title: "NHIF Claims",
+          icon: <ReportsIcon />,
+          to: "/nhif-claims",
+          show: user.privileges.payment_center,
+        },
+        {
           title: "Expenses",
           icon: <ExpensesIcon />,
           to: "/payment-center/expenses",
@@ -449,6 +455,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/reports/dental-morbidity",
               show: user.privileges.consultation_room,
             },
+            {
+              title: "DHIS2 Dental Summary",
+              icon: <ReportsIcon />,
+              to: "/reports/dental-dhis2-summary",
+              show: user.privileges.consultation_room,
+            },
           ],
         },
         {
@@ -466,6 +478,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Lab Orders",
           icon: <WaitingIcon />,
           to: "/dental-lab/lab-orders",
+          show: user.privileges.dental_lab,
+        },
+        {
+          title: "Dental Materials",
+          icon: <InventoryIcon />,
+          to: "/dental-lab/materials",
           show: user.privileges.dental_lab,
         },
         {
@@ -735,9 +753,21 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.inventory_management,
         },
         {
-          title: "Stocktaking",
+          title: "Stock In",
           icon: <ItemsIcon />,
           to: "/inventory-management/stocktaking",
+          show: user.privileges.inventory_management,
+        },
+        {
+          title: "Stock Out",
+          icon: <ExpensesIcon />,
+          to: "/inventory-management/stock-out",
+          show: user.privileges.inventory_management,
+        },
+        {
+          title: "Stock Movements",
+          icon: <ReportsIcon />,
+          to: "/inventory-management/stock-movements",
           show: user.privileges.inventory_management,
         },
         {
@@ -964,12 +994,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.user_management,
         },
         {
-         title: "Doctor Tasks",
-         icon: <DoctorTaskIcon />,
-         to: "/user-management/doctor-tasks", 
-         show: user.privileges.user_management,
-       },
-        {
           title: "12. SETTINGS",
           subheader: true,
           show: user.privileges.settings,
@@ -1087,6 +1111,18 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "IPD Report (HMIS 002)",
           icon: <ReportsIcon />,
           to: "/moh-reports/ipd-report",
+          show: true,
+        },
+        {
+          title: "Cancer Report (HMIS 003)",
+          icon: <ReportsIcon />,
+          to: "/moh-reports/cancer-report",
+          show: true,
+        },
+        {
+          title: "Birth & Death Notification",
+          icon: <ReportsIcon />,
+          to: "/moh-reports/birth-death-notification",
           show: true,
         },
       ]));

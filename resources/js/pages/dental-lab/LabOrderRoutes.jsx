@@ -17,7 +17,6 @@ const statusColors = {
   "In Progress": "info",
   Ready: "success",
   Delivered: "secondary",
-  Inserted: "primary",
 };
 
 const MATERIAL_OPTIONS = [
@@ -41,6 +40,7 @@ const LabOrderRoutes = () => {
   const [patch, saving] = usePatch();
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [orderForm, setOrderForm] = useState({
     consultation_id: consultationId,
     order_type: "",
@@ -52,6 +52,7 @@ const LabOrderRoutes = () => {
     lab_name: "",
     lab_notes: "",
     cost: "",
+    technician_charges: "",
     impression_date: "",
     delivery_date: "",
   });
@@ -83,36 +84,77 @@ const LabOrderRoutes = () => {
         ...orderForm,
         teeth_involved: orderForm.teeth_involved.length > 0 ? orderForm.teeth_involved : undefined,
       };
-      const res = await fetch("/api/dental-lab-orders", {
-        method: "POST",
+      const isEdit = !!editingId;
+      const url = isEdit ? `/api/dental-lab-orders/${editingId}` : "/api/dental-lab-orders";
+      const method = isEdit ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+      if (!res.ok) {
+        addToast(json.message || "Operation failed", { variant: "error" });
+        return;
+      }
       if (json.data) {
-        setOrders([json.data, ...orders]);
+        if (isEdit) {
+          setOrders(orders.map((o) => (o.id === editingId ? json.data : o)));
+        } else {
+          setOrders([json.data, ...orders]);
+        }
         setShowForm(false);
+        setEditingId(null);
         setOrderForm({
           consultation_id: consultationId,
           order_type: "", description: "", material: "", shade: "",
           tooth_number: "", teeth_involved: [], lab_name: "", lab_notes: "",
-          cost: "", impression_date: "", delivery_date: "",
+          cost: "", technician_charges: "", impression_date: "", delivery_date: "",
         });
-        addToast("Lab order created", { variant: "success" });
+        addToast(isEdit ? "Lab order updated" : "Lab order created", { variant: "success" });
       }
     } catch (e) {
-      addToast("Failed to create order", { variant: "error" });
+      addToast("Failed to save order", { variant: "error" });
     }
+  };
+
+  const handleEditClick = (order) => {
+    setOrderForm({
+      consultation_id: order.consultation_id,
+      order_type: order.order_type || "",
+      description: order.description || "",
+      material: order.material || "",
+      shade: order.shade || "",
+      tooth_number: order.tooth_number || "",
+      teeth_involved: order.teeth_involved || [],
+      lab_name: order.lab_name || "",
+      lab_notes: order.lab_notes || "",
+      cost: order.cost || "",
+      technician_charges: order.technician_charges || "",
+      impression_date: order.impression_date || "",
+      delivery_date: order.delivery_date || "",
+    });
+    setEditingId(order.id);
+    setShowForm(true);
+  };
+
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setOrderForm({
+      consultation_id: consultationId,
+      order_type: "", description: "", material: "", shade: "",
+      tooth_number: "", teeth_involved: [], lab_name: "", lab_notes: "",
+      cost: "", technician_charges: "", impression_date: "", delivery_date: "",
+    });
   };
 
   const handleStatus = async (id, status) => {
     const endpoint = status === "Ready"
       ? `/api/dental-lab-orders/${id}/mark-delivered`
-      : status === "Inserted"
-        ? `/api/dental-lab-orders/${id}/mark-inserted`
-        : `/api/dental-lab-orders/${id}`;
+      : `/api/dental-lab-orders/${id}`;
     try {
-      if (status === "Ready" || status === "Inserted") {
+      if (status === "Ready") {
         await patch(endpoint, {});
       } else {
         await patch(endpoint, { status });
@@ -229,15 +271,17 @@ const LabOrderRoutes = () => {
 
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h6">Lab Orders ({orders.length})</Typography>
-        <Button variant="contained" size="small" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Cancel" : "New Order"}
+        <Button variant="contained" size="small" onClick={() => showForm ? handleCancelForm() : setShowForm(true)}>
+          {showForm ? "Cancel" : editingId ? "Editing..." : "New Order"}
         </Button>
       </Box>
 
       {showForm && (
         <Card sx={{ mb: 2 }}>
           <CardContent>
-            <Typography variant="subtitle1" gutterBottom>Create Lab Order</Typography>
+            <Typography variant="subtitle1" gutterBottom>
+              {editingId ? `Edit Lab Order #DL-${editingId}` : "Create Lab Order"}
+            </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6} sm={3}>
                 <Select
@@ -314,6 +358,14 @@ const LabOrderRoutes = () => {
                   type="number" fullWidth size="small"
                 />
               </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  label="Technician Charges (TZS)"
+                  value={orderForm.technician_charges}
+                  onChange={(e) => setOrderForm({ ...orderForm, technician_charges: e.target.value })}
+                  type="number" fullWidth size="small"
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextField
                   label="Lab Notes"
@@ -324,7 +376,7 @@ const LabOrderRoutes = () => {
               </Grid>
               <Grid item xs={12}>
                 <Button variant="contained" onClick={handleCreateOrder} disabled={saving}>
-                  Create Order
+                  {editingId ? "Update Order" : "Create Order"}
                 </Button>
               </Grid>
             </Grid>
@@ -345,7 +397,12 @@ const LabOrderRoutes = () => {
                   </Typography>
                   {order.cost && (
                     <Typography variant="caption" color="text.secondary">
-                      TZS {Number(order.cost).toLocaleString()}
+                      Cost: TZS {Number(order.cost).toLocaleString()}
+                    </Typography>
+                  )}
+                  {order.technician_charges && (
+                    <Typography variant="caption" color="text.secondary">
+                      Tech: TZS {Number(order.technician_charges).toLocaleString()}
                     </Typography>
                   )}
                 </Grid>
@@ -390,13 +447,11 @@ const LabOrderRoutes = () => {
                         Mark Delivered
                       </Button>
                     )}
-                    {order.status === "Delivered" && (
-                      <Button size="small" variant="outlined" onClick={() => handleStatus(order.id, "Inserted")}>
-                        Mark Inserted
-                      </Button>
-                    )}
                     <Button size="small" variant="text" onClick={() => handlePrintSlip(order)}>
                       Print
+                    </Button>
+                    <Button size="small" variant="text" onClick={() => handleEditClick(order)}>
+                      Edit
                     </Button>
                     {(order.status === "Ordered" || order.status === "In Progress") && (
                       <Button size="small" variant="text" color="error" onClick={() => handleDelete(order.id)}>

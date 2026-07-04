@@ -23,8 +23,10 @@ class DentalLabDashboardController extends Controller
             'pending_orders' => DentalLabOrder::where('status', 'Ordered')->count(),
             'in_progress_orders' => DentalLabOrder::where('status', 'In Progress')->count(),
             'ready_for_delivery' => DentalLabOrder::where('status', 'Ready')->count(),
+            'delivered_orders' => DentalLabOrder::where('status', 'Delivered')->count(),
             'today_impressions' => DentalLabOrder::whereDate('impression_date', $today)->count(),
             'today_deliveries' => DentalLabOrder::whereDate('delivery_date', $today)->count(),
+            'total_cost' => DentalLabOrder::sum('cost'),
             'recent_orders' => DentalLabOrder::with(['consultation', 'orderedBy'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)

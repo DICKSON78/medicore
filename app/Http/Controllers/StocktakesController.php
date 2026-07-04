@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Item;
+use App\Models\Medicine;
+use App\Models\StockMovement;
 use App\Models\Stocktake;
 use App\Models\StocktakeItem;
 use Illuminate\Http\Request;
@@ -94,48 +96,46 @@ class StocktakesController extends Controller
                 $source = $input_item['item_source'] ?? 'item';
 
                 if ($source === 'medicine') {
-                    // Update medicine balance
-                    $medicine = \App\Models\Medicine::where('id', $input_item['item_id'])
+                    $stockItem = Medicine::where('id', $input_item['item_id'])
                         ->where('status', 'Active')
                         ->first();
-
-                    if ($medicine) {
-                        $input_item['stocktake_id'] = $data->id;
-                        $stocktake_item = StocktakeItem::create([
-                            'stocktake_id' => $data->id,
-                            'item_id' => $input_item['item_id'],
-                            'quantity' => $input_item['quantity'],
-                            'unit_buying_price' => $input_item['unit_buying_price'] ?? null,
-                            'selling_price' => $input_item['selling_price'] ?? null,
-                            'expiration_date' => $input_item['expiration_date'] ?? null,
-                        ]);
-
-                        if ($stocktake_item) {
-                            $medicine->update([
-                                'balance' => $input_item['quantity'],
-                                'unit_buying_price' => $input_item['unit_buying_price'] ?? $medicine->unit_buying_price,
-                                'selling_price' => $input_item['selling_price'] ?? $medicine->selling_price,
-                                'expiry_date' => $input_item['expiration_date'] ?? $medicine->expiry_date,
-                            ]);
-                        }
-                    }
                 } else {
-                    // Regular item (Lens, Frame, etc.)
-                    $item = Item::where('id', $input_item['item_id'])
+                    $stockItem = Item::where('id', $input_item['item_id'])
                         ->where('is_stock_item', 'Yes')
                         ->first();
+                }
 
-                    if ($item) {
-                        $input_item['stocktake_id'] = $data->id;
-                        $stocktake_item = StocktakeItem::create($input_item);
+                if ($stockItem) {
+                    StocktakeItem::create([
+                        'stocktake_id' => $data->id,
+                        'item_id' => $input_item['item_id'],
+                        'quantity' => $input_item['quantity'],
+                        'unit_buying_price' => $input_item['unit_buying_price'] ?? null,
+                        'selling_price' => $input_item['selling_price'] ?? null,
+                        'expiration_date' => $input_item['expiration_date'] ?? null,
+                    ]);
 
-                        if ($stocktake_item) {
-                            $item->update([
-                                'balance' => $stocktake_item->quantity,
-                                'unit_buying_price' => $stocktake_item->unit_buying_price,
-                            ]);
-                        }
-                    }
+                    $balanceBefore = (float) ($stockItem->balance ?? 0);
+                    $balanceAfter = $balanceBefore + (float) $input_item['quantity'];
+
+                    $stockItem->update([
+                        'balance' => $balanceAfter,
+                        'unit_buying_price' => $input_item['unit_buying_price'] ?? $stockItem->unit_buying_price,
+                        'selling_price' => $input_item['selling_price'] ?? ($stockItem->selling_price ?? null),
+                        'expiry_date' => $input_item['expiration_date'] ?? ($stockItem->expiry_date ?? null),
+                    ]);
+
+                    StockMovement::create([
+                        'item_id' => $stockItem->id,
+                        'type' => 'in',
+                        'quantity' => $input_item['quantity'],
+                        'balance_before' => $balanceBefore,
+                        'balance_after' => $balanceAfter,
+                        'reference_type' => 'stocktake',
+                        'reference_id' => $data->id,
+                        'reason' => $request->reason,
+                        'created_by' => $user->id,
+                    ]);
                 }
             }
         }
@@ -172,7 +172,8 @@ class StocktakesController extends Controller
     }
 
     /**
-     * Apply a stocktake (move new_balance to balance for all items)
+     * Apply a stocktake (finalize and mark as Applied)
+     * Note: Balances are already updated on store(), this just marks the status.
      *
      * @param  int $id
      * @return \Illuminate\Http\Response
@@ -184,15 +185,6 @@ class StocktakesController extends Controller
             
             if ($stocktake->status === 'Applied') {
                 return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Stocktake has already been applied.');
-            }
-
-            foreach ($stocktake->items as $stocktakeItem) {
-                if ($stocktakeItem->item) {
-                    $stocktakeItem->item->update([
-                        'balance' => $stocktakeItem->quantity, // Use stocktake quantity directly
-                        // Note: new_balance column doesn't exist in items table
-                    ]);
-                }
             }
 
             $stocktake->update(['status' => 'Applied']);

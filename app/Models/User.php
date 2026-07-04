@@ -48,16 +48,6 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function doctor_tasks()
-    {
-        return $this->hasMany(DoctorTask::class, 'doctor_id');
-    }
-
-    public function assigned_tasks()
-    {
-        return $this->hasMany(DoctorTask::class, 'assigned_by');
-    }
-
     public function patient_waiting_times()
     {
         return $this->hasMany(PatientWaitingTime::class, 'doctor_id');
@@ -76,17 +66,10 @@ class User extends Authenticatable
 
     public function scopeDoctors($query)
     {
-        // Match doctors by role/designation in a case-insensitive and grouped way
-        // Also include users who have doctor tasks assigned to them
         return $query->where(function ($q) {
             $q->whereRaw('LOWER(role) = ?', ['doctor'])
               ->orWhereRaw('LOWER(designation) LIKE ?', ['%doctor%'])
-              ->orWhereRaw('LOWER(designation) LIKE ?', ['%physician%'])
-              ->orWhereExists(function ($subQuery) {
-                  $subQuery->select(\Illuminate\Support\Facades\DB::raw(1))
-                          ->from('doctor_tasks')
-                          ->whereRaw('doctor_tasks.doctor_id = users.id');
-              });
+              ->orWhereRaw('LOWER(designation) LIKE ?', ['%physician%']);
         });
     }
 

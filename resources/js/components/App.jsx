@@ -35,6 +35,8 @@ import UserManagementRoutes from "../pages/user-management/UserManagementRoutes"
 import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import MohReportsRoutes from "../pages/moh-reports/MohReportsRoutes";
+import NHIFClaimsRoutes from "../pages/nhif/NHIFClaimsRoutes";
+import DentalDHIS2Summary from "../pages/reports/dental/DentalDHIS2Summary";
 
 const App = () => {
   const [themeMode, setThemeMode] = useState(
@@ -204,12 +206,24 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="reports/dental-dhis2-summary"
+                  element={
+                    user?.privileges?.consultation_room ? (
+                      <DentalDHIS2Summary />
+                    ) : null
+                  }
+                />
+                <Route
                   path="dental-appointments"
                   element={<DentalAppointments />}
                 />
                 <Route
                   path="moh-reports/*"
                   element={<MohReportsRoutes />}
+                />
+                <Route
+                  path="nhif-claims/*"
+                  element={<NHIFClaimsRoutes />}
                 />
               </React.Fragment>
             </Route>

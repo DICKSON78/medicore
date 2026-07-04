@@ -232,6 +232,8 @@ const DentalAppointments = () => {
                   { label: "Treatment", value: "Treatment" },
                   { label: "Follow-up", value: "Follow-up" },
                   { label: "Emergency", value: "Emergency" },
+                  { label: "Braces Works", value: "Braces Works" },
+                  { label: "Ceramics Works", value: "Ceramics Works" },
                 ]}
                 onChange={(e) => setForm({ ...form, appointment_type: e.target.value })}
                 fullWidth size="small"

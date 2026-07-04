@@ -205,27 +205,6 @@ class PatientWaitingTime extends Model
             }
         }
         
-        // If no consultation found or no consultant assigned, try to get from doctor tasks
-        $doctorTask = $this->patient->doctor_tasks()
-            ->whereDate('assigned_at', $this->registration_time->format('Y-m-d'))
-            ->with('doctor')
-            ->first();
-        
-        if ($doctorTask && $doctorTask->doctor) {
-            $this->doctor_id = $doctorTask->doctor_id;
-            $this->save();
-            
-            \Log::info('Assigned doctor from doctor task to patient', [
-                'patient_id' => $this->patient_id,
-                'patient_name' => $this->patient->full_name ?? 'Unknown',
-                'doctor_id' => $doctorTask->doctor_id,
-                'doctor_name' => $doctorTask->doctor->full_name ?? 'Unknown',
-                'task_id' => $doctorTask->id
-            ]);
-            
-            return $doctorTask->doctor;
-        }
-        
         // If still no doctor found, assign any available doctor as fallback
         $availableDoctor = \App\Models\User::where('designation', 'Doctor')
             ->where('status', 'Active')

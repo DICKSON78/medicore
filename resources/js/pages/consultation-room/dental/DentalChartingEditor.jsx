@@ -11,27 +11,27 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import { DENTAL_TREATMENT_OPTIONS, DENTAL_CHART_OPTIONS } from "../../../constants";
 
-const upperQuadrant = [
-  { num: 8, label: "8", name: "Central Incisor" },
-  { num: 7, label: "7", name: "Lateral Incisor" },
-  { num: 6, label: "6", name: "Canine" },
-  { num: 5, label: "5", name: "1st Premolar" },
-  { num: 4, label: "4", name: "2nd Premolar" },
-  { num: 3, label: "3", name: "1st Molar" },
-  { num: 2, label: "2", name: "2nd Molar" },
-  { num: 1, label: "1", name: "3rd Molar" },
-];
+const FDI_QUADRANTS = {
+  UR: [18, 17, 16, 15, 14, 13, 12, 11],
+  UL: [21, 22, 23, 24, 25, 26, 27, 28],
+  LL: [31, 32, 33, 34, 35, 36, 37, 38],
+  LR: [41, 42, 43, 44, 45, 46, 47, 48],
+};
 
-const lowerQuadrant = [
-  { num: 32, label: "32", name: "3rd Molar" },
-  { num: 31, label: "31", name: "2nd Molar" },
-  { num: 30, label: "30", name: "1st Molar" },
-  { num: 29, label: "29", name: "2nd Premolar" },
-  { num: 28, label: "28", name: "1st Premolar" },
-  { num: 27, label: "27", name: "Canine" },
-  { num: 26, label: "26", name: "Lateral Incisor" },
-  { num: 25, label: "25", name: "Central Incisor" },
-];
+const TOOTH_NAMES = {
+  11: "Central Incisor", 12: "Lateral Incisor", 13: "Canine",
+  14: "1st Premolar", 15: "2nd Premolar", 16: "1st Molar",
+  17: "2nd Molar", 18: "3rd Molar",
+  21: "Central Incisor", 22: "Lateral Incisor", 23: "Canine",
+  24: "1st Premolar", 25: "2nd Premolar", 26: "1st Molar",
+  27: "2nd Molar", 28: "3rd Molar",
+  31: "Central Incisor", 32: "Lateral Incisor", 33: "Canine",
+  34: "1st Premolar", 35: "2nd Premolar", 36: "1st Molar",
+  37: "2nd Molar", 38: "3rd Molar",
+  41: "Central Incisor", 42: "Lateral Incisor", 43: "Canine",
+  44: "1st Premolar", 45: "2nd Premolar", 46: "1st Molar",
+  47: "2nd Molar", 48: "3rd Molar",
+};
 
 const ToothBox = styled(Box, { shouldForwardProp: (prop) => prop !== "selected" && prop !== "status" })(
   ({ theme, selected, status }) => ({
@@ -168,40 +168,25 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
     }
   };
 
-  const renderArch = (isUpper) => {
-    const quad = isUpper ? [...upperQuadrant].reverse() : lowerQuadrant;
-    const rightQuad = isUpper ? upperQuadrant : [...lowerQuadrant].reverse();
+  const renderTooth = (num) => {
+    const data = getToothStatus(num);
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 0.5, mb: 1 }}>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          {rightQuad.map((tooth) => {
-            const data = getToothStatus(isUpper ? tooth.num + 8 : tooth.num);
-            const cs = data?.caries_status || "Sound";
-            const colors = statusColors[cs] || statusColors.Sound;
-            return (
-              <Tooltip
-                key={tooth.num}
-                title={`Tooth ${tooth.num} (${tooth.name}): ${cs}${data?.status === "Missing" ? " - MISSING" : ""}`}
-              >
-                <ToothBox
-                  selected={selectedTooth === tooth.num}
-                  status={data?.status}
-                  onClick={() => handleToothClick(isUpper ? tooth.num + 8 : tooth.num)}
-                  sx={{
-                    bgcolor: data?.status === "Missing" ? "#f5f5f5"
-                      : data?.caries_status === "Decayed" ? "#ffcdd2"
-                      : data?.caries_status === "Filled" ? "#B2DFDB"
-                      : data?.caries_status === "FilledDecay" ? "#ce93d8"
-                      : "#e8f5e9",
-                  }}
-                >
-                  {isUpper ? tooth.num + 8 : tooth.num}
-                </ToothBox>
-              </Tooltip>
-            );
-          })}
-        </Box>
-      </Box>
+      <Tooltip key={num} title={`Tooth ${num} (${TOOTH_NAMES[num] || ""})${data?.status === "Missing" ? " - MISSING" : ""} - ${data?.caries_status || "Sound"}`}>
+        <ToothBox
+          selected={selectedTooth === num}
+          status={data?.status}
+          onClick={() => handleToothClick(num)}
+          sx={{
+            bgcolor: data?.status === "Missing" ? "#f5f5f5"
+              : data?.caries_status === "Decayed" ? "#ffcdd2"
+              : data?.caries_status === "Filled" ? "#B2DFDB"
+              : data?.caries_status === "FilledDecay" ? "#ce93d8"
+              : "#e8f5e9",
+          }}
+        >
+          {num}
+        </ToothBox>
+      </Tooltip>
     );
   };
 
@@ -210,7 +195,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
       <CardContent>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: "primary.main" }}>
-            Dental Chart (Odontogram)
+            Dental Chart (Odontogram) — FDI (ISO 3950)
           </Typography>
           {!readOnly && chartData.length > 0 && (
             <Button variant="contained" size="small" onClick={handleBulkSave} disabled={saving}>
@@ -232,91 +217,39 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
 
         <Box sx={{ textAlign: "center", mb: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            UPPER ARCH (Maxillary)
+            UPPER ARCH — Quadrant 1 (Right) | Quadrant 2 (Left)
           </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Box>
             <Box sx={{ display: "flex", gap: 0.5, mb: 0.5 }}>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
-                const data = getToothStatus(n);
-                return (
-                  <Tooltip key={n} title={`Tooth ${n}`}>
-                    <ToothBox
-                      selected={selectedTooth === n}
-                      status={data?.status}
-                      onClick={() => handleToothClick(n)}
-                    >
-                      {n}
-                    </ToothBox>
-                  </Tooltip>
-                );
-              })}
+              {FDI_QUADRANTS.UR.map(renderTooth)}
             </Box>
             <Box sx={{ display: "flex", gap: 0.5, mb: 0.5 }}>
-              {[16, 15, 14, 13, 12, 11, 10, 9].map((n) => {
-                const data = getToothStatus(n);
-                return (
-                  <Tooltip key={n} title={`Tooth ${n}`}>
-                    <ToothBox
-                      selected={selectedTooth === n}
-                      status={data?.status}
-                      onClick={() => handleToothClick(n)}
-                    >
-                      {n}
-                    </ToothBox>
-                  </Tooltip>
-                );
-              })}
+              {FDI_QUADRANTS.UL.map(renderTooth)}
             </Box>
           </Box>
         </Box>
 
         <Box sx={{ textAlign: "center", mt: 2, mb: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            LOWER ARCH (Mandibular)
+            LOWER ARCH — Quadrant 3 (Left) | Quadrant 4 (Right)
           </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <Box>
             <Box sx={{ display: "flex", gap: 0.5, mb: 0.5 }}>
-              {[17, 18, 19, 20, 21, 22, 23, 24].map((n) => {
-                const data = getToothStatus(n);
-                return (
-                  <Tooltip key={n} title={`Tooth ${n}`}>
-                    <ToothBox
-                      selected={selectedTooth === n}
-                      status={data?.status}
-                      onClick={() => handleToothClick(n)}
-                    >
-                      {n}
-                    </ToothBox>
-                  </Tooltip>
-                );
-              })}
+              {FDI_QUADRANTS.LL.map(renderTooth)}
             </Box>
             <Box sx={{ display: "flex", gap: 0.5, mb: 0.5 }}>
-              {[32, 31, 30, 29, 28, 27, 26, 25].map((n) => {
-                const data = getToothStatus(n);
-                return (
-                  <Tooltip key={n} title={`Tooth ${n}`}>
-                    <ToothBox
-                      selected={selectedTooth === n}
-                      status={data?.status}
-                      onClick={() => handleToothClick(n)}
-                    >
-                      {n}
-                    </ToothBox>
-                  </Tooltip>
-                );
-              })}
+              {FDI_QUADRANTS.LR.map(renderTooth)}
             </Box>
           </Box>
         </Box>
 
         <Dialog open={toothDialogOpen} onClose={() => setToothDialogOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle>
-            Tooth #{toothForm.tooth_number} - {DENTAL_TREATMENT_OPTIONS.toothNumbers.find((t) => Number(t.value) === toothForm.tooth_number)?.label?.split(" - ")[1] || ""}
+            Tooth #{toothForm.tooth_number} — {TOOTH_NAMES[toothForm.tooth_number] || ""}
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={2} sx={{ mt: 0.5 }}>

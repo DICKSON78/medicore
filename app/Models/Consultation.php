@@ -13,7 +13,7 @@ class Consultation extends Model
     protected $fillable = [
         'payment_cache_item_id', 'patient_direction', 'chief_complaint', 'history_present_illness',
         'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils',
-        'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'remarks', 'created_by',
+        'extra_ocular_muscles',         'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'created_by',
         'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by',
         'extra_oral_examination', 'tmj_examination', 'lymph_nodes',
         'oral_hygiene_status', 'tobacco_use', 'alcohol_use',
@@ -73,11 +73,6 @@ class Consultation extends Model
         return $this->belongsTo(User::class, 'sent_to_optician_by');
     }
 
-    public function doctor_tasks()
-    {
-        return $this->hasMany(DoctorTask::class, 'consultation_id');
-    }
-
     public function dental_oral_examination()
     {
         return $this->hasOne(DentalOralExamination::class, 'consultation_id');
@@ -106,6 +101,11 @@ class Consultation extends Model
     public function dental_appointments()
     {
         return $this->hasMany(DentalAppointment::class, 'consultation_id');
+    }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class, 'consultation_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

@@ -24,6 +24,9 @@ import WorkIcon from "@mui/icons-material/WorkRounded";
 import PaymentIcon from "@mui/icons-material/PaymentRounded";
 import InfoIcon from "@mui/icons-material/InfoRounded";
 import BadgeIcon from "@mui/icons-material/BadgeRounded";
+import GroupIcon from "@mui/icons-material/GroupRounded";
+import FlagIcon from "@mui/icons-material/FlagRounded";
+import ChurchIcon from "@mui/icons-material/ChurchRounded";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, getAge } from "../../../helpers";
@@ -74,6 +77,9 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
     { label: "Age", value: getAge(data.date_of_birth), icon: <CalendarMonthIcon fontSize="small" /> },
     { label: "Gender", value: data.gender, icon: data.gender?.toLowerCase() === "male" ? <MaleIcon fontSize="small" /> : <FemaleIcon fontSize="small" /> },
     { label: "Occupation", value: data.occupation || "N/A", icon: <WorkIcon fontSize="small" /> },
+    { label: "Next of Kin", value: data.next_of_kin || "N/A", icon: <GroupIcon fontSize="small" /> },
+    { label: "Tribe", value: data.tribe || "N/A", icon: <FlagIcon fontSize="small" /> },
+    { label: "Religion", value: data.religion || "N/A", icon: <ChurchIcon fontSize="small" /> },
     { label: "National ID", value: data.national_id || "N/A", icon: <InfoIcon fontSize="small" /> },
   ] : [];
 

@@ -1,7 +1,6 @@
 import React from "react";
-import { Document, Font, Page } from "@react-pdf/renderer";
+import { Document, Font, Page, Text, View } from "@react-pdf/renderer";
 
-// Use system fonts as fallback to avoid font loading issues
 const fontRegular = "Helvetica";
 const fontItalic = "Helvetica-Oblique";
 const fontBold = "Helvetica-Bold";
@@ -11,7 +10,6 @@ import Descriptions from "../../../components/pdf/Descriptions";
 import Table from "../../../components/pdf/Table";
 import { numberFormat } from "../../../helpers";
 
-// Register fonts with system fonts to avoid loading issues
 Font.register({
   family: "Custom",
   fonts: [
@@ -28,6 +26,15 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
       0
     );
   };
+
+  const clinic = window.user?.clinic || {};
+  const total = getTotalAmount();
+  const grandTotal = total - (receipt.discount || 0);
+  const receiptNo = `RCP-${String(receipt.id).padStart(6, "0")}`;
+  const tin = clinic?.tin || "N/A";
+  const vrn = clinic?.vrn || "N/A";
+  const efdSerial = clinic?.efd_serial || "N/A";
+  const receiptFooter = clinic?.receipt_footer || "";
 
   return (
     <Document
@@ -47,17 +54,24 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
         orientation="portrait"
       >
         <Header
-          title="Payment Receipt"
+          title="TAX RECEIPT"
           dense
         />
+
+        <View style={{ marginBottom: 6, fontSize: 7, textAlign: "center" }}>
+          <Text>TIN: {tin}</Text>
+          {vrn !== "N/A" && <Text>VRN: {vrn}</Text>}
+          <Text>EFD Serial: {efdSerial}</Text>
+          <Text>Receipt No: {receiptNo}</Text>
+        </View>
 
         <Descriptions
           columns={2}
           vertical
           items={[
             { label: "Customer Name", value: patient.full_name },
-            { label: "Receipt Number", value: receipt.id },
-            { label: "Receipt Amount", value: numberFormat(receipt.amount) },
+            { label: "Receipt Number", value: receiptNo },
+            { label: "Receipt Amount", value: numberFormat(total) },
             { label: "Discount", value: numberFormat(receipt.discount) },
             { label: "Created By", value: receipt.creator?.full_name },
             { label: "Date Created", value: receipt.created_at },
@@ -82,7 +96,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             },
             {
               field: "quantity",
-              headerName: "Quantity",
+              headerName: "Qty",
               valueGetter: (item, index) => numberFormat(item.quantity),
             },
             {
@@ -96,7 +110,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
           footerItems={[
             [
               { value: "TOTAL", style: { flex: 0.786 } },
-              { value: numberFormat(getTotalAmount()), style: { flex: 0.214 } },
+              { value: numberFormat(total), style: { flex: 0.214 } },
             ],
           ]}
         />
@@ -106,11 +120,25 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
           items={[
             {
               label: "GRAND TOTAL",
-              value: numberFormat(getTotalAmount() - receipt.discount),
+              value: numberFormat(grandTotal),
             },
           ]}
           valueStyle={{ fontWeight: "bold" }}
         />
+
+        <View style={{ marginTop: 10, borderTopWidth: 1, borderTopColor: "#999", paddingTop: 6 }}>
+          <Text style={{ fontSize: 6, textAlign: "center", color: "#555" }}>
+            TIN: {tin} | EFD: {efdSerial}
+          </Text>
+          <Text style={{ fontSize: 6, textAlign: "center", color: "#555" }}>
+            This is a TRA-compliant receipt
+          </Text>
+          {receiptFooter && (
+            <Text style={{ fontSize: 6, textAlign: "center", color: "#555", marginTop: 2 }}>
+              {receiptFooter}
+            </Text>
+          )}
+        </View>
       </Page>
     </Document>
   );

@@ -90,6 +90,7 @@ class DentalTreatmentRecordsController extends Controller
             'prescription' => 'nullable|string',
             'material_used' => 'nullable|string',
             'status' => 'nullable|string',
+            'phase' => 'nullable|string',
             'treated_by' => 'nullable|exists:users,id',
             'treatment_date' => 'nullable|date_format:Y-m-d',
         ]);

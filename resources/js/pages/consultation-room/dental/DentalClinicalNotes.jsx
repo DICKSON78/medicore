@@ -17,6 +17,8 @@ import SelectDiagnoses from "../clinical-notes/SelectDiagnoses";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 import DentalOralExamination from "./DentalOralExamination";
 import DentalChartingEditor from "./DentalChartingEditor";
+import PrescriptionForm from "./PrescriptionForm";
+import DentalRadiographs from "./DentalRadiographs";
 import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
 
@@ -41,13 +43,15 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
 
   const [formData, setFormData] = useState({
     chief_complaint: "", history_present_illness: "", family_history: "",
-    general_health: "", remarks: "", patient_to_return: "No", to_return_date: "",
+    general_health: "", remarks: "", patient_to_return: "No", to_return_date: "", to_return_time: "",
     extra_oral_examination: "", tmj_examination: "", lymph_nodes: "",
     oral_hygiene_status: "", tobacco_use: "", alcohol_use: "",
   });
   const [diagnoses, setDiagnoses] = useState([]);
   const [consItems, setConsItems] = useState([]);
   const [oralExamData, setOralExamData] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [radiographs, setRadiographs] = useState([]);
 
   const [autoPatch, autoSaving] = usePatch();
   const [completePatch, completing] = usePatch();
@@ -85,6 +89,16 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         .then((r) => r.json())
         .then((d) => {
           if (d.data?.data) setConsItems(d.data.data);
+        });
+      fetch(`/api/prescriptions?consultation_id=${consultation.id}&per_page=100`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.data?.data) setPrescriptions(d.data.data);
+        });
+      fetch(`/api/dental-radiographs?consultation_id=${consultation.id}&per_page=100`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.data?.data) setRadiographs(d.data.data);
         });
     }
   }, [consultation?.id]);
@@ -341,7 +355,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           />
         </Grid>
         {formData.patient_to_return === "Yes" && (
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               label="Return Date"
               value={formData.to_return_date}
@@ -350,10 +364,20 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
             />
           </Grid>
         )}
+        {formData.patient_to_return === "Yes" && (
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Return Time"
+              value={formData.to_return_time}
+              onChange={handleChange("to_return_time")}
+              type="time" fullWidth size="small" disabled={isCompleted}
+            />
+          </Grid>
+        )}
       </Grid>
 
       <Box sx={{ my: 2 }}>
-        <Subheader title="Diagnoses & Items" />
+        <Subheader title="Diagnosis & Treatment Plan" />
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <DiagnosisCard
@@ -376,7 +400,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
       </Box>
 
       <Box sx={{ my: 2 }}>
-        <Subheader title="Treatment / Prescription Items" />
+        <Subheader title="Treatment Items" />
         <ConsultationItemsCard items={consItems} consultationId={consultation.id} />
         <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
           <SelectItems
@@ -389,6 +413,22 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           />
         </Box>
       </Box>
+
+      <Subheader title="Prescriptions" />
+      <PrescriptionForm
+        consultationId={consultation.id}
+        patientId={patient.id}
+        prescriptions={prescriptions}
+        onPrescriptionAdded={(rx) => setPrescriptions((prev) => [rx, ...prev])}
+      />
+
+      <Subheader title="Radiographs / X-rays" />
+      <DentalRadiographs
+        consultationId={consultation.id}
+        patientId={patient.id}
+        radiographs={radiographs}
+        onRadiographAdded={(rx) => setRadiographs((prev) => [rx, ...prev])}
+      />
 
       <Subheader title="Remarks" />
       <Grid container spacing={2}>

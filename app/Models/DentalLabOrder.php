@@ -21,11 +21,11 @@ class DentalLabOrder extends Model
         'teeth_involved',
         'impression_date',
         'delivery_date',
-        'insertion_date',
         'status',
         'lab_notes',
         'lab_name',
         'cost',
+        'technician_charges',
         'ordered_by',
         'created_by',
     ];
@@ -33,9 +33,9 @@ class DentalLabOrder extends Model
     protected $casts = [
         'teeth_involved' => 'json',
         'cost' => 'decimal:2',
+        'technician_charges' => 'decimal:2',
         'impression_date' => 'date:Y-m-d',
         'delivery_date' => 'date:Y-m-d',
-        'insertion_date' => 'date:Y-m-d',
     ];
 
     public function consultation()

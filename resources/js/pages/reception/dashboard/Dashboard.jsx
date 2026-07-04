@@ -11,7 +11,6 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  EventNoteRounded as AppointmentsIcon,
   Person2Rounded as PersonIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
@@ -19,7 +18,6 @@ import {
   StarRounded as VipIcon,
   TimerRounded as WaitingTimeIcon,
   ScheduleRounded as PatientsToReturnIcon,
-  AddRounded as AddLensIcon,
   NorthEastRounded as ViewMoreIcon,
   LibraryBooksRounded as ReportsIcon,
   SettingsRounded as SettingsIcon,
@@ -130,13 +128,6 @@ const Dashboard = () => {
               icon={<VipIcon />}
               color={teal[400]}
               onClick={() => navigate('/reception/vip-patients')}
-            />
-            <InfoCard
-              title="Optical Patients"
-              count={numberFormat(data.summary?.spectacle_patients || 0)}
-              icon={<AddLensIcon />}
-              color={green[400]}
-              onClick={() => navigate('/reception/glass-patients')}
             />
             <InfoCard
               title="Waiting Time"

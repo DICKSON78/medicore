@@ -66,7 +66,6 @@ class ResetDatabaseAndCreateAdmin extends Command
                 'patient_attachments',
                 'patient_notifications',
                 'patient_waiting_times',
-                'doctor_tasks',
                 'messages',
                 'expenses',
                 'expense_payments',

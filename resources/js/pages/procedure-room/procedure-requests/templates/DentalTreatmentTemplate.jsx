@@ -17,6 +17,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
     tooth_number: "",
     tooth_surface: "",
     anaesthesia_type: "",
+    phase: "",
     preoperative_notes: "",
     intraoperative_notes: "",
     postoperative_notes: "",
@@ -57,6 +58,15 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             value={form.treatment_type}
             options={DENTAL_TREATMENT_OPTIONS.treatmentTypes}
             onChange={(e) => setForm({ ...form, treatment_type: e.target.value })}
+            fullWidth size="small"
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <Select
+            label="Treatment Phase"
+            value={form.phase}
+            options={DENTAL_TREATMENT_OPTIONS.treatmentPhases}
+            onChange={(e) => setForm({ ...form, phase: e.target.value })}
             fullWidth size="small"
           />
         </Grid>

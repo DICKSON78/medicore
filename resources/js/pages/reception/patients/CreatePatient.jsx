@@ -43,6 +43,9 @@ const CreatePatient = ({ modal, fetchPatients }) => {
   const phoneRef = useRef();
   const emailRef = useRef();
   const occupationRef = useRef();
+  const nextOfKinRef = useRef();
+  const tribeRef = useRef();
+  const religionRef = useRef();
   const paymentModeRef = useRef();
   const informationSourceRef = useRef();
 
@@ -87,6 +90,9 @@ const CreatePatient = ({ modal, fetchPatients }) => {
     phone: undefined,
     email: undefined,
     occupation: undefined,
+    next_of_kin: undefined,
+    tribe: undefined,
+    religion: undefined,
     payment_mode_id: undefined,
     info_source_id: undefined,
     is_vip: false,
@@ -323,6 +329,51 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                 fullWidth
                 onChange={(value) =>
                   setFormData({ ...formData, occupation: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={nextOfKinRef}
+                label="Next of Kin"
+                fullWidth
+                onChange={(value) =>
+                  setFormData({ ...formData, next_of_kin: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={tribeRef}
+                label="Tribe"
+                fullWidth
+                onChange={(value) =>
+                  setFormData({ ...formData, tribe: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={religionRef}
+                label="Religion"
+                fullWidth
+                onChange={(value) =>
+                  setFormData({ ...formData, religion: value })
                 }
               />
             </Grid>

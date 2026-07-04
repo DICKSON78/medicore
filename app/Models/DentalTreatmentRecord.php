@@ -23,6 +23,7 @@ class DentalTreatmentRecord extends Model
         'prescription',
         'material_used',
         'status',
+        'phase',
         'treated_by',
         'treatment_date',
         'created_by',

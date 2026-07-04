@@ -10,7 +10,7 @@ class Clinic extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'email', 'address', 'sms_key', 'sms_sender_name', 'logo'];
+    protected $fillable = ['name', 'phone', 'email', 'address', 'sms_key', 'sms_sender_name', 'logo', 'tin', 'vrn', 'efd_serial', 'receipt_footer'];
 
     protected $hidden = ['sms_key'];
 

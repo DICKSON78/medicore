@@ -40,7 +40,7 @@ class DentalChartingController extends Controller
     {
         $request->validate([
             'consultation_id' => 'required|exists:consultations,id',
-            'tooth_number' => 'required|integer|between:1,32',
+            'tooth_number' => 'required|integer|between:11,48',
             'tooth_quadrant' => 'nullable|string',
             'status' => 'nullable|string',
             'caries_status' => 'nullable|string',
@@ -65,7 +65,7 @@ class DentalChartingController extends Controller
         $request->validate([
             'consultation_id' => 'required|exists:consultations,id',
             'teeth' => 'required|array',
-            'teeth.*.tooth_number' => 'required|integer|between:1,32',
+            'teeth.*.tooth_number' => 'required|integer|between:11,48',
             'teeth.*.status' => 'nullable|string',
             'teeth.*.caries_status' => 'nullable|string',
             'teeth.*.restoration_type' => 'nullable|string',

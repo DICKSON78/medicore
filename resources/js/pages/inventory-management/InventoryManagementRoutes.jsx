@@ -2,6 +2,8 @@ import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Dashboard from "./dashboard/Dashboard";
 import Stocktaking from "./Stocktaking";
+import StockOut from "./StockOut";
+import StockMovements from "./StockMovements";
 import StockAlerts from "./StockAlerts";
 import LensStock from "./LensStock";
 import ReportsRoutes from "./reports/ReportsRoutes";
@@ -16,6 +18,14 @@ const InventoryManagementRoutes = () => {
       <Route
         path="stocktaking"
         element={<Stocktaking />}
+      />
+      <Route
+        path="stock-out"
+        element={<StockOut />}
+      />
+      <Route
+        path="stock-movements"
+        element={<StockMovements />}
       />
       <Route
         path="stock-alerts"

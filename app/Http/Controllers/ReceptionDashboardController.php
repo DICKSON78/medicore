@@ -57,7 +57,6 @@ class ReceptionDashboardController extends Controller
                 'waiting_patients' => 0,
                 'vip_patients' => 0,
                 'patients_to_return' => 0,
-                'spectacle_patients' => 0,
                 'completed_patients' => 0,
                 'total_reports' => 0,
                 'total_messages' => 0,
@@ -148,22 +147,6 @@ class ReceptionDashboardController extends Controller
                     });
                 })
                 ->whereDate('created_at', '>=', Carbon::now()->subDays(30))
-                ->count();
-        }, 0);
-
-        // Spectacle patients
-        $data['summary']['spectacle_patients'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
-            return PatientPaymentCacheItem::query()
-                ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($query) use ($clinic_id) {
-                        $query->where('clinic_id', $clinic_id);
-                    });
-                })
-                ->whereHas('consultation_type', function ($query) {
-                    $query->where('name', 'Glass');
-                })
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
                 ->count();
         }, 0);
 

@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\DentalRadiograph;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class DentalRadiographsController extends Controller
 {
@@ -33,12 +34,19 @@ class DentalRadiographsController extends Controller
 
         $data->orderBy('taken_date', 'desc');
         $data = $data->paginate($per_page);
+
+        $data->getCollection()->transform(function ($item) {
+            $item->image_url = $item->image_path ? url('storage/' . $item->image_path) : null;
+            return $item;
+        });
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
     public function show($id)
     {
         $data = DentalRadiograph::with(['consultation', 'patient', 'takenBy', 'creator'])->findOrFail($id);
+        $data->image_url = $data->image_path ? url('storage/' . $data->image_path) : null;
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -51,14 +59,21 @@ class DentalRadiographsController extends Controller
             'tooth_number' => 'nullable|string',
             'findings' => 'nullable|string',
             'impression' => 'nullable|string',
-            'image_path' => 'nullable|string',
+            'image' => 'nullable|image|max:10240',
             'taken_date' => 'required|date_format:Y-m-d',
             'taken_by' => 'nullable|exists:users,id',
         ]);
 
-        $input = $request->all();
+        $input = $request->except('image');
         $input['created_by'] = $request->user()->id;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('dental-radiographs', 'public');
+            $input['image_path'] = $path;
+        }
+
         $data = DentalRadiograph::create($input);
+        $data->image_url = $data->image_path ? url('storage/' . $data->image_path) : null;
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Radiograph saved successfully.');
     }
@@ -66,13 +81,30 @@ class DentalRadiographsController extends Controller
     public function update(Request $request, $id)
     {
         $data = DentalRadiograph::findOrFail($id);
-        $data->update($request->all());
+
+        $input = $request->except('image');
+
+        if ($request->hasFile('image')) {
+            if ($data->image_path) {
+                Storage::disk('public')->delete($data->image_path);
+            }
+            $path = $request->file('image')->store('dental-radiographs', 'public');
+            $input['image_path'] = $path;
+        }
+
+        $data->update($input);
+        $data->image_url = $data->image_path ? url('storage/' . $data->image_path) : null;
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Updated successfully.');
     }
 
     public function destroy($id)
     {
-        DentalRadiograph::findOrFail($id)->delete();
+        $data = DentalRadiograph::findOrFail($id);
+        if ($data->image_path) {
+            Storage::disk('public')->delete($data->image_path);
+        }
+        $data->delete();
         return $this->sendResponse(null, Response::HTTP_OK, 'Deleted successfully.');
     }
 }

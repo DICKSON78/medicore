@@ -10,7 +10,6 @@ use App\Models\PatientCheckIn;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use App\Models\PatientWaitingTime;
-use App\Models\DoctorTask;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -200,7 +199,6 @@ class PatientCheckInsController extends Controller
                                     'created_by' => $user->id,
                                 ]);
 
-                                // Note: doctor_tasks table doesn't exist, so skipping doctor task creation
                             } else {
                                 \Log::warning('Item not found or no price available', [
                                     'item_id' => $input_item['item_id'] ?? 'unknown',

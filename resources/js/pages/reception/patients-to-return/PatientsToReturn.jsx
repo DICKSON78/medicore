@@ -199,6 +199,12 @@ const PatientsToReturn = () => {
                 field: "to_return_date",
                 headerName: "Return Date",
               },
+              {
+                field: "to_return_time",
+                headerName: "Return Time",
+                valueGetter: (item, index) =>
+                  item.to_return_time || "N/A",
+              },
               // Actions column removed per request
             ]}
             items={data.data}

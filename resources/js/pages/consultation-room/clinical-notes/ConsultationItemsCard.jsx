@@ -17,6 +17,7 @@ const ConsultationItemsCard = ({
   items,
   consultation,
   onClickAdd,
+  showAllTypes,
 }) => {
   const getStatusColor = (status) => {
     switch (status) {
@@ -29,7 +30,6 @@ const ConsultationItemsCard = ({
       case "Served":
         return "success";
     }
-
     return "neutral";
   };
 
@@ -37,15 +37,15 @@ const ConsultationItemsCard = ({
     if (status === "Pending") {
       return "Not Paid";
     }
-
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
-      if (status === "Served") {
-        return "Dispensed";
-      }
+    if (status === "Served") {
+      return "Dispensed";
     }
-
     return status;
   };
+
+  const filteredItems = showAllTypes
+    ? items
+    : items.filter((e) => e.consultation_type.name === consultationType);
 
   return (
     <Card variant="outlined" sx={{ width: '100%', height: '100%' }}>
@@ -66,14 +66,20 @@ const ConsultationItemsCard = ({
               valueGetter: (item, index) => item.item.name,
             },
             {
+              field: "item_type",
+              headerName: "Type",
+              show: showAllTypes,
+              valueGetter: (item, index) => item.consultation_type?.name || "-",
+            },
+            {
               field: "dosage",
               headerName: "Dosage",
-              show: consultationType === "Pharmacy",
+              show: showAllTypes || consultationType === "Pharmacy",
             },
             {
               field: "comments",
               headerName: "Comments",
-              show: consultationType !== "Pharmacy",
+              show: !showAllTypes && consultationType !== "Pharmacy",
             },
             {
               field: "status",
@@ -87,9 +93,7 @@ const ConsultationItemsCard = ({
               ),
             },
           ]}
-          items={items.filter(
-            (e) => e.consultation_type.name === consultationType
-          )}
+          items={filteredItems}
           hideNoItemsOverlayIcon
           hidePaginationFooter
           footerItems={[

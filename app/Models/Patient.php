@@ -15,7 +15,8 @@ class Patient extends Model
 
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
-        'address', 'national_id', 'phone', 'email', 'occupation', 'payment_mode_id', 'info_source_id', 'is_vip', 'created_by',
+        'address', 'national_id', 'phone', 'email', 'occupation', 'next_of_kin', 'tribe', 'religion',
+        'payment_mode_id', 'info_source_id', 'is_vip', 'created_by',
     ];
 
     protected $casts = [
@@ -56,11 +57,6 @@ class Patient extends Model
     public function waiting_times()
     {
         return $this->hasMany(PatientWaitingTime::class, 'patient_id');
-    }
-
-    public function doctor_tasks()
-    {
-        return $this->hasMany(DoctorTask::class, 'patient_id');
     }
 
     public function current_waiting_time()

@@ -12,7 +12,6 @@ const statusColors = {
   "In Progress": "info",
   Ready: "success",
   Delivered: "secondary",
-  Inserted: "primary",
 };
 
 const LabOrdersReport = () => {
@@ -89,7 +88,6 @@ const LabOrdersReport = () => {
                       { label: "In Progress", value: "In Progress" },
                       { label: "Ready", value: "Ready" },
                       { label: "Delivered", value: "Delivered" },
-                      { label: "Inserted", value: "Inserted" },
                     ]}
                     value={params.status}
                     onChange={(value) => setParams({ ...params, status: value })}
@@ -134,6 +132,11 @@ const LabOrdersReport = () => {
             field: "cost",
             headerName: "Cost (TZS)",
             valueGetter: (row) => row.cost ? Number(row.cost).toLocaleString() : "-",
+          },
+          {
+            field: "technician_charges",
+            headerName: "Tech Charges (TZS)",
+            valueGetter: (row) => row.technician_charges ? Number(row.technician_charges).toLocaleString() : "-",
           },
           {
             field: "impression_date",

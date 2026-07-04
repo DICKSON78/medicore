@@ -38,6 +38,9 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
   const phoneRef = useRef();
   const emailRef = useRef();
   const occupationRef = useRef();
+  const nextOfKinRef = useRef();
+  const tribeRef = useRef();
+  const religionRef = useRef();
   const paymentModeRef = useRef();
   const informationSourceRef = useRef();
 
@@ -52,6 +55,9 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     phone: item.phone,
     email: item.email,
     occupation: item.occupation,
+    next_of_kin: item.next_of_kin,
+    tribe: item.tribe,
+    religion: item.religion,
     payment_mode_id: item.payment_mode_id,
     info_source_id: item.info_source_id,
     is_vip: item.is_vip || false,
@@ -291,6 +297,54 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 defaultValue={formData.occupation}
                 onChange={(value) =>
                   setFormData({ ...formData, occupation: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={nextOfKinRef}
+                label="Next of Kin"
+                fullWidth
+                defaultValue={formData.next_of_kin}
+                onChange={(value) =>
+                  setFormData({ ...formData, next_of_kin: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={tribeRef}
+                label="Tribe"
+                fullWidth
+                defaultValue={formData.tribe}
+                onChange={(value) =>
+                  setFormData({ ...formData, tribe: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
+                ref={religionRef}
+                label="Religion"
+                fullWidth
+                defaultValue={formData.religion}
+                onChange={(value) =>
+                  setFormData({ ...formData, religion: value })
                 }
               />
             </Grid>
