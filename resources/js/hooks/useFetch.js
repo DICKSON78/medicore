@@ -23,7 +23,8 @@ const useFetch = (
       .get("/" + normalizedUri, { params })
       .then((response) => {
         if (!ignore.current) {
-          setData(callback ? callback(response) : response.data);
+          const result = callback ? callback(response) : response.data;
+          setData(result !== undefined && result !== null ? result : initialData);
           setLoading(false);
         }
       })

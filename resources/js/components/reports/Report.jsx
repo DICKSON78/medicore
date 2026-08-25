@@ -37,7 +37,7 @@ const Report = ({
     },
     true,
     { total: 0, data: [] },
-    (response) => response.data.data
+    (response) => response.data?.data || { total: 0, data: [] }
   );
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const Report = ({
     if (Array.isArray(summationFooterColumns)) {
       footerColumns = summationFooterColumns.map((col) => {
         if (typeof col.reducer === "function") {
-          const total = Array.isArray(data.data) ? data.data.reduce(col.reducer, 0) : 0;
+          const total = Array.isArray(data?.data) ? data.data.reduce(col.reducer, 0) : 0;
           // Ensure the total is a valid number before formatting
           const numericTotal = typeof total === 'number' && !isNaN(total) ? total : 0;
           col.value = numberFormat(numericTotal);
@@ -87,7 +87,7 @@ const Report = ({
               columns={Array.isArray(columns) ? columns.filter(
                 (col) => typeof col.webOnly === "undefined" || !col.webOnly
               ) : []}
-              items={Array.isArray(data.data) ? data.data : []}
+              items={Array.isArray(data?.data) ? data.data : []}
               orientation={pdfOrientation}
               nestedObject={nestedObject}
               nestedColumns={nestedColumns}
@@ -98,7 +98,7 @@ const Report = ({
               columns={Array.isArray(columns) ? columns.filter(
                 (col) => typeof col.webOnly === "undefined" || !col.webOnly
               ) : []}
-              items={Array.isArray(data.data) ? data.data : []}
+              items={Array.isArray(data?.data) ? data.data : []}
               format="xlsx"
             />
           </React.Fragment>
@@ -117,8 +117,8 @@ const Report = ({
             },
             ...(columns || []),
           ]}
-          items={Array.isArray(data.data) ? data.data : []}
-          itemCount={data.total}
+          items={Array.isArray(data?.data) ? data.data : []}
+          itemCount={data?.total || 0}
           page={page}
           pageSize={perPage}
           onPageChange={(page) => setPage(page)}
@@ -139,7 +139,7 @@ const Report = ({
                       ...(nestedColumns || []),
                     ]}
                     items={
-                      Array.isArray(data.data) && data.data[index] ? data.data[index][nestedObject] : []
+                      Array.isArray(data?.data) && data.data[index] ? data.data[index][nestedObject] : []
                     }
                     hidePaginationFooter
                   />
