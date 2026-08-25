@@ -48,7 +48,7 @@ class DashboardController extends Controller
                 'new_patients' => 0,
                 'patient_visits' => 0,
                 'consulted_patients' => 0,
-                'glass' => 0,
+                'dental_lab' => 0,
                 'pharmacy' => 0,
                 'procedure' => 0,
                 'others' => 0,
@@ -158,7 +158,7 @@ class DashboardController extends Controller
             ->where('status', 'Consulted')
             ->count();
 
-        $data['summary']['glass'] = PatientPaymentCacheItem::query()
+        $data['summary']['dental_lab'] = PatientPaymentCacheItem::query()
             ->where(function ($q) {
                 $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
             })
@@ -168,7 +168,7 @@ class DashboardController extends Controller
                 });
             })
             ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Glass');
+                $query->where('name', 'Dental Lab');
             })
             ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereNull('bill_id')

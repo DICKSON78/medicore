@@ -238,7 +238,7 @@ const Dashboard = ({ setSmsBalance = () => {} }) => {
                       data: [
                         { x: "Consultation", y: data.summary.consultation || 0 },
                         { x: "Pharmacy", y: data.summary.pharmacy || 0 },
-                        { x: "Glass", y: data.summary.glass || 0 },
+                        { x: "Dental Lab", y: data.summary.dental_lab || 0 },
                         { x: "Procedure", y: data.summary.procedure || 0 },
                         { x: "Others", y: data.summary.others || 0 },
                       ],

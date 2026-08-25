@@ -731,9 +731,9 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.medicine_center,
         },
         {
-          title: "Lens Stock",
+          title: "Dental Materials Stock",
           icon: <ItemsIcon />,
-          to: "/inventory-management/lens-stock",
+          to: "/inventory-management/dental-materials-stock",
           show: false,
         },
         {

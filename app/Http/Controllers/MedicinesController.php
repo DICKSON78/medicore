@@ -18,7 +18,7 @@ class MedicinesController extends Controller
     {
         return [
             'clinic_id', 'name', 'code', 'item_type_id', 'consultation_type_id',
-            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item', 'is_stock_item',
+            'unit_of_measure_id', 'is_consultation_item', 'is_stock_item',
             'balance', 'new_balance', 'unit_buying_price', 'expiry_date',
             'minimum_stock', 'has_expiry', 'templates', 'status'
         ];

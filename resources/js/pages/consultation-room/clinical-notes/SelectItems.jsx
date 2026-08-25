@@ -59,7 +59,6 @@ const SelectItems = ({
   const [consultant, setConsultant] = useState(window.user);
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
-  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
   const [dosage, setDosage] = useState();
@@ -78,16 +77,6 @@ const SelectItems = ({
     (response) => response.data.data.data
   );
 
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
-    "api/lens-types",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
   const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
     "api/payment-modes",
     {
@@ -113,7 +102,6 @@ const SelectItems = ({
       consultation_type: consultationType,
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       item_type: itemType,
-      lens_type_id: lensTypeId,
       stock_status: consultationType === "Pharmacy" || consultationType === "Medicine" ? "In Stock" : undefined,
     },
     false,
@@ -137,12 +125,6 @@ const SelectItems = ({
   } = useDelete();
 
   useEffect(() => {
-    if (consultationType === "Glass" && itemType === "Lens") {
-      fetchLensTypes();
-    }
-  }, [consultationType, itemType]);
-
-  useEffect(() => {
     if (paymentMode) {
       setSelectedItem(null);
       setQuantity(1);
@@ -157,13 +139,7 @@ const SelectItems = ({
     if (paymentMode) {
       fetchItems();
     }
-  }, [itemName, itemType, lensTypeId]);
-
-  useEffect(() => {
-    if (itemType !== "Lens") {
-      setLensTypeId(null);
-    }
-  }, [itemType]);
+  }, [itemName, itemType]);
 
   useEffect(() => {
     if (dataPost) {
@@ -309,32 +285,20 @@ const SelectItems = ({
               />
               <Divider />
               {loadingItems && <LinearProgress />}
-              {consultationType === "Glass" ? (
+              {consultationType === "Dental Lab" ? (
                 <React.Fragment>
                   <CardContent sx={{ bgcolor: "background.default" }}>
                     <Select
                       placeholder="Item Type"
                       fullWidth
                       clearable
-                      options={["Lens", "Frame"]}
+                      options={["Dental Materials", "Dental Prosthetics"]}
                       onChange={(value) => {
                         setItemType(value);
                         setIsPartnerItem(false);
                         setCollaboratorId(null);
                       }}
                     />
-                    {itemType === "Lens" ? (
-                      <Select
-                        placeholder="Lens Type"
-                        fullWidth
-                        clearable
-                        options={lensTypes}
-                        optionsLabel="name"
-                        optionsValue="id"
-                        onChange={(value) => setLensTypeId(value)}
-                        containerProps={{ mt: 2 }}
-                      />
-                    ) : null}
                   </CardContent>
                   <Divider />
                 </React.Fragment>
@@ -479,7 +443,7 @@ const SelectItems = ({
                         />
                       </Grid>
                     ) : null}
-                    {consultationType === "Glass" && itemType === "Frame" ? (
+                    {consultationType === "Dental Lab" && itemType === "Dental Prosthetics" ? (
                       <React.Fragment>
                         <Grid
                           item
@@ -494,7 +458,7 @@ const SelectItems = ({
                                 onChange={(e) => setIsPartnerItem(e.target.checked)}
                               />
                             }
-                            label="Partner Frame"
+                            label="Partner Lab"
                           />
                         </Grid>
                         {isPartnerItem ? (
@@ -592,7 +556,7 @@ const SelectItems = ({
                             </Typography>
                           </Box>
                         ) : null,
-                      show: consultationType === "Glass",
+                      show: consultationType === "Dental Lab",
                     },
                     {
                       field: "actions",

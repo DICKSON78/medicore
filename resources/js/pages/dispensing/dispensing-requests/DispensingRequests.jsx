@@ -121,7 +121,7 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
             consultationType === "Others"
               ? "Other Dispensing"
               : consultationType === "Glass"
-                ? "Optician Center"
+                ? "Dental Lab"
                 : "Medicine Center",
         },
         { title: "Dispensing Requests" },

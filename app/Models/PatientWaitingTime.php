@@ -386,12 +386,11 @@ class PatientWaitingTime extends Model
         $requiresProcedureRoom = false;
 
         if ($paymentCache) {
-            // Any Glass or Pharmacy-like items imply dispensing step
-            $glassCount = $paymentCache->items()
-                ->whereHas('consultation_type', function($q){ $q->where('name', 'Glass'); })
+            // Any Dental Lab or Pharmacy-like items imply dispensing step
+            $dentalLabCount = $paymentCache->items()
+                ->whereHas('consultation_type', function($q){ $q->where('name', 'Dental Lab'); })
                 ->count();
-            // If there are other item types that require dispensing (e.g., Drugs), add them here if applicable
-            $requiresDispensing = $glassCount > 0;
+            $requiresDispensing = $dentalLabCount > 0;
 
             // Procedure items imply procedure room step
             $procedureCount = $paymentCache->items()

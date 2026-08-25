@@ -96,7 +96,6 @@ const CheckInPatient = () => {
   const [consultant, setConsultant] = useState();
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
-  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState();
@@ -115,17 +114,6 @@ const CheckInPatient = () => {
     (response) => response.data.data.data
   );
 
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
-    "api/lens-types",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
-
   const {
     data: items,
     setData: setItems,
@@ -138,7 +126,6 @@ const CheckInPatient = () => {
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       q: itemName,
       item_type: itemType,
-      lens_type_id: lensTypeId,
     },
     false,
     [],
@@ -197,17 +184,7 @@ const CheckInPatient = () => {
     if (paymentMode) {
       fetchItems();
     }
-  }, [itemName, itemType, lensTypeId]);
-
-  useEffect(() => {
-    if (itemType !== "Lens") {
-      setLensTypeId(null);
-    }
-
-    if (itemType === "Lens") {
-      fetchLensTypes();
-    }
-  }, [itemType]);
+  }, [itemName, itemType]);
 
   useEffect(() => {
     if (data) {
@@ -454,8 +431,8 @@ const CheckInPatient = () => {
                       value={items.find((e) => selectedItem?.id === e.id) || null}
                       onChange={(value) => {
                         setSelectedItem(value);
-                        const isOutOfStockFrame = value?.item_type?.name === "Frame" && value?.balance <= 0;
-                        setIsPartnerItem(isOutOfStockFrame);
+                        const isOutOfStockProsthetic = value?.item_type?.name === "Dental Prosthetics" && value?.balance <= 0;
+                        setIsPartnerItem(isOutOfStockProsthetic);
                         setCollaboratorId(null);
                       }}
                     />
@@ -469,19 +446,6 @@ const CheckInPatient = () => {
                       onChange={(value) => setItemType(value)}
                     />
                   </Grid>
-                  {itemType === "Lens" ? (
-                    <Grid item md={3} sm={6} xs={12}>
-                      <Select
-                        label="Lens Type"
-                        fullWidth
-                        clearable
-                        options={lensTypes}
-                        optionsLabel="name"
-                        optionsValue="id"
-                        onChange={(value) => setLensTypeId(value)}
-                      />
-                    </Grid>
-                  ) : null}
                   <Grid item xs={12}>
                     <SearchTextField
                       label="Search Item"
@@ -510,8 +474,8 @@ const CheckInPatient = () => {
                                 checked={selectedItem === e}
                                 onChange={(event) => {
                                   setSelectedItem(e);
-                                  const isOutOfStockFrame = e.item_type?.name === "Frame" && e.balance <= 0;
-                                  setIsPartnerItem(isOutOfStockFrame);
+                                  const isOutOfStockProsthetic = e.item_type?.name === "Dental Prosthetics" && e.balance <= 0;
+                                  setIsPartnerItem(isOutOfStockProsthetic);
                                   setCollaboratorId(null);
                                 }}
                               />
@@ -519,7 +483,7 @@ const CheckInPatient = () => {
                             label={
                               <Stack direction="row" alignItems="center" spacing={1}>
                                 <Typography variant="body2">{e.name}</Typography>
-                                {e.item_type?.name === "Frame" && e.balance <= 0 ? (
+                                {e.item_type?.name === "Dental Prosthetics" && e.balance <= 0 ? (
                                   <Chip
                                     label="Out of Stock"
                                     size="small"

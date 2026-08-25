@@ -83,7 +83,7 @@ const PatientItems = ({
 
     if (
       consultationType === "Pharmacy" ||
-      consultationType === "Glass" ||
+      consultationType === "Dental Lab" ||
       consultationType === "Others"
     ) {
       if (status === "Served") {
@@ -404,7 +404,7 @@ const PatientItems = ({
             field: "served_by",
             headerName:
               consultationType === "Pharmacy" ||
-              consultationType === "Glass" ||
+              consultationType === "Dental Lab" ||
               consultationType === "Others"
                 ? "Dispensed By"
                 : "Served By",
@@ -417,7 +417,7 @@ const PatientItems = ({
               status !== "Served"
                 ? "Date Created"
                 : consultationType === "Pharmacy" ||
-                    consultationType === "Glass" ||
+                    consultationType === "Dental Lab" ||
                     consultationType === "Others"
                   ? "Date Dispensed"
                   : "Date Served",

@@ -457,9 +457,9 @@ class PatientPaymentCacheItemsController extends Controller
         return $this->updateStatus($request, 'Served', 'Dispensed successfully.', function ($payment_cache) use ($request) {
             $user = $request->user();
 
-            // check if dispensing a glass item and change its consultation status
+            // check if dispensing a dental lab item and change its consultation status
             $consultation = $payment_cache->consultation;
-            if ($consultation && $consultation->patient_direction == 'Direct to Optician') {
+            if ($consultation && $consultation->patient_direction == 'Direct to Dental Lab') {
                 $consultation->update(['status' => 'Consulted']);
 
                 // update consultant

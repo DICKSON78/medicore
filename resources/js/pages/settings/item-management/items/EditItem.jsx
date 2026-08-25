@@ -26,7 +26,6 @@ const EditItem = ({ item, modal, fetchItems }) => {
   const itemTypeRef = useRef();
   const consultationTypeRef = useRef();
   const unitOfMeasureRef = useRef();
-  const lensTypeRef = useRef();
 
   const { data: itemTypes } = useFetch(
     "api/item-types",
@@ -58,16 +57,6 @@ const EditItem = ({ item, modal, fetchItems }) => {
     [],
     (response) => response.data.data.data
   );
-  const { data: lensTypes } = useFetch(
-    "api/lens-types",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
 
   const [itemType, setItemType] = useState(item.item_type);
   const [consultationType, setConsultationType] = useState(
@@ -79,7 +68,6 @@ const EditItem = ({ item, modal, fetchItems }) => {
     item_type_id: item.item_type_id,
     consultation_type_id: item.consultation_type_id,
     unit_of_measure_id: item.unit_of_measure_id,
-    lens_type_id: item.lens_type_id,
     is_consultation_item: item.is_consultation_item,
     is_stock_item: item.is_stock_item,
     templates: (item.templates || "").split(","),
@@ -219,34 +207,6 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 }
               />
             </Grid>
-            {itemType && itemType.name === "Lens" ? (
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <Select
-                  ref={lensTypeRef}
-                  label="Lens Type"
-                  fullWidth
-                  options={lensTypes}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  clearable
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  value={
-                    lensTypes.find((e) => e.id === formData.lens_type_id) ||
-                    null
-                  }
-                  onChange={(value) =>
-                    setFormData({ ...formData, lens_type_id: value || null })
-                  }
-                />
-              </Grid>
-            ) : null}
             <Grid
               item
               md={6}

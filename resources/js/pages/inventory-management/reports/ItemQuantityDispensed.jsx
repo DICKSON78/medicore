@@ -31,7 +31,7 @@ const ItemQuantityDispensed = () => {
   );
 
   const [params, setParams] = useState({
-    consultation_type: "Pharmacy,Glass,Others",
+    consultation_type: "Pharmacy,Dental Lab,Others",
     payment_mode_id: undefined,
     q: undefined,
     start_date: undefined,

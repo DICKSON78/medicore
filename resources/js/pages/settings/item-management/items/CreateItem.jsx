@@ -29,7 +29,6 @@ const CreateItem = ({ modal, fetchItems }) => {
   const itemTypeRef = useRef();
   const consultationTypeRef = useRef();
   const unitOfMeasureRef = useRef();
-  const lensTypeRef = useRef();
 
   const { data: itemTypes } = useFetch(
     "api/item-types",
@@ -61,16 +60,6 @@ const CreateItem = ({ modal, fetchItems }) => {
     [],
     (response) => response.data.data.data
   );
-  const { data: lensTypes } = useFetch(
-    "api/lens-types",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
 
   const [itemType, setItemType] = useState();
   const [consultationType, setConsultationType] = useState();
@@ -81,7 +70,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     item_type_id: undefined,
     consultation_type_id: undefined,
     unit_of_measure_id: undefined,
-    lens_type_id: undefined,
+    lens_type_id: null,
     is_consultation_item: "No",
     is_stock_item: "No",
     templates: [],
@@ -225,26 +214,6 @@ const CreateItem = ({ modal, fetchItems }) => {
                 }
               />
             </Grid>
-            {itemType && itemType.name === "Lens" ? (
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <Select
-                  ref={lensTypeRef}
-                  label="Lens Type"
-                  fullWidth
-                  options={lensTypes}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  onChange={(value) =>
-                    setFormData({ ...formData, lens_type_id: value })
-                  }
-                />
-              </Grid>
-            ) : null}
             <Grid
               item
               md={6}

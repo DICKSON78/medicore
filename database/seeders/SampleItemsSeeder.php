@@ -6,7 +6,6 @@ use App\Models\Item;
 use App\Models\ItemType;
 use App\Models\ConsultationType;
 use App\Models\UnitOfMeasure;
-use App\Models\LensType;
 use App\Models\PaymentMode;
 use App\Models\ItemPrice;
 use Carbon\Carbon;
@@ -20,201 +19,62 @@ class SampleItemsSeeder extends Seeder
     public function run()
     {
         $now = Carbon::now()->toDateTimeString();
-        $clinic_id = 1; // Default clinic
+        $clinic_id = 1;
 
-        // Get required IDs
-        $glassConsultationType = ConsultationType::where('name', 'Glass')->first();
+        $dentalLabConsultationType = ConsultationType::where('name', 'Dental Lab')->first();
         $pharmacyConsultationType = ConsultationType::where('name', 'Pharmacy')->first();
         $procedureConsultationType = ConsultationType::where('name', 'Procedure')->first();
         
-        $lensItemType = ItemType::where('name', 'Lens')->first();
-        $frameItemType = ItemType::where('name', 'Frame')->first();
+        $dentalMaterialsType = ItemType::where('name', 'Dental Materials')->first();
+        $dentalProstheticsType = ItemType::where('name', 'Dental Prosthetics')->first();
         $pharmaceuticalItemType = ItemType::where('name', 'Pharmaceutical')->first();
         $serviceItemType = ItemType::where('name', 'Service')->first();
         
         $pcUnit = UnitOfMeasure::where('name', 'PC')->first();
         $mgUnit = UnitOfMeasure::where('name', 'mg')->first();
         $bottleUnit = UnitOfMeasure::where('name', 'Btl')->first();
+        $tubeUnit = UnitOfMeasure::where('name', 'Tube')->first();
+        $kitUnit = UnitOfMeasure::where('name', 'Kit')->first();
         
         $cashPaymentMode = PaymentMode::where('name', 'Cash')->first();
 
-        // Create lens types if they don't exist
-        $lensTypes = [
-            ['name' => 'Single Vision', 'description' => 'Single vision lenses'],
-            ['name' => 'Bifocal', 'description' => 'Bifocal lenses'],
-            ['name' => 'Progressive', 'description' => 'Progressive lenses'],
-            ['name' => 'Reading', 'description' => 'Reading glasses'],
-            ['name' => 'Distance', 'description' => 'Distance vision lenses'],
-        ];
-
-        foreach ($lensTypes as $lensTypeData) {
-            $lensType = LensType::firstOrCreate(
-                ['name' => $lensTypeData['name']],
-                [
-                    'description' => $lensTypeData['description'],
-                    'status' => 'Active',
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]
-            );
-        }
-
-        // Sample Glass Items (Lenses)
-        $glassItems = [
+        $dentalMaterialItems = [
             [
-                'name' => 'Single Vision Lens - Clear',
-                'code' => 'SV-CLEAR-001',
-                'item_type_id' => $lensItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
+                'name' => 'Composite Resin - Anterior',
+                'code' => 'COMP-ANT-001',
+                'item_type_id' => $dentalMaterialsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
                 'unit_of_measure_id' => $pcUnit->id,
-                'lens_type_id' => LensType::where('name', 'Single Vision')->first()->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 50,
-                'unit_buying_price' => 25.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-            [
-                'name' => 'Single Vision Lens - Anti-Reflective',
-                'code' => 'SV-AR-001',
-                'item_type_id' => $lensItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'lens_type_id' => LensType::where('name', 'Single Vision')->first()->id,
                 'is_consultation_item' => 'No',
                 'is_stock_item' => 'Yes',
                 'balance' => 30,
-                'unit_buying_price' => 45.00,
+                'unit_buying_price' => 15.00,
                 'status' => 'Active',
                 'clinic_id' => $clinic_id,
                 'created_at' => $now,
                 'updated_at' => $now
             ],
             [
-                'name' => 'Bifocal Lens - Clear',
-                'code' => 'BF-CLEAR-001',
-                'item_type_id' => $lensItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
+                'name' => 'Composite Resin - Posterior',
+                'code' => 'COMP-POST-001',
+                'item_type_id' => $dentalMaterialsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
                 'unit_of_measure_id' => $pcUnit->id,
-                'lens_type_id' => LensType::where('name', 'Bifocal')->first()->id,
                 'is_consultation_item' => 'No',
                 'is_stock_item' => 'Yes',
                 'balance' => 25,
-                'unit_buying_price' => 35.00,
+                'unit_buying_price' => 18.00,
                 'status' => 'Active',
                 'clinic_id' => $clinic_id,
                 'created_at' => $now,
                 'updated_at' => $now
             ],
             [
-                'name' => 'Progressive Lens - Premium',
-                'code' => 'PROG-PREM-001',
-                'item_type_id' => $lensItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'lens_type_id' => LensType::where('name', 'Progressive')->first()->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 20,
-                'unit_buying_price' => 85.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-            [
-                'name' => 'Reading Lens - Standard',
-                'code' => 'READ-STD-001',
-                'item_type_id' => $lensItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'lens_type_id' => LensType::where('name', 'Reading')->first()->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 40,
-                'unit_buying_price' => 20.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-        ];
-
-        // Sample Glass Items (Frames)
-        $frameItems = [
-            [
-                'name' => 'Classic Metal Frame - Silver',
-                'code' => 'FRAME-METAL-001',
-                'item_type_id' => $frameItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 15,
-                'unit_buying_price' => 30.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-            [
-                'name' => 'Plastic Frame - Black',
-                'code' => 'FRAME-PLASTIC-001',
-                'item_type_id' => $frameItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 20,
-                'unit_buying_price' => 25.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-            [
-                'name' => 'Designer Frame - Gold',
-                'code' => 'FRAME-DESIGNER-001',
-                'item_type_id' => $frameItemType->id,
-                'consultation_type_id' => $glassConsultationType->id,
-                'unit_of_measure_id' => $pcUnit->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 10,
-                'unit_buying_price' => 75.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-        ];
-
-        // Sample Pharmacy Items
-        $pharmacyItems = [
-            [
-                'name' => 'Eye Drops - Artificial Tears',
-                'code' => 'EYE-DROPS-001',
-                'item_type_id' => $pharmaceuticalItemType->id,
-                'consultation_type_id' => $pharmacyConsultationType->id,
-                'unit_of_measure_id' => $bottleUnit->id,
-                'is_consultation_item' => 'No',
-                'is_stock_item' => 'Yes',
-                'balance' => 25,
-                'unit_buying_price' => 8.00,
-                'status' => 'Active',
-                'clinic_id' => $clinic_id,
-                'created_at' => $now,
-                'updated_at' => $now
-            ],
-            [
-                'name' => 'Antibiotic Eye Drops',
-                'code' => 'EYE-ANTIBIOTIC-001',
-                'item_type_id' => $pharmaceuticalItemType->id,
-                'consultation_type_id' => $pharmacyConsultationType->id,
-                'unit_of_measure_id' => $bottleUnit->id,
+                'name' => 'Glass Ionomer Cement',
+                'code' => 'GIC-001',
+                'item_type_id' => $dentalMaterialsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $kitUnit->id,
                 'is_consultation_item' => 'No',
                 'is_stock_item' => 'Yes',
                 'balance' => 15,
@@ -224,35 +84,160 @@ class SampleItemsSeeder extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now
             ],
+            [
+                'name' => 'Impression Material (Alginate)',
+                'code' => 'IMP-ALGINATE-001',
+                'item_type_id' => $dentalMaterialsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 40,
+                'unit_buying_price' => 8.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
+                'name' => 'Dental Bonding Agent',
+                'code' => 'BOND-001',
+                'item_type_id' => $dentalMaterialsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 20,
+                'unit_buying_price' => 22.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
         ];
 
-        // Sample Procedure Items
+        $dentalProstheticItems = [
+            [
+                'name' => 'Acrylic Denture Base',
+                'code' => 'DENT-ACRYLIC-001',
+                'item_type_id' => $dentalProstheticsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 10,
+                'unit_buying_price' => 35.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
+                'name' => 'Porcelain Crown',
+                'code' => 'CROWN-PORC-001',
+                'item_type_id' => $dentalProstheticsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 8,
+                'unit_buying_price' => 65.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
+                'name' => 'Metal Crown',
+                'code' => 'CROWN-METAL-001',
+                'item_type_id' => $dentalProstheticsType->id,
+                'consultation_type_id' => $dentalLabConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 12,
+                'unit_buying_price' => 45.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+        ];
+
+        $pharmacyItems = [
+            [
+                'name' => 'Amoxicillin 500mg',
+                'code' => 'AMOX-500-001',
+                'item_type_id' => $pharmaceuticalItemType->id,
+                'consultation_type_id' => $pharmacyConsultationType->id,
+                'unit_of_measure_id' => $mgUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 100,
+                'unit_buying_price' => 5.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
+                'name' => 'Metronidazole 400mg',
+                'code' => 'METRO-400-001',
+                'item_type_id' => $pharmaceuticalItemType->id,
+                'consultation_type_id' => $pharmacyConsultationType->id,
+                'unit_of_measure_id' => $mgUnit->id,
+                'is_consultation_item' => 'No',
+                'is_stock_item' => 'Yes',
+                'balance' => 80,
+                'unit_buying_price' => 4.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+        ];
+
         $procedureItems = [
             [
-                'name' => 'Eye Examination',
-                'code' => 'PROC-EYE-EXAM-001',
+                'name' => 'Dental Check-up',
+                'code' => 'PROC-CHECKUP-001',
                 'item_type_id' => $serviceItemType->id,
                 'consultation_type_id' => $procedureConsultationType->id,
                 'unit_of_measure_id' => $pcUnit->id,
                 'is_consultation_item' => 'Yes',
                 'is_stock_item' => 'No',
                 'balance' => null,
-                'unit_buying_price' => 50.00,
+                'unit_buying_price' => 20.00,
                 'status' => 'Active',
                 'clinic_id' => $clinic_id,
                 'created_at' => $now,
                 'updated_at' => $now
             ],
             [
-                'name' => 'Glaucoma Screening',
-                'code' => 'PROC-GLAUCOMA-001',
+                'name' => 'Dental X-Ray',
+                'code' => 'PROC-XRAY-001',
                 'item_type_id' => $serviceItemType->id,
                 'consultation_type_id' => $procedureConsultationType->id,
                 'unit_of_measure_id' => $pcUnit->id,
                 'is_consultation_item' => 'Yes',
                 'is_stock_item' => 'No',
                 'balance' => null,
-                'unit_buying_price' => 75.00,
+                'unit_buying_price' => 35.00,
+                'status' => 'Active',
+                'clinic_id' => $clinic_id,
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+            [
+                'name' => 'Teeth Cleaning (Scaling)',
+                'code' => 'PROC-SCALE-001',
+                'item_type_id' => $serviceItemType->id,
+                'consultation_type_id' => $procedureConsultationType->id,
+                'unit_of_measure_id' => $pcUnit->id,
+                'is_consultation_item' => 'Yes',
+                'is_stock_item' => 'No',
+                'balance' => null,
+                'unit_buying_price' => 25.00,
                 'status' => 'Active',
                 'clinic_id' => $clinic_id,
                 'created_at' => $now,
@@ -260,28 +245,25 @@ class SampleItemsSeeder extends Seeder
             ],
         ];
 
-        // Combine all items
-        $allItems = array_merge($glassItems, $frameItems, $pharmacyItems, $procedureItems);
+        $allItems = array_merge($dentalMaterialItems, $dentalProstheticItems, $pharmacyItems, $procedureItems);
 
-        // Insert items
         foreach ($allItems as $itemData) {
             $item = Item::create($itemData);
 
-            // Create default price for Cash payment mode
             if ($cashPaymentMode) {
                 ItemPrice::create([
                     'item_id' => $item->id,
                     'payment_mode_id' => $cashPaymentMode->id,
-                    'unit_price' => $itemData['unit_buying_price'] * 1.5, // 50% markup
+                    'unit_price' => $itemData['unit_buying_price'] * 1.5,
                     'created_at' => $now,
                     'updated_at' => $now
                 ]);
             }
         }
 
-        $this->command->info('Sample items created successfully!');
-        $this->command->info('Created ' . count($glassItems) . ' glass items (lenses)');
-        $this->command->info('Created ' . count($frameItems) . ' glass items (frames)');
+        $this->command->info('Sample dental items created successfully!');
+        $this->command->info('Created ' . count($dentalMaterialItems) . ' dental material items');
+        $this->command->info('Created ' . count($dentalProstheticItems) . ' dental prosthetic items');
         $this->command->info('Created ' . count($pharmacyItems) . ' pharmacy items');
         $this->command->info('Created ' . count($procedureItems) . ' procedure items');
     }

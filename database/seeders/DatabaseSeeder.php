@@ -98,7 +98,7 @@ class DatabaseSeeder extends Seeder
             ['user_id' => 1, 'privilege' => 'reception'],
             ['user_id' => 1, 'privilege' => 'payment_center'],
             ['user_id' => 1, 'privilege' => 'consultation_room'],
-            ['user_id' => 1, 'privilege' => 'optician_center'],
+            ['user_id' => 1, 'privilege' => 'dental_lab'],
             ['user_id' => 1, 'privilege' => 'medicine_center'],
             ['user_id' => 1, 'privilege' => 'procedure_room'],
             ['user_id' => 1, 'privilege' => 'other_dispensing'],
@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
 
         ConsultationType::insert([
             ['name' => 'Pharmacy', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Glass', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Dental Lab', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Procedure', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Others', 'created_at' => $now, 'updated_at' => $now],
         ]);
@@ -141,14 +141,14 @@ class DatabaseSeeder extends Seeder
         ItemType::insert([
             ['name' => 'Service', 'description' => 'Serviced Item', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Pharmaceutical', 'description' => 'Pharmaceutical and Consumable Item', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Lens', 'description' => 'Lens Item', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Frame', 'description' => 'Frame Item', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Dental Materials', 'description' => 'Dental consumable materials', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Dental Prosthetics', 'description' => 'Dental prosthetic items (crowns, bridges, dentures)', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Others', 'description' => 'Other Item', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         Preference::insert([
             ['clinic_id' => 1, 'key' => 'CONSULTATION_MESSAGE', 'value' => 'Habari {name}, Hongera na asante kwa kupata huduma kwetu. Ni tumaini letu umepata huduma stahiki. Kwa maoni kuhusu huduma zetu tuma ujumbe au piga simu namba 0676 506 323. Karibu sana.'],
-            ['clinic_id' => 1, 'key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya macho yako. Wasiliana nasi 0676 506 323.'],
+            ['clinic_id' => 1, 'key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya meno yako. Wasiliana nasi 0676 506 323.'],
             ['clinic_id' => 1, 'key' => 'SEND_MESSAGES', 'value' => 'No'],
             ['clinic_id' => 1, 'key' => 'SEND_REMINDER_MESSAGES_AT', 'value' => '11:00'],
             ['clinic_id' => 1, 'key' => 'SMS_SENDER_NAME', 'value' => 'INFO'],

@@ -34,7 +34,6 @@ class ItemsController extends Controller
             $q = $request->q;
             $item_type_id = $request->item_type_id;
             $item_type = $request->item_type;
-            $lens_type_id = $request->lens_type_id;
             $consultation_type_id = $request->consultation_type_id;
             $consultation_type = $request->consultation_type;
             $is_consultation_item = $request->is_consultation_item;
@@ -44,7 +43,7 @@ class ItemsController extends Controller
             $date = $request->date;
             $end_date = $request->end_date;
 
-            $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])
+            $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'prices'])
                 ->withCount(['dispensations as dispensed_count' => function ($query) use ($date, $end_date, $include_all_stock) {
                     if ($include_all_stock === 'Yes') {
                         // Show all-time dispensations for stock management pages
@@ -89,10 +88,6 @@ class ItemsController extends Controller
                 
                 // Note: has_expiry and expiry_date columns don't exist in items table
                 // Removed expiry filtering for now
-            }
-
-            if ($lens_type_id) {
-                $data->where('lens_type_id', $lens_type_id);
             }
 
             if ($consultation_type_id) {
@@ -181,7 +176,6 @@ class ItemsController extends Controller
             'item_type_id' => 'required|exists:item_types,id',
             'consultation_type_id' => 'required|exists:consultation_types,id',
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
-            'lens_type_id' => 'nullable|exists:lens_types,id',
             'is_consultation_item' => 'required|in:Yes,No',
             'is_stock_item' => 'required|in:Yes,No',
             'balance' => 'nullable|numeric|min:0',
@@ -196,7 +190,6 @@ class ItemsController extends Controller
             'item_type_id',
             'consultation_type_id',
             'unit_of_measure_id',
-            'lens_type_id',
             'is_consultation_item',
             'is_stock_item',
             'balance',
@@ -242,7 +235,7 @@ class ItemsController extends Controller
      */
     public function show($id)
     {
-        $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])->findOrFail($id);
+        $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'prices'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -261,7 +254,6 @@ class ItemsController extends Controller
             'item_type_id' => 'sometimes|required|exists:item_types,id',
             'consultation_type_id' => 'sometimes|required|exists:consultation_types,id',
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
-            'lens_type_id' => 'nullable|exists:lens_types,id',
             'is_consultation_item' => 'sometimes|required|in:Yes,No',
             'is_stock_item' => 'sometimes|required|in:Yes,No',
             'balance' => 'nullable|numeric|min:0',

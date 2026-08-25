@@ -176,11 +176,6 @@ const Items = () => {
                 valueGetter: (item, index) => item.unit_of_measure?.name,
               },
               {
-                field: "lens_type_id",
-                headerName: "Lens Type",
-                valueGetter: (item, index) => item.lens_type?.name,
-              },
-              {
                 field: "prices",
                 headerName: "Prices",
                 renderCell: (item) => (

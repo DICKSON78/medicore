@@ -58,7 +58,6 @@ const Stocktaking = () => {
   const [reason, setReason] = useState();
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
-  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState();
   const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
@@ -67,14 +66,6 @@ const Stocktaking = () => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const isMedicine = itemType === "Pharmaceutical" || itemType === "Medicine";
-
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
-    "api/lens-types",
-    { status: "Active", per_page: 500 },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
 
   const {
     data: regularItems,
@@ -89,7 +80,6 @@ const Stocktaking = () => {
       include_all_stock: "Yes",
       q: itemName,
       item_type: itemType,
-      lens_type_id: lensTypeId,
     },
     false,
     [],
@@ -125,18 +115,13 @@ const Stocktaking = () => {
   }, []);
 
   useEffect(() => {
-    if (itemType !== "Lens") setLensTypeId(null);
-    if (itemType === "Lens") fetchLensTypes();
-  }, [itemType]);
-
-  useEffect(() => {
     if (!itemType) return;
     if (isMedicine) {
       fetchMedicineItems();
     } else {
       fetchRegularItems();
     }
-  }, [itemName, itemType, lensTypeId]);
+  }, [itemName, itemType]);
 
   useEffect(() => {
     if (data) {
@@ -289,21 +274,9 @@ const Stocktaking = () => {
                     placeholder="Item Type"
                     fullWidth
                     clearable
-                    options={["Medicine", "Pharmaceutical", "Lens", "Frame", "Equipment", "Materials", "Others", "Service"]}
+                    options={["Medicine", "Pharmaceutical", "Dental Materials", "Dental Prosthetics", "Equipment", "Materials", "Others", "Service"]}
                     onChange={(value) => { setItemType(value); setSelectedItem(null); }}
                   />
-                  {itemType === "Lens" && (
-                    <Select
-                      placeholder="Lens Type"
-                      fullWidth
-                      clearable
-                      options={lensTypes}
-                      optionsLabel="name"
-                      optionsValue="id"
-                      onChange={(value) => setLensTypeId(value)}
-                      containerProps={{ mt: 2 }}
-                    />
-                  )}
                 </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "35vh", overflowY: "auto" }}>

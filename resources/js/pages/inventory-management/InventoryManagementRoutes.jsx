@@ -5,7 +5,7 @@ import Stocktaking from "./Stocktaking";
 import StockOut from "./StockOut";
 import StockMovements from "./StockMovements";
 import StockAlerts from "./StockAlerts";
-import LensStock from "./LensStock";
+import DentalMaterialsStock from "./DentalMaterialsStock";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
 const InventoryManagementRoutes = () => {
@@ -32,8 +32,8 @@ const InventoryManagementRoutes = () => {
         element={<StockAlerts />}
       />
       <Route
-        path="lens-stock"
-        element={<LensStock />}
+        path="dental-materials-stock"
+        element={<DentalMaterialsStock />}
       />
       <Route
         path="reports/*"
