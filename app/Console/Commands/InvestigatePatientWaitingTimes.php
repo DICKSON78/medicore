@@ -60,7 +60,6 @@ class InvestigatePatientWaitingTimes extends Command
                 $this->line("Consultation Found:");
                 $this->line("  - ID: {$consultation->id}");
                 $this->line("  - Status: {$consultation->status}");
-                $this->line("  - Require Glass: " . ($consultation->require_glass ?: 'Not set'));
                 $this->line("  - Patient to Return: " . ($consultation->patient_to_return ?: 'Not set'));
                 $this->line("  - Sent to Dental Lab: " . ($consultation->sent_to_dental_lab_at ?: 'Not set'));
                 
@@ -153,9 +152,6 @@ class InvestigatePatientWaitingTimes extends Command
             }
             if (!$hasBeenToDispensing && $patient->current_department !== 'dispensing') {
                 $this->warn("  - Patient has not been to dispensing yet");
-            }
-            if ($patient->current_department === 'consultation' && $consultation && $consultation->require_glass === 'Yes') {
-                $this->warn("  - Patient needs glasses and is in consultation (should go to dispensing)");
             }
             
             $this->line("=== END INVESTIGATION ===");

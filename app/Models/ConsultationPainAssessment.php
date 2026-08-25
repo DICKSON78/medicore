@@ -6,14 +6,19 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConsultationRefraction extends Model
+class ConsultationPainAssessment extends Model
 {
     use HasFactory;
 
+    protected $table = 'consultation_pain_assessments';
+
     protected $fillable = [
-        'consultation_id', 'ob_re_sph', 'ob_re_cyl', 'ob_re_axis', 'ob_re_va', 'ob_le_sph', 'ob_le_cyl', 'ob_le_axis',
-        'ob_le_va', 'sub_re_sph', 'sub_re_cyl', 'sub_re_axis', 'sub_re_va', 'sub_re_add', 'sub_re_add_va', 'sub_le_sph',
-        'sub_le_cyl', 'sub_le_axis', 'sub_le_va', 'sub_le_add', 'sub_le_add_va', 'created_by',
+        'consultation_id',
+        'pain_level', 'pain_location', 'pain_type', 'pain_duration',
+        'pain_triggers', 'pain_relieving_factors', 'pain_radiation',
+        'swelling_level', 'swelling_location',
+        'numbness_location', 'numbness_severity',
+        'created_by',
     ];
 
     public function creator()

@@ -264,42 +264,6 @@ class PatientItemBillsController extends Controller
     {
         $consultation = $paymentCache->consultation;
 
-        $hasGlassItems = $paymentCache->items()
-            ->whereHas('consultation_type', function($query) {
-                $query->where('name', 'Glass');
-            })
-            ->count() > 0;
-
-        if (($consultation && $consultation->require_glass === 'Yes') || $hasGlassItems) {
-            $waitingTime->sendToConsultation();
-
-            if ($consultation && !$consultation->sent_to_optician_at) {
-                $consultation->update([
-                    'sent_to_optician_at' => now(),
-                    'sent_to_optician_by' => $consultation->creator_id ?? null,
-                ]);
-            }
-
-            if (!$consultation && $hasGlassItems) {
-                $glassItem = $paymentCache->items()
-                    ->whereHas('consultation_type', function($query) {
-                        $query->where('name', 'Glass');
-                    })
-                    ->first();
-
-                if ($glassItem) {
-                    \App\Models\Consultation::create([
-                        'patient_id' => $waitingTime->patient_id,
-                        'payment_cache_id' => $paymentCache->id,
-                        'require_glass' => 'Yes',
-                        'sent_to_optician_at' => now(),
-                        'created_by' => auth()->id(),
-                    ]);
-                }
-            }
-            return;
-        }
-
         $pendingItems = $paymentCache->items()
             ->where('status', '!=', 'Served')
             ->count();

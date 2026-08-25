@@ -7,15 +7,12 @@ export const useStaticNotifications = () => {
     waiting_patients: 0,
     vip_patients: 0,
     patients_to_return: 0,
-    spectacle_patients: 0,
     completed_patients: 0,
     procedure_requests: 0,
     other_dispensing_requests: 0,
     patients_sent_to_cashier: 0,
     credit_patients_approval: 0,
     patients_sent_to_doctor: 0,
-    patients_sent_to_optician: 0,
-    glass_dispensing_requests: 0,
     dispensing_requests: 0,
   };
 

@@ -21,7 +21,6 @@ import Footer from "../../../components/pdf/Footer";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table, { styles as tableStyles } from "../../../components/pdf/Table";
 import { PDFReportPage as SurgeryRecordReportPage } from "./SurgeryRecordReportPDF";
-import { PDFReportPage as CataractSurgeryRecordPage } from "./CataractSurgeryRecordPDF";
 
 import { getAge } from "../../../helpers";
 import useFetch from "../../../hooks/useFetch";
@@ -82,7 +81,7 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
       return "Not Paid";
     }
 
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
+    if (consultationType === "Pharmacy") {
       if (status === "Served") {
         return "Dispensed";
       }
@@ -182,7 +181,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 consultation.payment_cache_item.served_at ||
                 consultation.created_at,
             },
-            { label: "Require Spectacle", value: consultation.require_glass },
             { label: "To Return", value: consultation.patient_to_return },
             { label: "Return Date", value: consultation.to_return_date },
           ]}
@@ -200,10 +198,8 @@ const PDFReportDocument = ({ consultation, patient }) => {
             { label: "History of Present Illness", value: consultation.history_present_illness },
             { label: "Family History", value: consultation.family_history },
             { label: "General Health", value: consultation.general_health },
-            { label: "Family Ocular History", value: consultation.family_ocular_history },
+            { label: "Family Dental History", value: consultation.family_dental_history },
             { label: "Family General History", value: consultation.family_general_history },
-            { label: "Pupils", value: consultation.pupils },
-            { label: "EOM", value: consultation.extra_ocular_muscles },
             { label: "Remarks", value: consultation.remarks },
           ]}
           containerStyle={{ marginBottom: 8 }}
@@ -282,7 +278,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
                     { fontWeight: "bold" },
                   ]}
                 >
-                  FOH
+                  FDH
                 </Text>
                 <Text
                   style={[
@@ -299,405 +295,20 @@ const PDFReportDocument = ({ consultation, patient }) => {
                   {consultation.general_health}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_ocular_history}
+                  {consultation.family_dental_history}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
                   {consultation.family_general_history}
                 </Text>
               </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  Pupils
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  EOM
-                </Text>
-                <View style={tableStyles.tableCell} />
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.pupils}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.extra_ocular_muscles}
-                </Text>
-                <View style={tableStyles.tableCell} />
-              </View>
             </View>
           </React.Fragment>
         ) : null}
 
-        {consultation.visual_acuity ? (
+        {consultation.pain_assessment ? (
           <React.Fragment>
             <Subheader
-              title="Visual Acuity (VA)"
-              style={{ marginBottom: 8 }}
-            />
-
-            <View style={[tableStyles.table, { marginBottom: 8 }]}>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]} />
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  Unaided
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  Aided
-                </Text>
-              </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]} />
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  RE
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  LE
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  RE
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  LE
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCellNoFlex,
-                    { width: 64 },
-                  ]}
-                >
-                  VA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.unaided_re_va}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.unaided_le_va}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.aided_re_va}{" "}
-                  {consultation.visual_acuity.aided_re_va_description}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.aided_le_va}{" "}
-                  {consultation.visual_acuity.aided_le_va_description}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCellNoFlex,
-                    { width: 64 },
-                  ]}
-                >
-                  PH
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.unaided_re_ph}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.unaided_le_ph}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCellNoFlex,
-                    { width: 64 },
-                  ]}
-                >
-                  IPD
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.visual_acuity.unaided_ipd}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
-              </View>
-            </View>
-          </React.Fragment>
-        ) : null}
-
-        {consultation.external_examination ? (
-          <React.Fragment>
-            <Subheader
-              title="External Examination"
-              style={{ marginBottom: 8 }}
-            />
-
-            <View style={[tableStyles.table, { marginBottom: 8 }]}>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCell, { flex: 0.25 }]} />
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  RE
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  LE
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  LID
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_lid}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_lid}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  SCRELA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_sclera}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_sclera}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  CORNEA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_cornea}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_cornea}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  CONJUCTIVA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_conjuctiva}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_conjuctiva}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  IRIS
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_iris}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_iris}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  PUPIL
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_pupil}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_pupil}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  LENS
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_lens}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_lens}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}
-                >
-                  IOP
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.re_iop}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.external_examination.le_iop}
-                </Text>
-              </View>
-            </View>
-          </React.Fragment>
-        ) : null}
-
-        {consultation.functional_tests ? (
-          <React.Fragment>
-            <Subheader
-              title="Functional Tests"
-              style={{ marginBottom: 8 }}
-            />
-
-            <View style={[tableStyles.table, { marginBottom: 8 }]}>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCell, { flex: 0.3 }]} />
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  RE
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  LE
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}
-                >
-                  NPC
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.re_npc}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.le_npc}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}
-                >
-                  NPA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.re_npa}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.le_npa}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}
-                >
-                  CONFRONTATION
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.re_confrontation}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.le_confrontation}
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text
-                  style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}
-                >
-                  COVER TEST
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.re_cover_test}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.functional_tests.le_cover_test}
-                </Text>
-              </View>
-            </View>
-          </React.Fragment>
-        ) : null}
-
-        {consultation.refraction ? (
-          <React.Fragment>
-            <Subheader
-              title="Refraction Details (Subjective)"
+              title="Pain Assessment"
               style={{ marginBottom: 8 }}
             />
 
@@ -710,7 +321,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
                     { fontWeight: "bold" },
                   ]}
                 >
-                  RE
+                  Assessment
                 </Text>
                 <Text
                   style={[
@@ -719,199 +330,138 @@ const PDFReportDocument = ({ consultation, patient }) => {
                     { fontWeight: "bold" },
                   ]}
                 >
-                  LE
+                  Finding
                 </Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  SPH
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  CYL
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  AXIS
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  VA
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  SPH
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  CYL
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  AXIS
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  VA
-                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>Pain Level</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pain_assessment.pain_level}</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_sph}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_cyl}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_axis}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_va}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_sph}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_cyl}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_axis}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_va}
-                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>Pain Location</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pain_assessment.pain_location}</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  ADD
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  VA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  ADD
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  VA
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
+                <Text style={[styles.text, tableStyles.tableCell]}>Pain Type</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pain_assessment.pain_type}</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_add}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_re_add_va}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_add}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.refraction.sub_le_add_va}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]} />
-                <Text style={[styles.text, tableStyles.tableCell]} />
+                <Text style={[styles.text, tableStyles.tableCell]}>Pain Duration</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pain_assessment.pain_duration}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Pain Triggers</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pain_assessment.pain_triggers}</Text>
               </View>
             </View>
           </React.Fragment>
         ) : null}
 
-        {consultation.fundoscopy ? (
+        {consultation.dental_facial_assessment ? (
           <React.Fragment>
             <Subheader
-              title="Fundoscopy"
+              title="Facial & TMJ Assessment"
               style={{ marginBottom: 8 }}
             />
 
-            <Table
-              containerStyle={{ marginBottom: 8 }}
-              columns={[
-                {
-                  field: "re",
-                  headerName: "RE",
-                },
-                {
-                  field: "le",
-                  headerName: "LE",
-                },
-              ]}
-              items={[
-                {
-                  re: consultation.fundoscopy.re,
-                  le: consultation.fundoscopy.le,
-                },
-              ]}
+            <View style={[tableStyles.table, { marginBottom: 8 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  Assessment
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  Finding
+                </Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Facial Symmetry</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.facial_symmetry}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Right TMJ</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.right_tmj_tenderness}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Left TMJ</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.left_tmj_tenderness}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Submandibular Nodes</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.submandibular_lymph_nodes}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Lip Competence</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.lip_competence}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Palate Shape</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_facial_assessment.palate_shape}</Text>
+              </View>
+            </View>
+          </React.Fragment>
+        ) : null}
+
+        {consultation.dental_functional_assessment ? (
+          <React.Fragment>
+            <Subheader
+              title="Functional Assessment"
+              style={{ marginBottom: 8 }}
             />
+
+            <View style={[tableStyles.table, { marginBottom: 8 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  Assessment
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  Finding
+                </Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Mouth Opening</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_functional_assessment.maximum_mouth_opening}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Bite Classification</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_functional_assessment.bite_classification}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Overjet</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_functional_assessment.overjet}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Overbite</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_functional_assessment.overbite}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>Centric Relation</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.dental_functional_assessment.centric_relation}</Text>
+              </View>
+            </View>
           </React.Fragment>
         ) : null}
 
@@ -963,22 +513,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
             <ConsultationItemsCard
               title="Procedure"
               consultationType="Procedure"
-              items={consultation.items}
-            />
-          </View>
-          <View
-            style={{
-              width: "50%",
-              paddingLeft:
-                consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
-              paddingRight:
-                consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
-              marginBottom: 8,
-            }}
-          >
-            <ConsultationItemsCard
-              title="Glass"
-              consultationType="Glass"
               items={consultation.items}
             />
           </View>
@@ -1042,14 +576,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
           {consultation.templates?.surgery_record_report ? (
             <SurgeryRecordReportPage
               surgeryRecordReport={consultation.templates.surgery_record_report}
-              patient={patient}
-            />
-          ) : null}
-          {consultation.templates?.cataract_surgery_record ? (
-            <CataractSurgeryRecordPage
-              cataractSurgeryRecord={
-                consultation.templates.cataract_surgery_record
-              }
               patient={patient}
             />
           ) : null}

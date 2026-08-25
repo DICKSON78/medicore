@@ -4,7 +4,6 @@ import Dashboard from "./dashboard/Dashboard";
 import Patients from "./patients/Patients";
 import CheckInPatient from "./CheckInPatient";
 import PatientRecords from "./patients/PatientRecords";
-import GlassPatientsRoutes from "./glass-patients/GlassPatientsRoutes";
 import PatientsToReturn from "./patients-to-return/PatientsToReturn";
 import SentMessages from "./sent-messages/Messages";
 import ReportsRoutes from "./reports/ReportsRoutes";
@@ -38,10 +37,6 @@ const ReceptionRoutes = () => {
       <Route
         path="/patient-waiting-time"
         element={<PatientWaitingTime />}
-      />
-      <Route
-        path="/glass-patients/*"
-        element={<GlassPatientsRoutes />}
       />
       <Route
         path="/to-return/patients"

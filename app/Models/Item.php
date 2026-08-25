@@ -11,7 +11,7 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'clinic_id', 'name', 'code', 'item_type_id', 'consultation_type_id', 'unit_of_measure_id', 'lens_type_id',
+        'clinic_id', 'name', 'code', 'item_type_id', 'consultation_type_id', 'unit_of_measure_id',
         'is_consultation_item', 'is_stock_item', 'balance', 'new_balance', 'unit_buying_price', 'templates', 'status',
         'expiry_date', 'has_expiry', 'minimum_stock',
     ];
@@ -34,11 +34,6 @@ class Item extends Model
     public function unit_of_measure()
     {
         return $this->belongsTo(UnitOfMeasure::class, 'unit_of_measure_id');
-    }
-
-    public function lens_type()
-    {
-        return $this->belongsTo(LensType::class, 'lens_type_id');
     }
 
     public function prices()

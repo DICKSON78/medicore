@@ -46,7 +46,6 @@ const PendingCashPatients = () => {
       view_period: 'daily',
       start_date: dateRange.start_date,
       end_date: dateRange.end_date,
-      include_optician_glass: true,
     };
   });
 

@@ -30,11 +30,11 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import Select from "../../../components/Select";
 import DiagnosisCard from "./DiagnosisCard";
 import SelectDiagnoses from "./SelectDiagnoses";
-import ExternalExamination from "./ExternalExamination";
-import FunctionalTests from "./FunctionalTests";
-import VisualAcuity from "./VisualAcuity";
-import Refraction from "./Refraction";
-import Fundoscopy from "./Fundoscopy";
+import DentalFacialAssessment from "./DentalFacialAssessment";
+import DentalFunctionalAssessment from "./DentalFunctionalAssessment";
+import DentalPainAssessment from "./DentalPainAssessment";
+import PatientAllergies from "./PatientAllergies";
+import PatientMedicalHistory from "./PatientMedicalHistory";
 import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
@@ -82,15 +82,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const historyPresentIllnessRef = useRef();
   const familyHistoryRef = useRef();
   const generalHealthRef = useRef();
-  const familyOcularHistoryRef = useRef();
+  const familyDentalHistoryRef = useRef();
   const familyGeneralHistoryRef = useRef();
-  const pupilsRef = useRef();
-  const extraOcularMusclesRef = useRef();
-  const visualAcuityRef = useRef();
-  const externalExaminationRef = useRef();
-  const functionalTestsRef = useRef();
-  const refractionRef = useRef();
-  const fundoscopyRef = useRef();
+  const facialAssessmentRef = useRef();
+  const dentalFunctionalAssessmentRef = useRef();
+  const painAssessmentRef = useRef();
   const patientToReturnDateRef = useRef();
   const patientToReturnTimeRef = useRef();
   const remarksRef = useRef();
@@ -252,12 +248,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
             `api/consultations/${consultation.id}/complete-clinical-notes`,
             {
               ...formData,
-              visual_acuity: visualAcuityRef.current.getFormData(),
-              external_examination:
-                externalExaminationRef.current.getFormData(),
-              functional_tests: functionalTestsRef.current.getFormData(),
-              refraction: refractionRef.current.getFormData(),
-              fundoscopy: fundoscopyRef.current.getFormData(),
+              facial_assessment: facialAssessmentRef.current.getFormData(),
+              dental_functional_test: dentalFunctionalAssessmentRef.current.getFormData(),
+              pain_assessment: painAssessmentRef.current.getFormData(),
               to_return_date: formData.to_return_date
                 ? formatDateForDb(formData.to_return_date)
                 : undefined,
@@ -442,20 +435,20 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     </TableCell>
                     <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
-                        ref={familyOcularHistoryRef}
+                        ref={familyDentalHistoryRef}
                         fullWidth
                         multiline
                         rows={3}
                         variant="outlined"
                         size="small"
-                        placeholder="Family Ocular History"
-                        defaultValue={formData.family_ocular_history}
+                        placeholder="Family Dental History"
+                        defaultValue={formData.family_dental_history}
                         onChange={(value) => {
                           setFormData({
                             ...formData,
-                            family_ocular_history: value,
+                            family_dental_history: value,
                           });
-                          autoSave("family_ocular_history", value);
+                          autoSave("family_dental_history", value);
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -497,7 +490,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Table>
             </Box>
 
-            {/* Third Row - Pupils, EOM */}
+            {/* Third Row - Oral Hygiene, Tobacco, Alcohol */}
             <Box sx={{ 
               border: '1px solid #B2DFDB', 
               borderRadius: 2, 
@@ -507,26 +500,25 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Table sx={{ width: '100%' }}>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#E0F2F1' }}>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>Pupils</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>EOM</TableCell>
-                    <TableCell sx={{ border: '1px solid #B2DFDB' }}></TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>Oral Hygiene</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>Tobacco Use</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', border: '1px solid #B2DFDB' }}>Alcohol Use</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
                     <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
-                        ref={pupilsRef}
                         fullWidth
                         multiline
                         rows={3}
                         variant="outlined"
                         size="small"
-                        placeholder="Pupils Examination"
-                        defaultValue={formData.pupils}
+                        placeholder="Oral Hygiene Status"
+                        defaultValue={formData.oral_hygiene_status}
                         onChange={(value) => {
-                          setFormData({ ...formData, pupils: value });
-                          autoSave("pupils", value);
+                          setFormData({ ...formData, oral_hygiene_status: value });
+                          autoSave("oral_hygiene_status", value);
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -539,20 +531,16 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     </TableCell>
                     <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
                       <TextField
-                        ref={extraOcularMusclesRef}
                         fullWidth
                         multiline
                         rows={3}
                         variant="outlined"
                         size="small"
-                        placeholder="Extraocular Movements"
-                        defaultValue={formData.extra_ocular_muscles}
+                        placeholder="Tobacco Use"
+                        defaultValue={formData.tobacco_use}
                         onChange={(value) => {
-                          setFormData({
-                            ...formData,
-                            extra_ocular_muscles: value,
-                          });
-                          autoSave("extra_ocular_muscles", value);
+                          setFormData({ ...formData, tobacco_use: value });
+                          autoSave("tobacco_use", value);
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -563,39 +551,76 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ border: '1px solid #B2DFDB' }}></TableCell>
+                    <TableCell sx={{ border: '1px solid #B2DFDB', p: 1 }}>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        variant="outlined"
+                        size="small"
+                        placeholder="Alcohol Use"
+                        defaultValue={formData.alcohol_use}
+                        onChange={(value) => {
+                          setFormData({ ...formData, alcohol_use: value });
+                          autoSave("alcohol_use", value);
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                              border: 'none',
+                            },
+                          },
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </Box>
 
-            <Subheader title="Visual Acuity (VA)" />
-            <VisualAcuity
-              ref={visualAcuityRef}
+            <Subheader title="Patient Allergies" />
+            <Box sx={{ 
+              border: '1px solid #B2DFDB', 
+              borderRadius: 2, 
+              overflow: 'hidden',
+              mb: 2,
+              p: 2,
+            }}>
+              <PatientAllergies
+                patientId={patient?.id}
+                consultationId={consultation.id}
+              />
+            </Box>
+
+            <Subheader title="Medical History" />
+            <Box sx={{ 
+              border: '1px solid #B2DFDB', 
+              borderRadius: 2, 
+              overflow: 'hidden',
+              mb: 2,
+              p: 2,
+            }}>
+              <PatientMedicalHistory
+                patientId={patient?.id}
+                consultationId={consultation.id}
+              />
+            </Box>
+
+            <Subheader title="Pain Assessment" />
+            <DentalPainAssessment
+              ref={painAssessmentRef}
               consultation={consultation}
             />
 
-            <Subheader title="External Examination" />
-            <ExternalExamination
-              ref={externalExaminationRef}
+            <Subheader title="Facial & TMJ Assessment" />
+            <DentalFacialAssessment
+              ref={facialAssessmentRef}
               consultation={consultation}
             />
 
-            <Subheader title="Functional Tests" />
-            <FunctionalTests
-              ref={functionalTestsRef}
-              consultation={consultation}
-            />
-
-            <Subheader title="Refraction Details" />
-            <Refraction
-              ref={refractionRef}
-              consultation={consultation}
-            />
-
-            <Subheader title="Fundoscopy" />
-            <Fundoscopy
-              ref={fundoscopyRef}
+            <Subheader title="Functional Assessment" />
+            <DentalFunctionalAssessment
+              ref={dentalFunctionalAssessmentRef}
               consultation={consultation}
             />
 
@@ -767,28 +792,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       />
                     </Grid>
                   )}
-                  {consultation.status === "Pending" && (
-                    <Grid item xs={12} md={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formData.require_glass === "Yes"}
-                            onChange={(event) => {
-                              const value = event.target.checked ? "Yes" : "No";
-                              setFormData({
-                                ...formData,
-                                require_glass: value,
-                              });
-                              autoSave("require_glass", value);
-                            }}
-                          />
-                        }
-                        label="Require Spectacle"
-                      />
-                    </Grid>
-                  )}
                 </Grid>
-              </Box>
+              </Grid>
+            </Box>
             </Box>
           </CardContent>
         </Form>

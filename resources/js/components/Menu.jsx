@@ -49,7 +49,7 @@ import {
   WindowRounded as DepartmentsIcon,
   HandshakeRounded as CollaboratorsIcon,
 } from "@mui/icons-material";
-import GlassPatientsIcon from "./icons/AddLens";
+
 
 const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
   const isSelected = () => {
@@ -265,13 +265,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/reception/vip-patients",
           badge: Number(notifications?.vip_patients) || 0,
           show: user.privileges.reception,
-        },
-        {
-          title: "Spectacle Patients",
-          icon: <GlassPatientsIcon />,
-          to: "/reception/glass-patients",
-          badge: Number(notifications?.spectacle_patients) || 0,
-          show: false,
         },
         {
           title: "Patient Waiting Time",
@@ -497,57 +490,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               icon: <ReportsIcon />,
               to: "/dental-lab/reports/lab-orders",
               show: user.privileges.dental_lab,
-            },
-          ],
-        },
-        {
-          title: "5. OPTICIAN CENTER",
-          subheader: true,
-          show: false,
-        },
-        {
-          title: "Optician Center Dashboard",
-          icon: <HomeIcon />,
-          to: "/optician-center/dashboard",
-          show: false,
-        },
-        {
-          title: "Patients Sent to Optician",
-          icon: <WaitingIcon />,
-          to: "/optician-center/glass-patients",
-          badge: Number(notifications?.patients_sent_to_optician) || 0,
-          show: false,
-        },
-        {
-          title: "Glass Dispensing Requests",
-          icon: <WaitingIcon />,
-          to: "/optician-center/dispensing-requests",
-          badge: Number(notifications?.glass_dispensing_requests) || 0,
-          show: false,
-        },
-        {
-          title: "Reports",
-          icon: <ReportsIcon />,
-          to: "/optician-center/reports",
-          show: false,
-          items: [
-            {
-              title: "Items Dispensed Report",
-              icon: <ReportsIcon />,
-              to: "/optician-center/reports/items-dispensed",
-              show: false,
-            },
-            {
-              title: "Items Not Dispensed Report",
-              icon: <ReportsIcon />,
-              to: "/optician-center/reports/items-not-dispensed",
-              show: false,
-            },
-            {
-              title: "Item Balance Report",
-              icon: <ReportsIcon />,
-              to: "/optician-center/reports/item-balance",
-              show: false,
             },
           ],
         },
@@ -1009,12 +951,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               icon: <SettingsIcon />,
               to: "/settings/item-management/units-of-measure",
               show: user.privileges.settings,
-            },
-            {
-              title: "Lens Types",
-              icon: <SettingsIcon />,
-              to: "/settings/item-management/lens-types",
-              show: false,
             },
             {
               title: "Items",

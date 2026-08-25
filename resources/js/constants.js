@@ -255,20 +255,36 @@ export const HMIS_CANCER_TYPES = [
   { label: "Other (Specify)", value: "Other" },
 ];
 
-export const CATARACT_SURGERY_RECORD_OPTIONS = {
-  eyeOptions: [
-    { label: "Right Eye (OD)", value: "OD" },
-    { label: "Left Eye (OS)", value: "OS" },
-    { label: "Both Eyes (OU)", value: "OU" },
-  ],
+export const DENTAL_SURGERY_RECORD_OPTIONS = {
   surgeryTypes: [
-    { label: "Phacoemulsification", value: "Phaco" },
-    { label: "ECCE", value: "ECCE" },
-    { label: "ICCE", value: "ICCE" },
+    { label: "Tooth Extraction", value: "Extraction" },
+    { label: "Surgical Extraction", value: "SurgicalExtraction" },
+    { label: "Root Canal Treatment", value: "RCT" },
+    { label: "Apicectomy", value: "Apicectomy" },
+    { label: "Dental Implant Placement", value: "ImplantPlacement" },
+    { label: "Bone Grafting", value: "BoneGrafting" },
+    { label: "Sinus Lift", value: "SinusLift" },
+    { label: "Gingivectomy", value: "Gingivectomy" },
+    { label: "Flap Surgery", value: "FlapSurgery" },
+    { label: "Cyst Enucleation", value: "CystEnucleation" },
+    { label: "Biopsy", value: "Biopsy" },
+    { label: "Orthognathic Surgery", value: "Orthognathic" },
   ],
-  lensTypes: [
-    { label: "Monofocal IOL", value: "Monofocal" },
-    { label: "Multifocal IOL", value: "Multifocal" },
-    { label: "Toric IOL", value: "Toric" },
+  anaesthesiaTypes: [
+    { label: "Local Anaesthesia", value: "Local" },
+    { label: "Regional Block (Inferior Alveolar)", value: "IANBlock" },
+    { label: "Greater Palatine Block", value: "PalatineBlock" },
+    { label: "General Anaesthesia", value: "General" },
+    { label: "IV Sedation", value: "IVSedation" },
+  ],
+  toothOptions: [
+    { label: "Upper Right (18-11)", value: "UpperRight" },
+    { label: "Upper Left (21-28)", value: "UpperLeft" },
+    { label: "Lower Left (31-38)", value: "LowerLeft" },
+    { label: "Lower Right (41-48)", value: "LowerRight" },
+    { label: "All Quadrants", value: "All" },
   ],
 };
+
+// Alias for backward compatibility (historical PDF generation)
+export const CATARACT_SURGERY_RECORD_OPTIONS = DENTAL_SURGERY_RECORD_OPTIONS;

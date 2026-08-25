@@ -272,9 +272,7 @@ class PatientWaitingTimesController extends Controller
                 $patientAnalysis['consultation'] = [
                     'id' => $consultation->id,
                     'status' => $consultation->status,
-                    'require_glass' => $consultation->require_glass,
                     'patient_to_return' => $consultation->patient_to_return,
-                    'sent_to_optician_at' => $consultation->sent_to_optician_at,
                 ];
 
                 // Check payment cache items

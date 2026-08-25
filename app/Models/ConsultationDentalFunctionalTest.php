@@ -6,13 +6,19 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConsultationExternalExamination extends Model
+class ConsultationDentalFunctionalTest extends Model
 {
     use HasFactory;
 
+    protected $table = 'consultation_dental_functional_tests';
+
     protected $fillable = [
-        'consultation_id', 're_lid', 're_sclera', 're_cornea', 're_conjuctiva', 're_iris', 're_pupil', 're_lens', 're_iop',
-        'le_lid', 'le_sclera', 'le_cornea', 'le_conjuctiva', 'le_iris', 'le_pupil', 'le_lens', 'le_iop', 'created_by',
+        'consultation_id',
+        'maximum_mouth_opening', 'lateral_excursion_right', 'lateral_excursion_left',
+        'protrusion', 'bite_force', 'bite_classification',
+        'occlusal_relationship', 'cross_bite', 'overjet', 'overbite',
+        'centric_relation', 'centric_occlusion',
+        'created_by',
     ];
 
     public function creator()

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CataractSurgeryRecordsController;
+use App\Http\Controllers\DentalSurgeryRecordsController;
 use App\Http\Controllers\ClinicsController;
 use App\Http\Controllers\ConsultationDiagnosesController;
 use App\Http\Controllers\ConsultationsController;
@@ -23,7 +23,7 @@ use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\JobTitlesController;
-use App\Http\Controllers\LensTypesController;
+
 use App\Http\Controllers\Marketing\CommunicationLogsController;
 use App\Http\Controllers\Marketing\DailyActivitiesController;
 use App\Http\Controllers\Marketing\EventsController;
@@ -71,7 +71,9 @@ use App\Http\Controllers\InventoryManagementDashboardController;
 use App\Http\Controllers\FinancialManagementDashboardController;
 use App\Http\Controllers\ProcedureRoomDashboardController;
 use App\Http\Controllers\ConsultationRoomDashboardController;
-use App\Http\Controllers\OpticianCenterDashboardController;
+use App\Http\Controllers\DentalLabDashboardController;
+use App\Http\Controllers\PatientAllergiesController;
+use App\Http\Controllers\PatientMedicalHistoriesController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -172,7 +174,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->get('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'show']);
     $router->put('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'update']);
     $router->delete('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'destroy']);
-    $router->apiResource('/lens-types', LensTypesController::class);
     $router->apiResource('/item-types', ItemTypesController::class);
     $router->apiResource('/consultation-types', ConsultationTypesController::class);
     $router->apiResource('/items', ItemsController::class);
@@ -210,7 +211,11 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
     });
     $router->apiResource('/surgery-record-reports', SurgeryRecordReportsController::class);
-    $router->apiResource('/cataract-surgery-records', CataractSurgeryRecordsController::class);
+    $router->apiResource('/dental-surgery-records', DentalSurgeryRecordsController::class);
+
+    // Patient allergies and medical history
+    $router->apiResource('/patient-allergies', PatientAllergiesController::class);
+    $router->apiResource('/patient-medical-histories', PatientMedicalHistoriesController::class);
 
     // Dental module routes
     $router->apiResource('/dental-oral-examinations', DentalOralExaminationsController::class);
@@ -305,10 +310,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     
     $router->prefix('dental-lab')->group(function ($router) {
         $router->get('/dashboard', [\App\Http\Controllers\DentalLabDashboardController::class, '__invoke']);
-    });
-    
-    $router->prefix('optician-center')->group(function ($router) {
-        $router->get('/dashboard', [OpticianCenterDashboardController::class, '__invoke']);
     });
     
     $router->prefix('medicine-center')->group(function ($router) {

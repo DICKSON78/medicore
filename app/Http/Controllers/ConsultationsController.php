@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Jobs\SendConsultationMessageJob;
-use App\Models\CataractSurgeryRecord;
+use App\Models\DentalSurgeryRecord;
 use App\Models\Consultation;
-use App\Models\ConsultationExternalExamination;
-use App\Models\ConsultationFunctionalTest;
-use App\Models\ConsultationFundoscopy;
-use App\Models\ConsultationRefraction;
-use App\Models\ConsultationVisualAcuity;
+use App\Models\ConsultationFacialAssessment;
+use App\Models\ConsultationDentalFunctionalTest;
+use App\Models\ConsultationPainAssessment;
 use App\Models\DentalOralExamination;
 use App\Models\DentalCharting;
 use App\Models\DentalTreatmentRecord;
@@ -30,12 +28,6 @@ class ConsultationsController extends Controller
 {
     use ApiResponse;
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         $request->validate([
@@ -52,10 +44,8 @@ class ConsultationsController extends Controller
         $clinic_id = $request->clinic_id;
         $with_diagnoses = $request->with_diagnoses;
         $status = $request->status;
-        $require_glass = $request->require_glass;
         $payment_cache_item_id = $request->payment_cache_item_id;
         $item_id = $request->item_id;
-        $patient_direction = $request->patient_direction;
         $consultant_id = $request->consultant_id;
         $patient_id = $request->patient_id;
         $patient_name = $request->patient_name;
@@ -65,24 +55,16 @@ class ConsultationsController extends Controller
         $to_return_date = $request->to_return_date;
         $view_period = $request->view_period ?? 'daily';
         $item_payment_mode_id = $request->item_payment_mode_id;
-
-        // Debug logging
-        \Log::info('ConsultationsController Debug', [
-            'patient_to_return' => $patient_to_return,
-            'to_return_date' => $to_return_date,
-            'view_period' => $view_period,
-            'all_params' => $request->all()
-        ]);
         $disease_id = $request->disease_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+
         $data = Consultation::with(['payment_cache_item' => function ($query) {
             $query->with(['payment_cache.check_in.patient' => function ($query2) {
                 $query2->with(['region', 'district', 'ward']);
             }]);
-
             $query->with(['item', 'payment_mode', 'consultant', 'consultation_type']);
-        }, 'creator', 'to_optician_sender']);
+        }, 'creator']);
 
         if ($with_diagnoses == 'Yes') {
             $data->with(['diagnoses.disease']);
@@ -90,7 +72,6 @@ class ConsultationsController extends Controller
 
         if ($user->is_admin) {
             $data->with(['creator.clinic']);
-
             if ($clinic_id) {
                 $data->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -103,39 +84,17 @@ class ConsultationsController extends Controller
         }
 
         if ($status) {
-            if ($status === 'Awaiting Glass') {
-                $data->where('require_glass', 'Yes')
-                    ->whereNull('sent_to_optician_at')
-                    ->where('patient_direction', '!=', 'Direct to Optician');
-            } else if ($status === 'Sent to Optician') {
-                $data->where(function ($query) {
-                    $query->where('require_glass', 'Yes')
-                          ->orWhereNotNull('sent_to_optician_at')
-                          ->orWhere('patient_direction', 'Direct to Optician');
-                })
-                ->whereHas('payment_cache_item', function ($query) {
-                    // Exclude patients whose items have been served/dispensed
-                    $query->where('status', '!=', 'Served');
-                });
-            } else if ($status === 'Pending') {
-                // For pending consultations, only show those that came from cashier flow
-                // (consultations created after payment with consultation items)
+            if ($status === 'Pending') {
                 $data->where('status', 'Pending')
                     ->whereHas('payment_cache_item', function ($query) {
-                        // Only show consultations for items that require consultation
                         $query->whereHas('item', function ($itemQuery) {
                             $itemQuery->where('is_consultation_item', 'Yes');
                         });
-                        // Ensure the payment cache item is paid (came from cashier)
                         $query->where('status', 'Paid');
                     });
             } else {
                 $data->where('status', $status);
             }
-        }
-
-        if ($require_glass) {
-            $data->where('require_glass', $require_glass);
         }
 
         if ($payment_cache_item_id) {
@@ -146,10 +105,6 @@ class ConsultationsController extends Controller
             $data->whereHas('payment_cache_item', function ($query) use ($item_id) {
                 $query->where('item_id', $item_id);
             });
-        }
-
-        if ($patient_direction) {
-            $data->where('patient_direction', $patient_direction);
         }
 
         if ($consultant_id) {
@@ -187,12 +142,9 @@ class ConsultationsController extends Controller
             $data->where('patient_to_return', $patient_to_return)
                 ->where(function ($query) use ($to_return_date, $now, $view_period) {
                     $query->whereNotNull('to_return_date');
-
                     if ($to_return_date) {
-                        // When specific date is selected, use that date regardless of view_period
                         $query->where('to_return_date', $to_return_date);
                     } else {
-                        // Apply view period filtering only when no specific date is selected
                         switch ($view_period) {
                             case 'daily':
                                 $query->where('to_return_date', $now);
@@ -227,41 +179,7 @@ class ConsultationsController extends Controller
         }
 
         if ($start_date) {
-            if ($status === 'Awaiting Glass') {
-                // For Awaiting Glass, show recent new patients (last few days)
-                $data->where(function ($query) use ($start_date) {
-                    $query->where(function ($query2) use ($start_date) {
-                        // For Direct to Optician patients, filter by when they were created recently
-                        $query2->where('patient_direction', 'Direct to Optician');
-                        $query2->whereDate('created_at', '>=', $start_date);
-                    });
-                    $query->orWhere(function ($query2) use ($start_date) {
-                        // For Direct to Doctor patients, filter by when they were created recently OR served recently
-                        $query2->where('patient_direction', 'Direct to Doctor');
-                        $query2->where(function ($query3) use ($start_date) {
-                            $query3->whereDate('created_at', '>=', $start_date);
-                            $query3->orWhereHas('payment_cache_item', function ($query4) use ($start_date) {
-                                $query4->whereNotNull('served_at');
-                                $query4->whereDate('served_at', '>=', $start_date);
-                            });
-                        });
-                    });
-                });
-            } elseif ($status === 'Sent to Optician') {
-                // For Sent to Optician, filter by date for both directly sent and doctor-sent patients
-                if ($start_date) {
-                    $data->where(function ($query) use ($start_date) {
-                        $query->where(function ($subQuery) use ($start_date) {
-                            $subQuery->whereNotNull('sent_to_optician_at');
-                            $subQuery->whereDate('sent_to_optician_at', '>=', $start_date);
-                        });
-                        $query->orWhere(function ($subQuery) use ($start_date) {
-                            $subQuery->where('patient_direction', 'Direct to Optician');
-                            $subQuery->whereDate('created_at', '>=', $start_date);
-                        });
-                    });
-                }
-            } elseif ($status === 'Consulted') {
+            if ($status === 'Consulted') {
                 $data->whereHas('payment_cache_item', function ($query) use ($start_date) {
                     $query->whereNotNull('served_at');
                     $query->whereDate('served_at', '>=', $start_date);
@@ -272,41 +190,7 @@ class ConsultationsController extends Controller
         }
 
         if ($end_date) {
-            if ($status === 'Awaiting Glass') {
-                // For Awaiting Glass, show recent new patients (last few days)
-                $data->where(function ($query) use ($end_date) {
-                    $query->where(function ($query2) use ($end_date) {
-                        // For Direct to Optician patients, filter by when they were created recently
-                        $query2->where('patient_direction', 'Direct to Optician');
-                        $query2->whereDate('created_at', '<=', $end_date);
-                    });
-                    $query->orWhere(function ($query2) use ($end_date) {
-                        // For Direct to Doctor patients, filter by when they were created recently OR served recently
-                        $query2->where('patient_direction', 'Direct to Doctor');
-                        $query2->where(function ($query3) use ($end_date) {
-                            $query3->whereDate('created_at', '<=', $end_date);
-                            $query3->orWhereHas('payment_cache_item', function ($query4) use ($end_date) {
-                                $query4->whereNotNull('served_at');
-                                $query4->whereDate('served_at', '<=', $end_date);
-                            });
-                        });
-                    });
-                });
-            } elseif ($status === 'Sent to Optician') {
-                // For Sent to Optician, filter by date for both directly sent and doctor-sent patients
-                if ($end_date) {
-                    $data->where(function ($query) use ($end_date) {
-                        $query->where(function ($subQuery) use ($end_date) {
-                            $subQuery->whereNotNull('sent_to_optician_at');
-                            $subQuery->whereDate('sent_to_optician_at', '<=', $end_date);
-                        });
-                        $query->orWhere(function ($subQuery) use ($end_date) {
-                            $subQuery->where('patient_direction', 'Direct to Optician');
-                            $subQuery->whereDate('created_at', '<=', $end_date);
-                        });
-                    });
-                }
-            } elseif ($status === 'Consulted') {
+            if ($status === 'Consulted') {
                 $data->whereHas('payment_cache_item', function ($query) use ($end_date) {
                     $query->whereNotNull('served_at');
                     $query->whereDate('served_at', '<=', $end_date);
@@ -317,18 +201,11 @@ class ConsultationsController extends Controller
         }
 
         $data->orderBy('created_at', 'desc');
-        
         $data = $data->paginate($per_page);
         
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
@@ -350,7 +227,6 @@ class ConsultationsController extends Controller
         $data = null;
         $user = $request->user();
 
-        // if item has price for the provided payment mode, continue
         $item = Item::where('id', $request->item_id)
             ->whereHas('prices', function ($query) use ($request) {
                 $query->where('payment_mode_id', $request->payment_mode_id);
@@ -361,7 +237,6 @@ class ConsultationsController extends Controller
             ->first();
 
         if ($item) {
-            // if this consultation has payment cache for this user use the existing one, otherwise create new
             $payment_cache = PatientPaymentCache::where('consultation_id', $request->consultation_id)
                 ->where('created_by', $user->id)
                 ->first();
@@ -396,7 +271,6 @@ class ConsultationsController extends Controller
             $data->item = $item;
             $data->status = 'Pending';
 
-            // Start treatment for patient waiting time tracking
             try {
                 $patient = $data->payment_cache_item->payment_cache->check_in->patient;
                 if ($patient) {
@@ -427,13 +301,6 @@ class ConsultationsController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param Request $request
-     * @param  int $id
-     * @return Response
-     */
     public function show(Request $request, $id)
     {
         try {
@@ -445,10 +312,9 @@ class ConsultationsController extends Controller
                     $query->with(['payment_cache.check_in.patient' => function ($query2) {
                         $query2->with(['region', 'district', 'ward']);
                     }]);
-
                     $query->with(['item', 'payment_mode', 'consultant', 'server']);
-                }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
-                'to_optician_sender',
+                }, 'creator',
+                'dental_facial_assessment', 'dental_functional_assessment', 'dental_pain_assessment',
                 'dental_oral_examination', 'dental_charting', 'dental_treatment_records', 'dental_radiographs',
             ]);
 
@@ -473,7 +339,7 @@ class ConsultationsController extends Controller
                         $query->where('consultation_id', $id);
                     })
                     ->first();
-                $data->templates->cataract_surgery_record = CataractSurgeryRecord::with(['creator'])
+                $data->templates->dental_surgery_record = DentalSurgeryRecord::with(['creator'])
                     ->whereHas('payment_cache_item.payment_cache', function ($query) use ($id) {
                         $query->where('consultation_id', $id);
                     })
@@ -492,18 +358,10 @@ class ConsultationsController extends Controller
                 'consultation_id' => $id,
                 'exception_type' => get_class($e),
             ]);
-            // Return safe empty payload to keep UI responsive
             return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Consultation temporarily unavailable.');
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -512,121 +370,30 @@ class ConsultationsController extends Controller
                 'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
                 'to_return_time' => 'nullable|date_format:H:i',
                 'status' => 'sometimes|required|in:Pending,Consulted',
-                'require_glass' => 'sometimes|required|in:Yes,No',
-                'send_to_optician' => 'sometimes|required|in:Yes,No',
             ]);
 
             $data = Consultation::findOrFail($id);
             $data->update($request->all());
 
-            // DO NOT automatically complete treatment when consultation is done
-            // Treatment should only be completed when patient actually finishes their entire journey
-            // (consultation + payment + dispensing + any other required departments)
             if ($request->status === 'Consulted') {
                 try {
                     $patient = $data->payment_cache_item->payment_cache->check_in->patient;
                     if ($patient) {
                         $waitingTime = $patient->current_waiting_time;
-                        
                         if ($waitingTime && $waitingTime->status === 'in_treatment') {
-                            // Keep patient in treatment - they may still need to go to other departments
-                            // Treatment will be completed only when they actually finish their journey
                             \Log::info('Consultation completed - keeping patient in treatment', [
                                 'patient_id' => $patient->id,
                                 'patient_name' => $patient->full_name,
                                 'consultation_id' => $data->id,
-                                'require_glass' => $data->require_glass,
-                                'sent_to_optician' => $data->sent_to_optician_at ? 'Yes' : 'No'
                             ]);
                         }
                     }
-
                 } catch (\Exception $e) {
                     \Log::error('Failed to check patient waiting time status', [
                         'consultation_id' => $data->id,
                         'error' => $e->getMessage()
                     ]);
                 }
-            }
-
-            if ($request->send_to_optician == 'Yes') {
-                $data->update([
-                    'sent_to_optician_at' => Carbon::now(),
-                    'sent_to_optician_by' => $request->user()->id,
-                    'require_glass' => 'Yes', // Automatically set require_glass when manually sent to optician
-                    'patient_direction' => 'Sent to Optician', // Update patient direction to reflect optician status
-                ]);
-                
-                // Get patient for both waiting time and notification
-                $patient = null;
-                try {
-                    $patient = $data->payment_cache_item->payment_cache->check_in->patient;
-                } catch (\Exception $e) {
-                    \Log::error('Failed to get patient for consultation', [
-                        'consultation_id' => $data->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-                
-                // Move patient to consultation department (optician)
-                if ($patient) {
-                    try {
-                        $waitingTime = $patient->current_waiting_time;
-                        if ($waitingTime) {
-                            $waitingTime->sendToConsultation();
-                            \Log::info('Patient manually sent to optician - moved to consultation department', [
-                                'patient_id' => $patient->id,
-                                'patient_name' => $patient->full_name ?? 'Unknown',
-                                'consultation_id' => $data->id,
-                                'sent_by' => $request->user()->id
-                            ]);
-                        } else {
-                            \Log::warning('No waiting time found for patient when sending to optician', [
-                                'patient_id' => $patient->id,
-                                'consultation_id' => $data->id
-                            ]);
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to move patient to optician department', [
-                            'consultation_id' => $data->id,
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-                        // Don't fail the entire request, just log the error
-                    }
-                } else {
-                    \Log::warning('No patient found for consultation when sending to optician', [
-                        'consultation_id' => $data->id
-                    ]);
-                }
-                
-                // Create notification for optician
-                try {
-                    if ($patient && class_exists('App\Models\PatientNotification')) {
-                        \App\Models\PatientNotification::create([
-                            'patient_id' => $patient->id,
-                            'type' => 'patient_sent_to_optician',
-                            'title' => 'New Patient Sent to Optician',
-                            'message' => "Patient {$patient->full_name} has been manually sent to optician for spectacle fitting.",
-                            'data' => [
-                                'patient_name' => $patient->full_name,
-                                'consultation_id' => $data->id,
-                                'sent_by' => $request->user()->id,
-                                'sent_at' => now()->toISOString()
-                            ],
-                            'status' => 'unread'
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to create optician notification for manual send', [
-                        'error' => $e->getMessage(),
-                        'patient_id' => $patient->id ?? 'unknown'
-                    ]);
-                }
-            }
-
-            if ($request->refraction) {
-                $data->refraction->update($request->refraction);
             }
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
@@ -649,7 +416,7 @@ class ConsultationsController extends Controller
     {
         try {
             $request->validate([
-                'what' => 'required|in:Consultation,Visual Acuity,External Examination,Functional Test,Refraction,Fundoscopy,Dental Oral Examination,Dental Charting,Dental Treatment Record,Dental Radiograph'
+                'what' => 'required|in:Consultation,Facial Assessment,Dental Functional Test,Pain Assessment,Dental Oral Examination,Dental Charting,Dental Treatment Record,Dental Radiograph'
             ]);
 
             $user = $request->user();
@@ -661,63 +428,40 @@ class ConsultationsController extends Controller
                         'patient_to_return' => 'sometimes|required|in:Yes,No',
                         'to_return_date' => 'nullable|date_format:Y-m-d',
                         'to_return_time' => 'nullable|date_format:H:i',
-                        'require_glass' => 'sometimes|required|in:Yes,No',
                     ]);
                     $data->update($request->except('what'));
                 }
                 break;
-                case 'External Examination': {
-                    if ($data->external_examination) {
-                        $data->external_examination->update($request->except('what'));
+                case 'Facial Assessment': {
+                    if ($data->dental_facial_assessment) {
+                        $data->dental_facial_assessment->update($request->except('what'));
                     } else {
                         $input = $request->except('what');
                         $input['consultation_id'] = $id;
                         $input['created_by'] = $user->id;
-                        ConsultationExternalExamination::create($input);
+                        ConsultationFacialAssessment::create($input);
                     }
                 }
                 break;
-                case 'Functional Test': {
-                    if ($data->functional_tests) {
-                        $data->functional_tests->update($request->except('what'));
+                case 'Dental Functional Test': {
+                    if ($data->dental_functional_assessment) {
+                        $data->dental_functional_assessment->update($request->except('what'));
                     } else {
                         $input = $request->except('what');
                         $input['consultation_id'] = $id;
                         $input['created_by'] = $user->id;
-                        ConsultationFunctionalTest::create($input);
+                        ConsultationDentalFunctionalTest::create($input);
                     }
                 }
                 break;
-                case 'Visual Acuity': {
-                    if ($data->visual_acuity) {
-                        $data->visual_acuity->update($request->except('what'));
+                case 'Pain Assessment': {
+                    if ($data->dental_pain_assessment) {
+                        $data->dental_pain_assessment->update($request->except('what'));
                     } else {
                         $input = $request->except('what');
                         $input['consultation_id'] = $id;
                         $input['created_by'] = $user->id;
-                        ConsultationVisualAcuity::create($input);
-                    }
-                }
-                break;
-                case 'Refraction': {
-                    if ($data->refraction) {
-                        $data->refraction->update($request->except('what'));
-                    } else {
-                        $input = $request->except('what');
-                        $input['consultation_id'] = $id;
-                        $input['created_by'] = $user->id;
-                        ConsultationRefraction::create($input);
-                    }
-                }
-                break;
-                case 'Fundoscopy': {
-                    if ($data->fundoscopy) {
-                        $data->fundoscopy->update($request->except('what'));
-                    } else {
-                        $input = $request->except('what');
-                        $input['consultation_id'] = $id;
-                        $input['created_by'] = $user->id;
-                        ConsultationFundoscopy::create($input);
+                        ConsultationPainAssessment::create($input);
                     }
                 }
                 break;
@@ -794,49 +538,56 @@ class ConsultationsController extends Controller
                 'patient_to_return' => 'nullable|in:Yes,No',
                 'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
                 'to_return_time' => 'nullable|date_format:H:i',
-                'require_glass' => 'nullable|in:Yes,No',
                 'info_source_id' => 'nullable|exists:information_sources,id',
             ]);
 
             $user = $request->user();
             $data = Consultation::findOrFail($id);
-            $input = $request->only('chief_complaint', 'history_present_illness', 'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils', 'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'require_glass');
+            $input = $request->only('chief_complaint', 'history_present_illness', 'family_history', 'general_health', 'family_dental_history', 'family_general_history', 'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'oral_hygiene_status', 'tobacco_use', 'alcohol_use');
             $input['status'] = 'Consulted';
 
             $data->update($input);
 
-            if ($request->visual_acuity) {
-                $data->visual_acuity->update($request->visual_acuity);
+            if ($request->facial_assessment) {
+                if ($data->dental_facial_assessment) {
+                    $data->dental_facial_assessment->update($request->facial_assessment);
+                } else {
+                    $facialData = $request->facial_assessment;
+                    $facialData['consultation_id'] = $id;
+                    $facialData['created_by'] = $user->id;
+                    ConsultationFacialAssessment::create($facialData);
+                }
             }
 
-            if ($request->external_examination) {
-                $data->external_examination->update($request->external_examination);
+            if ($request->dental_functional_test) {
+                if ($data->dental_functional_assessment) {
+                    $data->dental_functional_assessment->update($request->dental_functional_test);
+                } else {
+                    $funcData = $request->dental_functional_test;
+                    $funcData['consultation_id'] = $id;
+                    $funcData['created_by'] = $user->id;
+                    ConsultationDentalFunctionalTest::create($funcData);
+                }
             }
 
-            if ($request->functional_tests) {
-                $data->functional_tests->update($request->functional_tests);
+            if ($request->pain_assessment) {
+                if ($data->dental_pain_assessment) {
+                    $data->dental_pain_assessment->update($request->pain_assessment);
+                } else {
+                    $painData = $request->pain_assessment;
+                    $painData['consultation_id'] = $id;
+                    $painData['created_by'] = $user->id;
+                    ConsultationPainAssessment::create($painData);
+                }
             }
 
-            if ($request->refraction) {
-                $data->refraction->update($request->refraction);
-            }
-
-            if ($request->fundoscopy) {
-                $data->fundoscopy->update($request->fundoscopy);
-            }
-
-            // Update payment cache item status and consultant
             $data->payment_cache_item->update([
                 'consultant_id' => $user->id,
             ]);
 
-            // Balance decrement removed — balance tracks import quantity only
-
-            // Check if patient waiting time should be completed after consultation (optimized)
             try {
                 $patient = $data->payment_cache_item->payment_cache->check_in->patient;
                 if ($patient) {
-                    // Use a more efficient query with eager loading
                     $waitingTime = $patient->waiting_times()
                         ->whereDate('registration_time', $data->created_at->format('Y-m-d'))
                         ->where('status', 'in_treatment')
@@ -860,49 +611,20 @@ class ConsultationsController extends Controller
                 ]);
             }
 
-            // send message to patient (dispatch to queue to avoid timeout)
-            if ($data->patient_direction == 'Direct to Doctor') {
-                // Dispatch the job asynchronously to prevent timeout
-                try {
-                    // Use dispatch instead of dispatch()->onQueue() to avoid queue configuration issues
-                    SendConsultationMessageJob::dispatch($data);
-                } catch (\Exception $e) {
-                    // Log the error but don't fail the request
-                    \Log::warning('Failed to dispatch SMS job', [
-                        'consultation_id' => $data->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
-
-            // update source of information
             if ($request->info_source_id) {
                 $patient = $data->payment_cache_item->payment_cache->check_in->patient;
                 $patient->info_source_id = $request->info_source_id;
                 $patient->save();
             }
 
-            // Trigger notification refresh for real-time updates
             try {
                 event(new \App\Events\NotificationUpdate());
-                \Log::info('Consultation completed - notification refresh triggered', [
-                    'consultation_id' => $data->id,
-                    'patient_id' => $data->patient->id ?? 'Unknown',
-                    'status' => $data->status
-                ]);
             } catch (\Exception $e) {
                 \Log::error('Failed to trigger notification refresh after consultation completion', [
                     'consultation_id' => $data->id,
                     'error' => $e->getMessage()
                 ]);
             }
-
-            \Log::info('Clinical notes completed successfully', [
-                'consultation_id' => $data->id,
-                'patient_id' => $data->patient->id ?? 'Unknown',
-                'user_id' => $user->id,
-                'status' => $data->status
-            ]);
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Clinical notes saved successfully.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -920,12 +642,6 @@ class ConsultationsController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

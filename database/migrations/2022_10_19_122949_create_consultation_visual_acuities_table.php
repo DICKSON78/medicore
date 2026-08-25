@@ -6,25 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
-        Schema::create('consultation_visual_acuities', function (Blueprint $table) {
+        Schema::create('consultation_pain_assessments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('consultation_id');
-            $table->string('unaided_re_va')->nullable();
-            $table->string('unaided_re_ph')->nullable();
-            $table->string('unaided_ipd')->nullable();
-            $table->string('unaided_le_va')->nullable();
-            $table->string('unaided_le_ph')->nullable();
-            $table->string('aided_re_va')->nullable();
-            $table->string('aided_re_va_description')->nullable();
-            $table->string('aided_le_va')->nullable();
-            $table->string('aided_le_va_description')->nullable();
+            $table->string('pain_level')->nullable();
+            $table->string('pain_location')->nullable();
+            $table->string('pain_type')->nullable();
+            $table->string('pain_duration')->nullable();
+            $table->string('pain_triggers')->nullable();
+            $table->string('pain_relieving_factors')->nullable();
+            $table->string('pain_radiation')->nullable();
+            $table->string('swelling_level')->nullable();
+            $table->string('swelling_location')->nullable();
+            $table->string('numbness_location')->nullable();
+            $table->string('numbness_severity')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
@@ -42,13 +39,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists('consultation_visual_acuities');
+        Schema::dropIfExists('consultation_pain_assessments');
     }
 };

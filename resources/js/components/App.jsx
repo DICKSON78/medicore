@@ -126,10 +126,6 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="optician-center/*"
-                  element={null}
-                />
-                <Route
                   path="dental-lab/*"
                   element={<DentalLabRoutes />}
                 />

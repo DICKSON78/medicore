@@ -48,11 +48,6 @@ class Medicine extends Model
         return $this->belongsTo(ConsultationType::class, 'consultation_type_id');
     }
 
-    public function lens_type()
-    {
-        return $this->belongsTo(LensType::class, 'lens_type_id');
-    }
-
     public function prices()
     {
         return $this->hasMany(ItemPrice::class, 'item_id');

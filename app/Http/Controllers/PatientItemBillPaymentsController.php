@@ -202,51 +202,7 @@ class PatientItemBillPaymentsController extends Controller
      */
     private function determineNextDepartment($waitingTime, $paymentCache)
     {
-        // Check if patient has consultation that requires glasses FIRST
-        $consultation = $paymentCache->consultation;
-        
-        // Also check if patient has glass items that require optician attention
-        $hasGlassItems = $paymentCache->items()
-            ->whereHas('consultation_type', function($query) {
-                $query->where('name', 'Glass');
-            })
-            ->count() > 0;
-        
-        if (($consultation && $consultation->require_glass === 'Yes') || $hasGlassItems) {
-            // Patient needs glasses, send to optician (consultation department) FIRST
-            $waitingTime->sendToConsultation();
-            
-            // If consultation exists, set sent_to_optician_at if not already set
-            if ($consultation && !$consultation->sent_to_optician_at) {
-                $consultation->update([
-                    'sent_to_optician_at' => now(),
-                    'sent_to_optician_by' => $consultation->creator_id ?? null,
-                ]);
-            }
-            
-            // If no consultation exists but patient has glass items, create one
-            if (!$consultation && $hasGlassItems) {
-                // Find the first glass item to create consultation
-                $glassItem = $paymentCache->items()
-                    ->whereHas('consultation_type', function($query) {
-                        $query->where('name', 'Glass');
-                    })
-                    ->first();
-                    
-                if ($glassItem) {
-                    // Create consultation record for glass items
-                    \App\Models\Consultation::create([
-                        'patient_id' => $waitingTime->patient_id,
-                        'payment_cache_id' => $paymentCache->id,
-                        'require_glass' => 'Yes',
-                        'sent_to_optician_at' => now(),
-                        'created_by' => auth()->id(),
-                    ]);
-                }
-            }
-        } else {
-            // Patient doesn't need glasses, send to medicine department
-            $waitingTime->sendToMedicine();
-        }
+        // Send patient to medicine department
+        $waitingTime->sendToMedicine();
     }
 }

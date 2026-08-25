@@ -11,16 +11,10 @@ class Consultation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'payment_cache_item_id', 'patient_direction', 'chief_complaint', 'history_present_illness',
-        'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils',
-        'extra_ocular_muscles',         'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'created_by',
-        'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by',
-        'extra_oral_examination', 'tmj_examination', 'lymph_nodes',
-        'oral_hygiene_status', 'tobacco_use', 'alcohol_use',
-    ];
-
-    protected $casts = [
-        'sent_to_optician_at' => 'datetime:Y-m-d H:i',
+        'payment_cache_item_id', 'chief_complaint', 'history_present_illness',
+        'family_history', 'general_health', 'family_dental_history', 'family_general_history',
+        'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'created_by',
+        'status', 'oral_hygiene_status', 'tobacco_use', 'alcohol_use',
     ];
 
     public function payment_cache_item()
@@ -38,39 +32,24 @@ class Consultation extends Model
         return $this->hasMany(ConsultationDiagnosis::class, 'consultation_id');
     }
 
-    public function external_examination()
-    {
-        return $this->hasOne(ConsultationExternalExamination::class, 'consultation_id');
-    }
-
-    public function functional_tests()
-    {
-        return $this->hasOne(ConsultationFunctionalTest::class, 'consultation_id');
-    }
-
-    public function visual_acuity()
-    {
-        return $this->hasOne(ConsultationVisualAcuity::class, 'consultation_id');
-    }
-
-    public function refraction()
-    {
-        return $this->hasOne(ConsultationRefraction::class, 'consultation_id');
-    }
-
-    public function fundoscopy()
-    {
-        return $this->hasOne(ConsultationFundoscopy::class, 'consultation_id');
-    }
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function to_optician_sender()
+    public function dental_facial_assessment()
     {
-        return $this->belongsTo(User::class, 'sent_to_optician_by');
+        return $this->hasOne(ConsultationFacialAssessment::class, 'consultation_id');
+    }
+
+    public function dental_functional_assessment()
+    {
+        return $this->hasOne(ConsultationDentalFunctionalTest::class, 'consultation_id');
+    }
+
+    public function dental_pain_assessment()
+    {
+        return $this->hasOne(ConsultationPainAssessment::class, 'consultation_id');
     }
 
     public function dental_oral_examination()

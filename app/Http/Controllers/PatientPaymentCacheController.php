@@ -24,7 +24,6 @@ class PatientPaymentCacheController extends Controller
             'page' => 'sometimes|integer|min:1',
             'start_date' => 'sometimes|date_format:Y-m-d',
             'end_date' => 'sometimes|date_format:Y-m-d',
-            'include_optician_glass' => 'sometimes|in:true,false,1,0'
         ]);
 
         $user = $request->user();
@@ -42,7 +41,6 @@ class PatientPaymentCacheController extends Controller
         $item_consultant_id = $request->item_consultant_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $include_optician_glass = filter_var($request->include_optician_glass, FILTER_VALIDATE_BOOLEAN);
 
         $data = PatientPaymentCache::with(['check_in.patient', 'check_in.payment_mode', 'creator', 'consultation', 'items.consultation_type', 'items.item']);
 
@@ -85,56 +83,7 @@ class PatientPaymentCacheController extends Controller
         }
 
         // Handle the main query logic
-        if ($include_optician_glass) {
-            // When including optician glass, we need to show both regular cash patients AND optician glass patients
-            $data->where(function ($query) use ($item_status, $item_transaction_type, $start_date, $end_date) {
-                // Regular cash patients (pharmacy items)
-                $query->whereHas('items', function ($subQuery) use ($item_status, $item_transaction_type) {
-                    if ($item_status) {
-                        $statuses = explode(',', $item_status);
-                        if (count($statuses) > 1) {
-                            $subQuery->whereIn('status', $statuses);
-                        } else {
-                            $subQuery->where('status', $statuses[0]);
-                        }
-                    }
-                    
-                    if ($item_transaction_type) {
-                        $subQuery->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
-                            $query2->where('transaction_type', $item_transaction_type);
-                        });
-                    }
-                });
-                
-                // OR optician glass patients
-                $query->orWhere(function ($subQuery) use ($item_status, $start_date, $end_date) {
-                    $subQuery->whereHas('items', function ($itemQuery) use ($item_status) {
-                        if ($item_status) {
-                            $statuses = explode(',', $item_status);
-                            if (count($statuses) > 1) {
-                                $itemQuery->whereIn('status', $statuses);
-                            } else {
-                                $itemQuery->where('status', $statuses[0]);
-                            }
-                        }
-                        
-                        $itemQuery->whereHas('consultation_type', function ($typeQuery) {
-                            $typeQuery->where('name', 'Glass');
-                        });
-                        
-                        $itemQuery->whereHas('payment_mode', function ($modeQuery) {
-                            $modeQuery->where('transaction_type', 'Cash');
-                        });
-                    })
-                    ->whereHas('consultation', function ($consultationQuery) {
-                        $consultationQuery->whereNotNull('sent_to_optician_at')
-                                         ->where('require_glass', 'Yes');
-                    });
-                });
-            });
-        } else {
-            // Regular filtering logic
-            $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
+        $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
                 // Status filter
                 if ($item_status) {
                     $statuses = explode(',', $item_status);

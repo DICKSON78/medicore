@@ -32,9 +32,6 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
     item_payment_mode_id: undefined,
     start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     end_date: new Date(), // today
-    // Add consultation-specific filters for Glass items
-    consultation_require_glass: consultationType === "Glass" ? "Yes" : undefined,
-    consultation_sent_to_optician: consultationType === "Glass" ? true : undefined,
   });
 
   // Use separate state for actual query params to avoid auto-refetch on every params change
@@ -51,8 +48,6 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
     item_payment_mode_id: undefined,
     start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     end_date: new Date(),
-    consultation_require_glass: consultationType === "Glass" ? "Yes" : undefined,
-    consultation_sent_to_optician: consultationType === "Glass" ? true : undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch(
@@ -215,7 +210,7 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
                       size="small"
                       onClick={() =>
                         navigate(
-                          `/${consultationType === "Others" ? "other-dispensing" : consultationType === "Glass" ? "optician-center" : "medicine-center"}/dispensing-requests/${item.check_in.patient_id}/${item.id}`
+                          `/${consultationType === "Others" ? "other-dispensing" : "medicine-center"}/dispensing-requests/${item.check_in.patient_id}/${item.id}`
                         )
                       }
                     >

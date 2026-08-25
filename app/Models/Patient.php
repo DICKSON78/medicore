@@ -89,6 +89,26 @@ class Patient extends Model
         return $this->hasMany(PatientCheckIn::class, 'patient_id');
     }
 
+    public function allergies()
+    {
+        return $this->hasMany(PatientAllergy::class, 'patient_id');
+    }
+
+    public function active_allergies()
+    {
+        return $this->hasMany(PatientAllergy::class, 'patient_id')->where('is_active', true);
+    }
+
+    public function medical_histories()
+    {
+        return $this->hasMany(PatientMedicalHistory::class, 'patient_id');
+    }
+
+    public function active_medical_histories()
+    {
+        return $this->hasMany(PatientMedicalHistory::class, 'patient_id')->where('is_active', true);
+    }
+
     public function getFullNameAttribute()
     {
         $parts = array_filter([

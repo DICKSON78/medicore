@@ -114,7 +114,6 @@ const Dashboard = ({ setSmsBalance = () => {} }) => {
   const navigateToReception = () => navigate("/reception/dashboard");
   const navigateToConsultationRoom = () => navigate("/consultation-room/dashboard");
   const navigateToMedicineCenter = () => navigate("/medicine-center/medicines");
-  const navigateToOpticianCenter = () => navigate("/optician-center/dashboard");
   const navigateToProcedureRoom = () => navigate("/procedure-room/dashboard");
   const navigateToPatientRecords = () => navigate("/patient-records/patients");
 
