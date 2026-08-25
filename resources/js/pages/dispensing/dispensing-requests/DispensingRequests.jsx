@@ -67,7 +67,7 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => response.data?.data
   );
 
   useEffect(() => {
@@ -220,8 +220,8 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
                 ),
               },
             ]}
-            items={data.data}
-            itemCount={data.total}
+            items={data?.data || []}
+            itemCount={data?.total || 0}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => { setParams({ ...params, page }); setQueryParams((prev) => ({ ...prev, page })); handleFetch(); }}

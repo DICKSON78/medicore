@@ -57,7 +57,7 @@ const DispensingRequestItems = ({ consultationType, stockItem }) => {
     },
     true, // Changed to true to fetch immediately
     [],
-    (response) => response.data.data.data
+    (response) => response.data?.data?.data || []
   );
 
   const { handlePatch: handleAutoSave } = usePatch();
