@@ -13,7 +13,6 @@ import {
 import {
   Person2Rounded as PersonIcon,
   AccountBalanceRounded as SalesIcon,
-  CenterFocusStrongRounded as GlassIcon,
   DiscountRounded as DiscountIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
@@ -178,13 +177,6 @@ const Dashboard = ({ setSmsBalance = () => {} }) => {
               icon={<PharmacyIcon />}
               color={teal[400]}
               onClick={navigateToMedicineCenter}
-            />
-            <InfoCard
-              title="Glass"
-              count={numberFormat(data.summary.glass)}
-              icon={<GlassIcon />}
-              color={purple[300]}
-              onClick={navigateToOpticianCenter}
             />
             <InfoCard
               title="Procedure"
