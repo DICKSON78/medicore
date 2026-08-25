@@ -235,6 +235,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/{id}', 'show');
         $router->post('/', 'store');
         $router->put('/{id}', 'update');
+        $router->post('/{id}/mark-ready', 'markReady');
         $router->post('/{id}/mark-delivered', 'markDelivered');
         $router->delete('/{id}', 'destroy');
     });

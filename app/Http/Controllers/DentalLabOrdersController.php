@@ -64,10 +64,10 @@ class DentalLabOrdersController extends Controller
             'teeth_involved' => 'nullable|array',
             'impression_date' => 'nullable|date_format:Y-m-d',
             'delivery_date' => 'nullable|date_format:Y-m-d',
-            'insertion_date' => 'nullable|date_format:Y-m-d',
             'lab_notes' => 'nullable|string',
             'lab_name' => 'nullable|string',
             'cost' => 'nullable|numeric',
+            'technician_charges' => 'nullable|numeric',
         ]);
 
         $input = $request->all();
@@ -92,6 +92,7 @@ class DentalLabOrdersController extends Controller
             'teeth_involved' => 'nullable|array',
             'impression_date' => 'nullable|date_format:Y-m-d',
             'delivery_date' => 'nullable|date_format:Y-m-d',
+            'insertion_date' => 'nullable|date_format:Y-m-d',
             'lab_notes' => 'nullable|string',
             'lab_name' => 'nullable|string',
             'cost' => 'nullable|numeric',
@@ -103,12 +104,21 @@ class DentalLabOrdersController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Updated successfully.');
     }
 
-    public function markDelivered($id)
+    public function markReady($id)
     {
         $data = DentalLabOrder::findOrFail($id);
         $data->update([
             'status' => 'Ready',
             'delivery_date' => now()->format('Y-m-d'),
+        ]);
+        return $this->sendResponse($data, Response::HTTP_OK, 'Marked as ready for delivery.');
+    }
+
+    public function markDelivered($id)
+    {
+        $data = DentalLabOrder::findOrFail($id);
+        $data->update([
+            'status' => 'Delivered',
         ]);
         return $this->sendResponse($data, Response::HTTP_OK, 'Marked as delivered.');
     }

@@ -19,16 +19,6 @@ const statusColors = {
   Delivered: "secondary",
 };
 
-const MATERIAL_OPTIONS = [
-  { label: "PFM", value: "PFM" },
-  { label: "Zirconia", value: "Zirconia" },
-  { label: "E-max", value: "Emax" },
-  { label: "Composite", value: "Composite" },
-  { label: "Acrylic", value: "Acrylic" },
-  { label: "Metal Alloy", value: "MetalAlloy" },
-  { label: "Cobalt Chrome", value: "CobaltChrome" },
-];
-
 const LabOrderRoutes = () => {
   const { patientId, consultationId } = useParams();
   const navigate = useNavigate();
@@ -296,17 +286,19 @@ const LabOrderRoutes = () => {
                 <Select
                   label="Material"
                   value={orderForm.material}
-                  options={MATERIAL_OPTIONS}
+                  options={DENTAL_TREATMENT_OPTIONS.labMaterials}
                   onChange={(e) => setOrderForm({ ...orderForm, material: e.target.value })}
                   fullWidth size="small"
                 />
               </Grid>
               <Grid item xs={4} sm={2}>
-                <TextField
+                <Select
                   label="Shade"
                   value={orderForm.shade}
-                  onChange={(e) => setOrderForm({ ...orderForm, shade: e.target.value })}
+                  onChange={(value) => setOrderForm({ ...orderForm, shade: value })}
+                  options={DENTAL_TREATMENT_OPTIONS.labShadeGuide}
                   fullWidth size="small"
+                  clearable
                 />
               </Grid>
               <Grid item xs={4} sm={2}>

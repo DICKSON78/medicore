@@ -127,7 +127,11 @@ const App = () => {
                 />
                 <Route
                   path="dental-lab/*"
-                  element={<DentalLabRoutes />}
+                  element={
+                    user?.privileges?.dental_lab ? (
+                      <DentalLabRoutes />
+                    ) : null
+                  }
                 />
                 <Route
                   path="medicine-center/*"
