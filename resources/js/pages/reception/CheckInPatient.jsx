@@ -424,7 +424,6 @@ const CheckInPatient = () => {
                       clearable
                       options={items}
                       optionsLabel="name"
-                      optionsValue="id"
                       isOptionEqualToValue={(option, value) =>
                         option.id === value?.id
                       }
