@@ -30,7 +30,7 @@ class DentalLabDashboardController extends Controller
 
         $baseQuery = function ($query) use ($clinic_id) {
             if ($clinic_id) {
-                $query->whereHas('consultation', function ($q) use ($clinic_id) {
+                $query->whereHas('creator', function ($q) use ($clinic_id) {
                     $q->where('clinic_id', $clinic_id);
                 });
             }
