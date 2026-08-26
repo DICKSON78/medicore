@@ -248,12 +248,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.reception,
         },
         {
-          title: "Reception Dashboard",
-          icon: <HomeIcon />,
-          to: "/reception/dashboard",
-          show: user.privileges.reception,
-        },
-        {
           title: "Patients/Customers",
           icon: <PeopleIcon />,
           to: "/reception/patients",
@@ -283,6 +277,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Sent Messages",
           icon: <MessageIcon />,
           to: "/reception/sent-messages",
+          show: user.privileges.reception,
+        },
+        {
+          title: "Reception Dashboard",
+          icon: <HomeIcon />,
+          to: "/reception/dashboard",
           show: user.privileges.reception,
         },
         {
