@@ -37,12 +37,6 @@ class NotificationsController extends Controller
         })
             ->whereHas('items', function ($query) {
                 $query->where('status', 'Pending');
-                $query->whereHas('consultation_type', function ($query2) {
-                    $query2->where('name', 'Pharmacy');
-                });
-                $query->whereHas('payment_mode', function ($query2) {
-                    $query2->where('transaction_type', 'Cash');
-                });
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)

@@ -124,6 +124,18 @@ export const NotificationProvider = ({ children }) => {
     window.notificationEvents = notificationEvents;
   }, []); // Only run once on mount
 
+  // Periodic polling every 15 seconds to keep notifications fresh
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const pollInterval = setInterval(() => {
+      fetchNotifications(currentParams);
+    }, 15000);
+
+    return () => clearInterval(pollInterval);
+  }, [fetchNotifications, currentParams]);
+
   // Listen to notification refresh events with debouncing to prevent flickering
   useEffect(() => {
     let timeoutId;

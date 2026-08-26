@@ -216,6 +216,8 @@ class PatientCheckInsController extends Controller
             }
         }
 
+        event(new \App\Events\NotificationUpdate());
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Checked in successfully.');
         
         } catch (\Illuminate\Validation\ValidationException $e) {
