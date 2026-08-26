@@ -212,7 +212,7 @@ const CheckInPatient = () => {
           item_id: selectedItem.id,
           item_name: selectedItem.name,
           consultation_type_id: selectedItem.consultation_type_id,
-          unit_price: selectedItem.prices[0].unit_price,
+          unit_price: selectedItem.prices?.[0]?.unit_price || 0,
           quantity,
           comments,
           consultant_id: consultant ? consultant.id : null,
@@ -537,7 +537,7 @@ const CheckInPatient = () => {
                             label="Unit Price"
                             fullWidth
                             value={
-                              selectedItem.prices.length
+                              (selectedItem.prices || []).length
                                 ? numberFormat(
                                     selectedItem.prices[0].unit_price || 0
                                   )
@@ -595,7 +595,7 @@ const CheckInPatient = () => {
                             fullWidth
                             value={
                               numberFormat(
-                                (selectedItem.prices[0].unit_price || 0) *
+                                (selectedItem.prices?.[0]?.unit_price || 0) *
                                   (quantity || 0)
                               ) || ""
                             }

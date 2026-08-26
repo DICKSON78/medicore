@@ -378,13 +378,13 @@ const SelectItems = ({
                         disabled={true}
                         label="Unit Price"
                         fullWidth
-                        value={
-                          selectedItem.prices.length
-                            ? numberFormat(
-                                selectedItem.prices[0].unit_price || 0
-                              )
-                            : ""
-                        }
+                          value={
+                            (selectedItem.prices || []).length
+                              ? numberFormat(
+                                  selectedItem.prices[0].unit_price || 0
+                                )
+                              : ""
+                          }
                       />
                     </Grid>
                     <Grid
@@ -422,7 +422,7 @@ const SelectItems = ({
                         fullWidth
                         value={
                           numberFormat(
-                            (selectedItem.prices[0].unit_price || 0) *
+                            (selectedItem.prices?.[0]?.unit_price || 0) *
                               (quantity || 0)
                           ) || ""
                         }
