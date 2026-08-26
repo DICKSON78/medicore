@@ -234,13 +234,13 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Dashboard",
           icon: <HomeIcon />,
           to: "/dashboard",
-          show: true,
+          show: user.privileges.dashboard,
         },
         {
           title: "Patient Records",
           icon: <ReportsIcon />,
           to: "/patient-records/patients",
-          show: true,
+          show: user.privileges.reception || user.privileges.consultation_room,
         },
         {
           title: "1. RECEPTION",
@@ -542,51 +542,51 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "6. DISPENSING",
           subheader: true,
-          show: true, // Temporarily show for all users
+          show: user.privileges.dispensing,
         },
         {
           title: "Dispensing Dashboard",
           icon: <HomeIcon />,
           to: "/dispensing/dashboard",
-          show: true, // Temporarily show for all users
+          show: user.privileges.dispensing,
         },
         {
           title: "Medicine Dispensing Requests",
           icon: <WaitingIcon />,
           to: "/dispensing/dispensing-requests",
           badge: Number(notifications?.dispensing_requests) || 0,
-          show: true, // Temporarily show for all users
+          show: user.privileges.dispensing,
         },
         {
           title: "Other Dispensing Requests",
           icon: <WaitingIcon />,
           to: "/other-dispensing/dispensing-requests",
           badge: Number(notifications?.other_dispensing_requests) || 0,
-          show: true, // Temporarily show for all users
+          show: user.privileges.other_dispensing,
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/dispensing/reports",
-          show: true, // Temporarily show for all users
+          show: user.privileges.dispensing || user.privileges.other_dispensing,
           items: [
             {
               title: "Medicine Dispensing Reports",
               icon: <ReportsIcon />,
               to: "/medicine-center/reports/dispensing",
-              show: true, // Temporarily show for all users
+              show: user.privileges.dispensing,
               items: [
                 {
                   title: "Medicines Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/medicine-center/reports/dispensing/medicines-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.dispensing,
                 },
                 {
                   title: "Medicines Not Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/medicine-center/reports/dispensing/medicines-not-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.dispensing,
                 },
               ],
             },
@@ -594,25 +594,25 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "General Dispensing Reports",
               icon: <ReportsIcon />,
               to: "/dispensing/reports",
-              show: true, // Temporarily show for all users
+              show: user.privileges.dispensing,
               items: [
                 {
                   title: "Items Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/dispensing/reports/items-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.dispensing,
                 },
                 {
                   title: "Items Not Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/dispensing/reports/items-not-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.dispensing,
                 },
                 {
                   title: "Item Balance Report",
                   icon: <ReportsIcon />,
                   to: "/dispensing/reports/item-balance",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.dispensing,
                 },
               ],
             },
@@ -620,25 +620,25 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Other Dispensing Reports",
               icon: <ReportsIcon />,
               to: "/other-dispensing/reports",
-              show: true, // Temporarily show for all users
+              show: user.privileges.other_dispensing,
               items: [
                 {
                   title: "Items Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/other-dispensing/reports/items-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.other_dispensing,
                 },
                 {
                   title: "Items Not Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/other-dispensing/reports/items-not-dispensed",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.other_dispensing,
                 },
                 {
                   title: "Item Balance Report",
                   icon: <ReportsIcon />,
                   to: "/other-dispensing/reports/item-balance",
-                  show: true, // Temporarily show for all users
+                  show: user.privileges.other_dispensing,
                 },
               ],
             },
@@ -1023,43 +1023,43 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "13. MOH REPORTS",
           subheader: true,
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Monthly OPD Report",
           icon: <ReportsIcon />,
           to: "/moh-reports/monthly-opd",
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Pharm. Consumption",
           icon: <ReportsIcon />,
           to: "/moh-reports/pharmaceutical-consumption",
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Revenue Summary",
           icon: <ReportsIcon />,
           to: "/moh-reports/revenue-summary",
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "IPD Report (HMIS 002)",
           icon: <ReportsIcon />,
           to: "/moh-reports/ipd-report",
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Cancer Report (HMIS 003)",
           icon: <ReportsIcon />,
           to: "/moh-reports/cancer-report",
-          show: true,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Birth & Death Notification",
           icon: <ReportsIcon />,
           to: "/moh-reports/birth-death-notification",
-          show: true,
+          show: user.privileges.consultation_room,
         },
       ]));
     } else {

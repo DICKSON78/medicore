@@ -167,15 +167,25 @@ class AuthController extends Controller
             $user->clinic->preferences = collect();
         }
         
-        // Optimize user privileges query
-        $user_privileges = UserPrivilege::where('user_id', $user->id)
+        // Build normalized privileges object: { key: true }
+        $privilegeRows = UserPrivilege::where('user_id', $user->id)
             ->pluck('privilege')
             ->toArray();
 
-        $user->privileges = new \stdClass();
-        foreach ($user_privileges as $privilege) {
-            $user->privileges->$privilege = true;
+        $normalized = new \stdClass();
+        foreach ($privilegeRows as $row) {
+            $decoded = json_decode($row, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $key => $value) {
+                    if ($value) {
+                        $normalized->$key = true;
+                    }
+                }
+            } else if ($row) {
+                $normalized->$row = true;
+            }
         }
+        $user->privileges = $normalized;
 
         return $this->sendResponse($user, Response::HTTP_OK, 'Success.');
     }

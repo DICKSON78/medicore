@@ -101,7 +101,11 @@ const App = () => {
                 />
                 <Route
                   path="patient-records/*"
-                  element={<PatientRecordsRoutes />}
+                  element={
+                    user?.privileges?.reception || user?.privileges?.consultation_room ? (
+                      <PatientRecordsRoutes />
+                    ) : null
+                  }
                 />
                 <Route
                   path="reception/*"
@@ -143,7 +147,11 @@ const App = () => {
                 />
                 <Route
                   path="dispensing/*"
-                  element={<DispensingMainRoutes />}
+                  element={
+                    user?.privileges?.dispensing ? (
+                      <DispensingMainRoutes />
+                    ) : null
+                  }
                 />
                 <Route
                   path="procedure-room/*"
@@ -215,15 +223,27 @@ const App = () => {
                 />
                 <Route
                   path="dental-appointments"
-                  element={<DentalAppointments />}
+                  element={
+                    user?.privileges?.consultation_room ? (
+                      <DentalAppointments />
+                    ) : null
+                  }
                 />
                 <Route
                   path="moh-reports/*"
-                  element={<MohReportsRoutes />}
+                  element={
+                    user?.privileges?.consultation_room ? (
+                      <MohReportsRoutes />
+                    ) : null
+                  }
                 />
                 <Route
                   path="nhif-claims/*"
-                  element={<NHIFClaimsRoutes />}
+                  element={
+                    user?.privileges?.payment_center ? (
+                      <NHIFClaimsRoutes />
+                    ) : null
+                  }
                 />
               </React.Fragment>
             </Route>

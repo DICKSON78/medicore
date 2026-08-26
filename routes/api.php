@@ -75,34 +75,21 @@ use App\Http\Controllers\DentalLabDashboardController;
 use App\Http\Controllers\PatientAllergiesController;
 use App\Http\Controllers\PatientMedicalHistoriesController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
+
+// ─── Public routes ────────────────────────────────────────────────────────────
 
 Route::group(['prefix' => 'auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
 });
 
-// Public routes - accessible without authentication
-Route::get('/units-of-measure', [UnitsOfMeasureController::class, 'index']);
-
-// Temporary public dispensing dashboard for testing
-Route::get('/dispensing-dashboard-public', [\App\Http\Controllers\DispensingDashboardController::class, '__invoke']);
-
-// Health check endpoint
 Route::get('/health', function () {
     try {
-        // Test database connection
         DB::connection()->getPdo();
         return response()->json([
             'status' => 'healthy',
@@ -119,265 +106,323 @@ Route::get('/health', function () {
     }
 });
 
-// Test authentication endpoint
-Route::get('/test-auth', function (\Illuminate\Http\Request $request) {
-    return response()->json([
-        'authenticated' => auth()->check(),
-        'user' => auth()->user() ? auth()->user()->id : null,
-        'headers' => $request->headers->all()
-    ]);
-})->middleware('auth:api');
+// ─── Authenticated routes (no privilege required) ─────────────────────────────
 
 Route::group(['middleware' => 'auth:api'], function ($router) {
+
     $router->controller(AuthController::class)->prefix('auth')->group(function ($router) {
         $router->post('/change-password', 'changePassword');
         $router->get('/user', 'getAuthUser');
     });
 
-     // VIP Patients - move this inside the main auth group
-    $router->get('/patients/vip', [PatientsController::class, 'vipPatients']);
-    
-    // Patient Waiting Times
-    $router->prefix('patient-waiting-times')->group(function ($router) {
-        $router->get('/', [PatientWaitingTimesController::class, 'index']);
-        $router->get('/statistics', [PatientWaitingTimesController::class, 'statistics']);
-        $router->post('/{id}/start-treatment', [PatientWaitingTimesController::class, 'startTreatment']);
-        $router->post('/{id}/end-treatment', [PatientWaitingTimesController::class, 'endTreatment']);
-        $router->post('/{id}/force-complete-treatment', [PatientWaitingTimesController::class, 'forceCompleteTreatment']);
-        $router->post('/{id}/send-to-cashier', [PatientWaitingTimesController::class, 'sendToCashier']);
-        $router->post('/{id}/send-to-consultation', [PatientWaitingTimesController::class, 'sendToConsultation']);
-        $router->post('/{id}/send-to-dispensing', [PatientWaitingTimesController::class, 'sendToDispensing']);
-        $router->post('/{id}/send-to-procedure-room', [PatientWaitingTimesController::class, 'sendToProcedureRoom']);
-        $router->post('/{id}/move-to-department', [PatientWaitingTimesController::class, 'moveToDepartment']);
-    });
-    
     $router->get('/dashboard', [DashboardController::class, '__invoke']);
     $router->get('/notifications', [NotificationsController::class, '__invoke']);
     $router->get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications']);
-    
-    // Patient Notifications
-    $router->prefix('patient-notifications')->group(function ($router) {
-        $router->get('/', [PatientNotificationsController::class, 'index']);
-        $router->get('/unread-count', [PatientNotificationsController::class, 'unreadCount']);
-        $router->post('/{id}/mark-as-read', [PatientNotificationsController::class, 'markAsRead']);
-        $router->post('/mark-all-as-read', [PatientNotificationsController::class, 'markAllAsRead']);
-        $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
-    });
-    $router->apiResource('/clinics', ClinicsController::class);
-    $router->apiResource('/departments', DepartmentsController::class);
-    $router->apiResource('/job-titles', JobTitlesController::class);
-    $router->apiResource('/users', UsersController::class);
-    $router->apiResource('/payment-modes', PaymentModesController::class);
-    $router->apiResource('/payment-channels', PaymentChannelsController::class);
-    // Units of measure - only CRUD operations (index is public)
-    $router->post('/units-of-measure', [UnitsOfMeasureController::class, 'store']);
-    $router->get('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'show']);
-    $router->put('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'update']);
-    $router->delete('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'destroy']);
-    $router->apiResource('/item-types', ItemTypesController::class);
-    $router->apiResource('/consultation-types', ConsultationTypesController::class);
-    $router->apiResource('/items', ItemsController::class);
-    $router->apiResource('/item-prices', ItemPricesController::class);
-    $router->apiResource('/regions', RegionsController::class);
-    $router->apiResource('/districts', DistrictsController::class);
-    $router->apiResource('/wards', WardsController::class);
-    $router->apiResource('/diseases', DiseasesController::class);
-
-    $router->get('/patients/test', [PatientsController::class, 'test']);
-    $router->apiResource('/patients', PatientsController::class);
-    $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
-    $router->apiResource('/patient-attachments', PatientAttachmentsController::class);
-
-    $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
-    $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
-    $router->controller(PatientPaymentCacheItemsController::class)->prefix('patient-payment-cache-items')->group(function ($router) {
-        $router->post('/make-cash-payment', 'makeCashPayment');
-        $router->post('/approve-credit-payment', 'approveCreditPayment');
-        $router->post('/create-bill', 'createBill');
-        $router->post('/dispense', 'dispense');
-        $router->post('/complete', 'complete');
-    });
-    $router->apiResource('/patient-item-payments', PatientItemPaymentsController::class);
-
-    $router->get('/patient-item-bills-summary', [PatientItemBillsController::class, 'summary']);
-    $router->apiResource('/patient-item-bills', PatientItemBillsController::class);
-    $router->patch('/patient-item-bills/{id}/clear', [PatientItemBillsController::class, 'clear']);
-    $router->apiResource('/patient-item-bill-payments', PatientItemBillPaymentsController::class);
-
-    $router->apiResource('/consultations', ConsultationsController::class);
-    $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
-        $router->post('/add-item', 'addItem');
-        $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
-        $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
-    });
-    $router->apiResource('/surgery-record-reports', SurgeryRecordReportsController::class);
-    $router->apiResource('/dental-surgery-records', DentalSurgeryRecordsController::class);
-
-    // Patient allergies and medical history
-    $router->apiResource('/patient-allergies', PatientAllergiesController::class);
-    $router->apiResource('/patient-medical-histories', PatientMedicalHistoriesController::class);
-
-    // Dental module routes
-    $router->apiResource('/dental-oral-examinations', DentalOralExaminationsController::class);
-    $router->controller(DentalChartingController::class)->prefix('dental-charting')->group(function ($router) {
-        $router->get('/', 'index');
-        $router->get('/{id}', 'show');
-        $router->post('/', 'store');
-        $router->post('/bulk', 'bulkStore');
-        $router->put('/{id}', 'update');
-        $router->delete('/{id}', 'destroy');
-        $router->get('/consultation/{consultationId}', 'getByConsultation');
-    });
-    $router->apiResource('/dental-treatment-records', DentalTreatmentRecordsController::class);
-    $router->apiResource('/prescriptions', PrescriptionsController::class);
-    $router->controller(DentalLabOrdersController::class)->prefix('dental-lab-orders')->group(function ($router) {
-        $router->get('/', 'index');
-        $router->get('/{id}', 'show');
-        $router->post('/', 'store');
-        $router->put('/{id}', 'update');
-        $router->post('/{id}/mark-ready', 'markReady');
-        $router->post('/{id}/mark-delivered', 'markDelivered');
-        $router->delete('/{id}', 'destroy');
-    });
-    $router->apiResource('/dental-radiographs', DentalRadiographsController::class);
-    $router->controller(DentalAppointmentsController::class)->prefix('dental-appointments')->group(function ($router) {
-        $router->get('/', 'index');
-        $router->get('/today', 'getToday');
-        $router->get('/by-date-range', 'getByDateRange');
-        $router->get('/{id}', 'show');
-        $router->post('/', 'store');
-        $router->put('/{id}', 'update');
-        $router->post('/{id}/mark-status', 'markStatus');
-        $router->delete('/{id}', 'destroy');
-    });
-
-    $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
-    $router->apiResource('/stocktakes', StocktakesController::class);
-    $router->post('/stocktakes/{id}/apply', [StocktakesController::class, 'apply']);
-    $router->post('/stock-out', [StockOutController::class, 'store']);
-    $router->get('/stock-out/reasons', [StockOutController::class, 'reasons']);
-    $router->get('/stock-movements', [StockMovementsController::class, 'index']);
-    $router->get('/stock-movements/summary', [StockMovementsController::class, 'summary']);
-    
-    // Stock Alerts
-    $router->prefix('stock-alerts')->group(function ($router) {
-        $router->get('/out-of-stock', [StockAlertsController::class, 'getOutOfStockItems']);
-        $router->get('/expired', [StockAlertsController::class, 'getExpiredItems']);
-        $router->get('/expiring-soon', [StockAlertsController::class, 'getExpiringSoonItems']);
-        $router->get('/summary', [StockAlertsController::class, 'getStockAlertsSummary']);
-        $router->get('/medicine', [StockAlertsController::class, 'getMedicineAlerts']);
-        $router->get('/medicine-summary', [StockAlertsController::class, 'getMedicineAlertsSummary']);
-    });
-
-    // Medicine Taking routes
-    $router->group(['prefix' => 'medicine-taking'], function () use ($router) {
-        $router->get('/', [MedicineTakingController::class, 'index']);
-        $router->post('/', [MedicineTakingController::class, 'store']);
-        $router->get('/{id}', [MedicineTakingController::class, 'show']);
-        $router->put('/{id}', [MedicineTakingController::class, 'update']);
-        $router->delete('/{id}', [MedicineTakingController::class, 'destroy']);
-        $router->post('/{id}/mark-taken', [MedicineTakingController::class, 'markAsTaken']);
-    });
-
-    // Medicines routes
-    $router->apiResource('/medicines', MedicinesController::class);
-    $router->post('/medicines/bulk-create', [MedicinesController::class, 'bulkCreate']);
-    $router->get('/medicines/selection', [MedicinesController::class, 'getForSelection']);
-
-    $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
-    $router->apiResource('/expenses', ExpensesController::class);
-    $router->apiResource('/expense-payments', ExpensePaymentsController::class);
-    $router->apiResource('/preferences', PreferencesController::class);
-    $router->apiResource('/collaborators', CollaboratorsController::class);
-    $router->apiResource('/nhif-claims', NhifClaimsController::class);
-    $router->apiResource('/cancer-records', CancerRecordsController::class);
-
     $router->get('/messages', [MessagesController::class, '__invoke']);
 
-    $router->prefix('marketing')->group(function ($router) {
-        $router->get('/dashboard', [MarketingDashboardController::class, '__invoke']);
-        $router->apiResource('/daily-activities', DailyActivitiesController::class);
-        $router->apiResource('/ideas', IdeasController::class);
-        $router->apiResource('/events', EventsController::class);
-        $router->apiResource('/research-plans', ResearchPlansController::class);
-        $router->apiResource('/marketing-strategies', MarketingStrategiesController::class);
-        $router->apiResource('/information-sources', InformationSourcesController::class);
-        $router->apiResource('/communication-logs', CommunicationLogsController::class);
-    });
-    
-    $router->prefix('consultation-room')->group(function ($router) {
-        $router->get('/dashboard', [ConsultationRoomDashboardController::class, '__invoke']);
-    });
-    
-    $router->prefix('dental-lab')->group(function ($router) {
-        $router->get('/dashboard', [\App\Http\Controllers\DentalLabDashboardController::class, '__invoke']);
-    });
-    
-    $router->prefix('medicine-center')->group(function ($router) {
-        $router->get('/dashboard', [MedicineCenterDashboardController::class, '__invoke']);
+    // ─── Reception ────────────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:reception,consultation_room'], function ($router) {
+        $router->get('/patients/test', [PatientsController::class, 'test']);
+        $router->apiResource('/patients', PatientsController::class);
+        $router->get('/patients/vip', [PatientsController::class, 'vipPatients']);
+        $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
+        $router->apiResource('/patient-attachments', PatientAttachmentsController::class);
     });
 
-    $router->prefix('other-dispensing')->group(function ($router) {
-        $router->get('/dashboard', [OtherDispensingDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('dispensing')->group(function ($router) {
-        $router->get('/dashboard', [DispensingDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('inventory-management')->group(function ($router) {
-        $router->get('/dashboard', [InventoryManagementDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('financial-management')->group(function ($router) {
-        $router->get('/dashboard', [FinancialManagementDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('procedure-room')->group(function ($router) {
-        $router->get('/dashboard', [ProcedureRoomDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('reception')->group(function ($router) {
-        $router->get('/dashboard', [\App\Http\Controllers\ReceptionDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('payment-center')->group(function ($router) {
-        $router->get('/dashboard', [\App\Http\Controllers\PaymentCenterDashboardController::class, '__invoke']);
-    });
-
-    $router->prefix('reports')->group(function ($router) {
-        $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
-            $router->get('/cash-collection', 'getCashCollectionReport');
-            $router->get('/partner-frame-payments', 'getPartnerFramePaymentsReport');
+    $router->group(['middleware' => 'privilege:reception'], function ($router) {
+        $router->prefix('patient-waiting-times')->group(function ($router) {
+            $router->get('/', [PatientWaitingTimesController::class, 'index']);
+            $router->get('/statistics', [PatientWaitingTimesController::class, 'statistics']);
+            $router->post('/{id}/start-treatment', [PatientWaitingTimesController::class, 'startTreatment']);
+            $router->post('/{id}/end-treatment', [PatientWaitingTimesController::class, 'endTreatment']);
+            $router->post('/{id}/force-complete-treatment', [PatientWaitingTimesController::class, 'forceCompleteTreatment']);
+            $router->post('/{id}/send-to-cashier', [PatientWaitingTimesController::class, 'sendToCashier']);
+            $router->post('/{id}/send-to-consultation', [PatientWaitingTimesController::class, 'sendToConsultation']);
+            $router->post('/{id}/send-to-dispensing', [PatientWaitingTimesController::class, 'sendToDispensing']);
+            $router->post('/{id}/send-to-procedure-room', [PatientWaitingTimesController::class, 'sendToProcedureRoom']);
+            $router->post('/{id}/move-to-department', [PatientWaitingTimesController::class, 'moveToDepartment']);
         });
-        $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
-            $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');
-            $router->get('/item-balance', 'getItemBalanceReport');
+
+        $router->prefix('patient-notifications')->group(function ($router) {
+            $router->get('/', [PatientNotificationsController::class, 'index']);
+            $router->get('/unread-count', [PatientNotificationsController::class, 'unreadCount']);
+            $router->post('/{id}/mark-as-read', [PatientNotificationsController::class, 'markAsRead']);
+            $router->post('/mark-all-as-read', [PatientNotificationsController::class, 'markAllAsRead']);
+            $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
         });
-        $router->controller(\App\Http\Controllers\Reports\DentalReportsController::class)->prefix('dental')->group(function ($router) {
-            $router->get('/morbidity', 'morbidityReport');
-            $router->get('/procedure-summary', 'procedureSummary');
-            $router->get('/dhis2-summary', 'dhis2Summary');
-        });
-        $router->controller(\App\Http\Controllers\Reports\MoHReportsController::class)->prefix('moh')->group(function ($router) {
-            $router->get('/monthly-opd', 'monthlyOpd');
-            $router->get('/pharmaceutical-consumption', 'pharmaceuticalConsumption');
-            $router->get('/revenue-summary', 'revenueSummary');
-            $router->get('/ipd-report', 'ipdReport');
-            $router->get('/cancer-report', 'cancerReport');
-            $router->get('/birth-death-notification', 'birthDeathNotification');
+
+        $router->prefix('reception')->group(function ($router) {
+            $router->get('/dashboard', [\App\Http\Controllers\ReceptionDashboardController::class, '__invoke']);
         });
     });
-});
 
-Route::get('/restore', function (\Illuminate\Http\Request $request) {
-    $items = \Illuminate\Support\Facades\DB::select('select message, phone, patient_id from messages group by patient_id');
+    // ─── Payment Center ───────────────────────────────────────────────────────
 
-    foreach ($items as &$item) {
-        $pattern = '/Habari\s+(.+?)\./';
-        if (preg_match($pattern, $item->message, $matches)) {
-            $first_name = trim($matches[1]);
-            \App\Models\Patient::where('id', $item->patient_id)->where('first_name', '')->update(['first_name' => $first_name, 'phone' => $item->phone]);
-        }
-    }
+    $router->group(['middleware' => 'privilege:payment_center'], function ($router) {
+        $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
+        $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
+        $router->controller(PatientPaymentCacheItemsController::class)->prefix('patient-payment-cache-items')->group(function ($router) {
+            $router->post('/make-cash-payment', 'makeCashPayment');
+            $router->post('/approve-credit-payment', 'approveCreditPayment');
+            $router->post('/create-bill', 'createBill');
+            $router->post('/complete', 'complete');
+        });
+        $router->apiResource('/patient-item-payments', PatientItemPaymentsController::class);
+
+        $router->get('/patient-item-bills-summary', [PatientItemBillsController::class, 'summary']);
+        $router->apiResource('/patient-item-bills', PatientItemBillsController::class);
+        $router->patch('/patient-item-bills/{id}/clear', [PatientItemBillsController::class, 'clear']);
+        $router->apiResource('/patient-item-bill-payments', PatientItemBillPaymentsController::class);
+
+        $router->apiResource('/nhif-claims', NhifClaimsController::class);
+
+        $router->prefix('payment-center')->group(function ($router) {
+            $router->get('/dashboard', [\App\Http\Controllers\PaymentCenterDashboardController::class, '__invoke']);
+        });
+
+        $router->prefix('reports')->group(function ($router) {
+            $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
+                $router->get('/cash-collection', 'getCashCollectionReport');
+                $router->get('/partner-frame-payments', 'getPartnerFramePaymentsReport');
+            });
+        });
+    });
+
+    // Shared: dispense endpoint accessible by both payment_center and dispensing
+    $router->group(['middleware' => 'privilege:payment_center,dispensing'], function ($router) {
+        $router->post('/patient-payment-cache-items/dispense', [PatientPaymentCacheItemsController::class, 'dispense']);
+    });
+
+    // ─── Consultation Room ────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:consultation_room'], function ($router) {
+        $router->apiResource('/consultations', ConsultationsController::class);
+        $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
+            $router->post('/add-item', 'addItem');
+            $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
+            $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
+        });
+        $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
+        $router->apiResource('/dental-oral-examinations', DentalOralExaminationsController::class);
+        $router->controller(DentalChartingController::class)->prefix('dental-charting')->group(function ($router) {
+            $router->get('/', 'index');
+            $router->get('/{id}', 'show');
+            $router->post('/', 'store');
+            $router->post('/bulk', 'bulkStore');
+            $router->put('/{id}', 'update');
+            $router->delete('/{id}', 'destroy');
+            $router->get('/consultation/{consultationId}', 'getByConsultation');
+        });
+        $router->apiResource('/dental-treatment-records', DentalTreatmentRecordsController::class);
+        $router->apiResource('/prescriptions', PrescriptionsController::class);
+        $router->apiResource('/dental-radiographs', DentalRadiographsController::class);
+        $router->apiResource('/dental-surgery-records', DentalSurgeryRecordsController::class);
+        $router->apiResource('/surgery-record-reports', SurgeryRecordReportsController::class);
+        $router->apiResource('/patient-allergies', PatientAllergiesController::class);
+        $router->apiResource('/patient-medical-histories', PatientMedicalHistoriesController::class);
+        $router->apiResource('/cancer-records', CancerRecordsController::class);
+
+        $router->controller(DentalAppointmentsController::class)->prefix('dental-appointments')->group(function ($router) {
+            $router->get('/', 'index');
+            $router->get('/today', 'getToday');
+            $router->get('/by-date-range', 'getByDateRange');
+            $router->get('/{id}', 'show');
+            $router->post('/', 'store');
+            $router->put('/{id}', 'update');
+            $router->post('/{id}/mark-status', 'markStatus');
+            $router->delete('/{id}', 'destroy');
+        });
+
+        $router->prefix('consultation-room')->group(function ($router) {
+            $router->get('/dashboard', [ConsultationRoomDashboardController::class, '__invoke']);
+        });
+
+        $router->prefix('reports')->group(function ($router) {
+            $router->controller(\App\Http\Controllers\Reports\DentalReportsController::class)->prefix('dental')->group(function ($router) {
+                $router->get('/morbidity', 'morbidityReport');
+                $router->get('/procedure-summary', 'procedureSummary');
+                $router->get('/dhis2-summary', 'dhis2Summary');
+            });
+            $router->controller(\App\Http\Controllers\Reports\MoHReportsController::class)->prefix('moh')->group(function ($router) {
+                $router->get('/monthly-opd', 'monthlyOpd');
+                $router->get('/pharmaceutical-consumption', 'pharmaceuticalConsumption');
+                $router->get('/revenue-summary', 'revenueSummary');
+                $router->get('/ipd-report', 'ipdReport');
+                $router->get('/cancer-report', 'cancerReport');
+                $router->get('/birth-death-notification', 'birthDeathNotification');
+            });
+        });
+    });
+
+    // ─── Dental Lab ───────────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:dental_lab'], function ($router) {
+        $router->controller(DentalLabOrdersController::class)->prefix('dental-lab-orders')->group(function ($router) {
+            $router->get('/', 'index');
+            $router->get('/{id}', 'show');
+            $router->post('/', 'store');
+            $router->put('/{id}', 'update');
+            $router->post('/{id}/mark-ready', 'markReady');
+            $router->post('/{id}/mark-delivered', 'markDelivered');
+            $router->delete('/{id}', 'destroy');
+        });
+
+        $router->prefix('dental-lab')->group(function ($router) {
+            $router->get('/dashboard', [DentalLabDashboardController::class, '__invoke']);
+        });
+    });
+
+    // ─── Medicine Center ──────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:medicine_center'], function ($router) {
+        $router->apiResource('/medicines', MedicinesController::class);
+        $router->post('/medicines/bulk-create', [MedicinesController::class, 'bulkCreate']);
+        $router->get('/medicines/selection', [MedicinesController::class, 'getForSelection']);
+
+        $router->group(['prefix' => 'medicine-taking'], function () use ($router) {
+            $router->get('/', [MedicineTakingController::class, 'index']);
+            $router->post('/', [MedicineTakingController::class, 'store']);
+            $router->get('/{id}', [MedicineTakingController::class, 'show']);
+            $router->put('/{id}', [MedicineTakingController::class, 'update']);
+            $router->delete('/{id}', [MedicineTakingController::class, 'destroy']);
+            $router->post('/{id}/mark-taken', [MedicineTakingController::class, 'markAsTaken']);
+        });
+
+        $router->prefix('medicine-center')->group(function ($router) {
+            $router->get('/dashboard', [MedicineCenterDashboardController::class, '__invoke']);
+        });
+    });
+
+    // Shared: stock-alerts accessible by both medicine_center and inventory_management
+    $router->group(['middleware' => 'privilege:medicine_center,inventory_management'], function ($router) {
+        $router->prefix('stock-alerts')->group(function ($router) {
+            $router->get('/out-of-stock', [StockAlertsController::class, 'getOutOfStockItems']);
+            $router->get('/expired', [StockAlertsController::class, 'getExpiredItems']);
+            $router->get('/expiring-soon', [StockAlertsController::class, 'getExpiringSoonItems']);
+            $router->get('/summary', [StockAlertsController::class, 'getStockAlertsSummary']);
+            $router->get('/medicine', [StockAlertsController::class, 'getMedicineAlerts']);
+            $router->get('/medicine-summary', [StockAlertsController::class, 'getMedicineAlertsSummary']);
+        });
+    });
+
+    // ─── Dispensing ───────────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:dispensing'], function ($router) {
+        $router->prefix('dispensing')->group(function ($router) {
+            $router->get('/dashboard', [DispensingDashboardController::class, '__invoke']);
+        });
+    });
+
+    // ─── Other Dispensing ─────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:other_dispensing'], function ($router) {
+        $router->prefix('other-dispensing')->group(function ($router) {
+            $router->get('/dashboard', [OtherDispensingDashboardController::class, '__invoke']);
+        });
+    });
+
+    // ─── Procedure Room ───────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:procedure_room'], function ($router) {
+        $router->prefix('procedure-room')->group(function ($router) {
+            $router->get('/dashboard', [ProcedureRoomDashboardController::class, '__invoke']);
+        });
+    });
+
+    // ─── Inventory Management ─────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:inventory_management'], function ($router) {
+        $router->apiResource('/items', ItemsController::class);
+        $router->apiResource('/item-prices', ItemPricesController::class);
+        $router->apiResource('/stocktakes', StocktakesController::class);
+        $router->post('/stocktakes/{id}/apply', [StocktakesController::class, 'apply']);
+        $router->post('/stock-out', [StockOutController::class, 'store']);
+        $router->get('/stock-out/reasons', [StockOutController::class, 'reasons']);
+        $router->get('/stock-movements', [StockMovementsController::class, 'index']);
+        $router->get('/stock-movements/summary', [StockMovementsController::class, 'summary']);
+        $router->post('/units-of-measure', [UnitsOfMeasureController::class, 'store']);
+        $router->get('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'show']);
+        $router->put('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'update']);
+        $router->delete('/units-of-measure/{id}', [UnitsOfMeasureController::class, 'destroy']);
+
+        $router->prefix('inventory-management')->group(function ($router) {
+            $router->get('/dashboard', [InventoryManagementDashboardController::class, '__invoke']);
+        });
+
+        $router->prefix('reports')->group(function ($router) {
+            $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
+                $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');
+                $router->get('/item-balance', 'getItemBalanceReport');
+            });
+        });
+    });
+
+    // Public index for units-of-measure (used by selection dropdowns)
+    $router->get('/units-of-measure', [UnitsOfMeasureController::class, 'index']);
+
+    // ─── Marketing ────────────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:marketing'], function ($router) {
+        $router->prefix('marketing')->group(function ($router) {
+            $router->get('/dashboard', [MarketingDashboardController::class, '__invoke']);
+            $router->apiResource('/daily-activities', DailyActivitiesController::class);
+            $router->apiResource('/ideas', IdeasController::class);
+            $router->apiResource('/events', EventsController::class);
+            $router->apiResource('/research-plans', ResearchPlansController::class);
+            $router->apiResource('/marketing-strategies', MarketingStrategiesController::class);
+            $router->apiResource('/information-sources', InformationSourcesController::class);
+            $router->apiResource('/communication-logs', CommunicationLogsController::class);
+        });
+    });
+
+    // ─── Financial Management ─────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:financial_management'], function ($router) {
+        $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
+        $router->apiResource('/expenses', ExpensesController::class);
+        $router->apiResource('/expense-payments', ExpensePaymentsController::class);
+
+        $router->prefix('financial-management')->group(function ($router) {
+            $router->get('/dashboard', [FinancialManagementDashboardController::class, '__invoke']);
+        });
+    });
+
+    // ─── User Management ──────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:user_management'], function ($router) {
+        $router->apiResource('/users', UsersController::class);
+    });
+
+    // ─── Settings ─────────────────────────────────────────────────────────────
+
+    $router->group(['middleware' => 'privilege:settings'], function ($router) {
+        $router->apiResource('/clinics', ClinicsController::class);
+        $router->apiResource('/departments', DepartmentsController::class);
+        $router->apiResource('/job-titles', JobTitlesController::class);
+        $router->apiResource('/payment-modes', PaymentModesController::class);
+        $router->apiResource('/payment-channels', PaymentChannelsController::class);
+        $router->apiResource('/regions', RegionsController::class);
+        $router->apiResource('/districts', DistrictsController::class);
+        $router->apiResource('/wards', WardsController::class);
+        $router->apiResource('/diseases', DiseasesController::class);
+        $router->apiResource('/consultation-types', ConsultationTypesController::class);
+        $router->apiResource('/preferences', PreferencesController::class);
+        $router->apiResource('/collaborators', CollaboratorsController::class);
+    });
+
+    // Shared: item-types accessible by both settings and inventory_management
+    $router->group(['middleware' => 'privilege:settings,inventory_management'], function ($router) {
+        $router->apiResource('/item-types', ItemTypesController::class);
+    });
+
+    // ─── Test endpoint ────────────────────────────────────────────────────────
+
+    Route::get('/test-auth', function (\Illuminate\Http\Request $request) {
+        return response()->json([
+            'authenticated' => auth()->check(),
+            'user' => auth()->user() ? auth()->user()->id : null,
+            'headers' => $request->headers->all()
+        ]);
+    })->middleware('auth:api');
 });

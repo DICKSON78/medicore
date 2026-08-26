@@ -13,6 +13,13 @@ class UsersController extends Controller
 {
     use ApiResponse;
 
+    private $allowedPrivileges = [
+        'dashboard', 'reception', 'payment_center', 'consultation_room',
+        'dental_lab', 'medicine_center', 'procedure_room', 'dispensing',
+        'other_dispensing', 'inventory_management', 'marketing',
+        'financial_management', 'user_management', 'settings',
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -117,8 +124,13 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number',
             'password' => 'required',
+            'role' => 'nullable|in:Admin,Doctor,Client',
             'privileges' => 'sometimes|array',
         ]);
+
+        if (!$user->is_admin && $request->role === 'Admin') {
+            return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Only admins can assign the Admin role.');
+        }
 
         $input = $request->except('password', 'privileges');
         $input['clinic_id'] = $clinic_id;
@@ -127,11 +139,14 @@ class UsersController extends Controller
         $data = User::create($input);
 
         if ($data && $request->privileges) {
-            $privileges = array_map(function ($e) use ($data) {
-                return ['user_id' => $data->id, 'privilege' => $e];
-            }, $request->json('privileges'));
+            $validPrivileges = array_intersect($request->privileges, $this->allowedPrivileges);
+            if (!empty($validPrivileges)) {
+                $privileges = array_map(function ($e) use ($data) {
+                    return ['user_id' => $data->id, 'privilege' => $e];
+                }, $validPrivileges);
 
-            UserPrivilege::insert($privileges);
+                UserPrivilege::insert($privileges);
+            }
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -169,10 +184,21 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'sometimes|required|in:Active,Inactive',
+            'role' => 'nullable|in:Admin,Doctor,Client',
             'privileges' => 'sometimes|array',
         ]);
 
+        $currentUser = $request->user();
         $data = User::findOrFail($id);
+
+        if (!$currentUser->is_admin && $request->role === 'Admin') {
+            return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Only admins can assign the Admin role.');
+        }
+
+        if (!$currentUser->is_admin && $data->is_admin && $request->role !== 'Admin') {
+            return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Only admins can demote an admin user.');
+        }
+
         $input = $request->except('privileges');
 
         if ($request->password) {
@@ -182,13 +208,16 @@ class UsersController extends Controller
         $data->update($input);
 
         if ($request->privileges !== null) {
-            // delete and reinsert privileges
             UserPrivilege::where('user_id', $data->id)->delete();
-            $privileges = array_map(function ($e) use ($data) {
-                return ['user_id' => $data->id, 'privilege' => $e];
-            }, $request->json('privileges'));
 
-            UserPrivilege::insert($privileges);
+            $validPrivileges = array_intersect($request->privileges, $this->allowedPrivileges);
+            if (!empty($validPrivileges)) {
+                $privileges = array_map(function ($e) use ($data) {
+                    return ['user_id' => $data->id, 'privilege' => $e];
+                }, $validPrivileges);
+
+                UserPrivilege::insert($privileges);
+            }
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

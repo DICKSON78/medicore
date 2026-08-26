@@ -75,11 +75,16 @@ class User extends Authenticatable
 
     public function getIsAdminAttribute()
     {
-        // Default-allow: if role is not specified, treat as Admin for access checks
-        if ($this->role === null || $this->role === '') {
+        return $this->role === 'Admin';
+    }
+
+    public function hasPrivilege(string $privilege): bool
+    {
+        if ($this->is_admin) {
             return true;
         }
-        return $this->role == 'Admin';
+
+        return $this->privileges()->where('privilege', $privilege)->exists();
     }
 
     public function getIsDoctorAttribute()

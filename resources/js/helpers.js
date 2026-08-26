@@ -347,6 +347,7 @@ export const getPrivileges = (preferences) => {
     { label: "Medicine Center", value: "medicine_center" },
     { label: "Procedure Room", value: "procedure_room" },
     { label: "Dispensing", value: "dispensing" },
+    { label: "Other Dispensing", value: "other_dispensing" },
     { label: "Inventory Management", value: "inventory_management" },
     {
       label: "Marketing",
