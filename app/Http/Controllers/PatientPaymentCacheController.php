@@ -127,7 +127,6 @@ class PatientPaymentCacheController extends Controller
                     });
                 }
             });
-        }
 
         // Apply date filtering
         if ($start_date) {
