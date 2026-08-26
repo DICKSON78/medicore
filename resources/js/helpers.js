@@ -369,65 +369,65 @@ export const DEFAULT_ROLE_PRIVILEGES = {
     "financial_management", "user_management", "settings",
   ],
   "Hospital Manager": [
-    "dashboard", "reception", "payment_center", "consultation_room",
+    "reception", "payment_center", "consultation_room",
     "dental_lab", "medicine_center", "procedure_room", "dispensing",
     "other_dispensing", "inventory_management", "marketing",
     "financial_management", "user_management", "settings",
   ],
 
   // Clinical
-  "Dental Surgeon": ["dashboard", "consultation_room", "dental_lab", "procedure_room"],
-  Doctor: ["dashboard", "consultation_room", "dental_lab"],
-  "Dental Therapist": ["dashboard", "consultation_room", "dental_lab"],
-  "Oral Health Officer": ["dashboard", "consultation_room", "dental_lab"],
-  "Clinical Officer": ["dashboard", "consultation_room", "procedure_room"],
-  "Medical Officer": ["dashboard", "consultation_room", "procedure_room", "medicine_center"],
+  "Dental Surgeon": ["consultation_room", "dental_lab", "procedure_room"],
+  Doctor: ["consultation_room", "dental_lab"],
+  "Dental Therapist": ["consultation_room", "dental_lab"],
+  "Oral Health Officer": ["consultation_room", "dental_lab"],
+  "Clinical Officer": ["consultation_room", "procedure_room"],
+  "Medical Officer": ["consultation_room", "procedure_room", "medicine_center"],
 
   // Nursing
-  Nurse: ["dashboard", "consultation_room", "procedure_room"],
-  "Dental Nurse": ["dashboard", "consultation_room", "dental_lab", "procedure_room"],
-  "Theatre Nurse": ["dashboard", "procedure_room", "consultation_room"],
-  "Anaesthesia Officer": ["dashboard", "procedure_room"],
-  "Dental Assistant": ["dashboard", "consultation_room", "dental_lab"],
+  Nurse: ["consultation_room", "procedure_room"],
+  "Dental Nurse": ["consultation_room", "dental_lab", "procedure_room"],
+  "Theatre Nurse": ["procedure_room", "consultation_room"],
+  "Anaesthesia Officer": ["procedure_room"],
+  "Dental Assistant": ["consultation_room", "dental_lab"],
 
   // Lab
-  "Dental Lab Technician": ["dashboard", "dental_lab"],
-  "Lab Assistant": ["dashboard", "dental_lab"],
+  "Dental Lab Technician": ["dental_lab"],
+  "Lab Assistant": ["dental_lab"],
 
   // Pharmacy
-  Pharmacist: ["dashboard", "medicine_center", "dispensing", "inventory_management"],
-  "Pharmacy Technician": ["dashboard", "medicine_center", "dispensing"],
-  "Dispensing Assistant": ["dashboard", "dispensing", "other_dispensing"],
+  Pharmacist: ["medicine_center", "dispensing", "inventory_management"],
+  "Pharmacy Technician": ["medicine_center", "dispensing"],
+  "Dispensing Assistant": ["dispensing", "other_dispensing"],
 
   // Administrative
-  Receptionist: ["dashboard", "reception"],
-  "Medical Records Officer": ["dashboard", "reception", "settings"],
-  "Office Administrator": ["dashboard", "reception", "settings", "user_management"],
-  Secretary: ["dashboard", "reception"],
-  "Health Information Officer": ["dashboard", "reception", "consultation_room"],
+  Receptionist: ["reception"],
+  "Medical Records Officer": ["reception", "settings"],
+  "Office Administrator": ["reception", "settings", "user_management"],
+  Secretary: ["reception"],
+  "Health Information Officer": ["reception", "consultation_room"],
 
   // Finance
-  Cashier: ["dashboard", "payment_center", "dispensing", "other_dispensing"],
-  "Billing Officer": ["dashboard", "payment_center", "financial_management"],
-  Accountant: ["dashboard", "financial_management", "payment_center"],
+  Cashier: ["payment_center", "dispensing", "other_dispensing"],
+  "Billing Officer": ["payment_center", "financial_management"],
+  Accountant: ["financial_management", "payment_center"],
 
   // Inventory
-  "Inventory Manager": ["dashboard", "inventory_management", "medicine_center"],
-  "Store Keeper": ["dashboard", "inventory_management"],
+  "Inventory Manager": ["inventory_management", "medicine_center"],
+  "Store Keeper": ["inventory_management"],
 
   // Marketing
-  "Marketing Officer": ["dashboard", "marketing"],
-  "Community Oral Health Worker": ["dashboard", "marketing", "reception"],
-  "Public Health Officer": ["dashboard", "marketing", "consultation_room"],
+  "Marketing Officer": ["marketing"],
+  "Community Oral Health Worker": ["marketing", "reception"],
+  "Public Health Officer": ["marketing", "consultation_room"],
 
   // Oversight
-  "Quality Assurance Officer": ["dashboard", "settings"],
-  "Compliance Officer": ["dashboard", "financial_management", "settings"],
-  "Training Coordinator": ["dashboard", "settings"],
+  "Quality Assurance Officer": ["settings"],
+  "Compliance Officer": ["financial_management", "settings"],
+  "Training Coordinator": ["settings"],
 
   // IT
-  "IT Administrator": ["dashboard", "settings", "user_management"],
-  "System Administrator": ["dashboard", "settings", "user_management"],
+  "IT Administrator": ["settings", "user_management"],
+  "System Administrator": ["settings", "user_management"],
 };
 
 export const getRoleOptions = (preferences) => {

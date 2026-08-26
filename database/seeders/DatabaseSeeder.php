@@ -7,11 +7,13 @@ use App\Models\Clinic;
 use App\Models\ConsultationType;
 use App\Models\ItemType;
 use App\Models\JobTitle;
+use App\Models\PaymentChannel;
 use App\Models\PaymentMode;
 use App\Models\Preference;
 use App\Models\UnitOfMeasure;
 use App\Models\User;
 use App\Models\UserPrivilege;
+use App\Constants\RolePrivileges;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -47,67 +49,62 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::insert([
-            'clinic_id' => 1,
-            'first_name' => 'Admin',
-            'last_name' => 'Admin',
-            'username' => 'admin',
-            'password' => Hash::make('1234'),
-            'created_at' => $now,
-            'updated_at' => $now,
+            [
+                'clinic_id' => 1,
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'role' => 'Admin',
+                'username' => 'admin',
+                'password' => Hash::make('1234'),
+                'gender' => 'Male',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'clinic_id' => 1,
+                'first_name' => 'Cashier',
+                'last_name' => 'User',
+                'role' => 'Cashier',
+                'username' => 'cashier',
+                'password' => Hash::make('1234'),
+                'gender' => 'Female',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'clinic_id' => 1,
+                'first_name' => 'Receptionist',
+                'last_name' => 'User',
+                'role' => 'Receptionist',
+                'username' => 'receptionist',
+                'password' => Hash::make('1234'),
+                'gender' => 'Female',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'clinic_id' => 1,
+                'first_name' => 'Doctor',
+                'last_name' => 'User',
+                'role' => 'Doctor',
+                'designation' => 'Doctor',
+                'username' => 'doctor',
+                'password' => Hash::make('1234'),
+                'gender' => 'Male',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
 
-        // Add doctor users
-        User::insert([
-            [
-                'clinic_id' => 1,
-                'first_name' => 'John',
-                'last_name' => 'Doe',
-                'role' => 'Doctor',
-                'designation' => 'General Physician',
-                'username' => 'doctor1',
-                'password' => Hash::make('1234'),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Jane',
-                'last_name' => 'Smith',
-                'role' => 'Doctor',
-                'designation' => 'Ophthalmologist',
-                'username' => 'doctor2',
-                'password' => Hash::make('1234'),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Michael',
-                'last_name' => 'Johnson',
-                'role' => 'Doctor',
-                'designation' => 'Optometrist',
-                'username' => 'doctor3',
-                'password' => Hash::make('1234'),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-        ]);
-
-        UserPrivilege::insert([
-            ['user_id' => 1, 'privilege' => 'dashboard'],
-            ['user_id' => 1, 'privilege' => 'reception'],
-            ['user_id' => 1, 'privilege' => 'payment_center'],
-            ['user_id' => 1, 'privilege' => 'consultation_room'],
-            ['user_id' => 1, 'privilege' => 'dental_lab'],
-            ['user_id' => 1, 'privilege' => 'medicine_center'],
-            ['user_id' => 1, 'privilege' => 'procedure_room'],
-            ['user_id' => 1, 'privilege' => 'other_dispensing'],
-            ['user_id' => 1, 'privilege' => 'inventory_management'],
-            ['user_id' => 1, 'privilege' => 'marketing'],
-            ['user_id' => 1, 'privilege' => 'financial_management'],
-            ['user_id' => 1, 'privilege' => 'user_management'],
-            ['user_id' => 1, 'privilege' => 'settings'],
-        ]);
+        // Assign privileges based on role
+        $users = User::all();
+        foreach ($users as $user) {
+            $privileges = RolePrivileges::getPrivilegesForRole($user->role);
+            if (!empty($privileges)) {
+                $rows = array_map(fn($p) => ['user_id' => $user->id, 'privilege' => $p], $privileges);
+                UserPrivilege::insert($rows);
+            }
+        }
 
         ConsultationType::insert([
             ['name' => 'Pharmacy', 'created_at' => $now, 'updated_at' => $now],

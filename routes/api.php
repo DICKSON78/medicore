@@ -115,7 +115,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/user', 'getAuthUser');
     });
 
-    $router->get('/dashboard', [DashboardController::class, '__invoke']);
+    $router->get('/dashboard', [DashboardController::class, '__invoke'])->middleware('privilege:dashboard');
     $router->get('/notifications', [NotificationsController::class, '__invoke']);
     $router->get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications']);
     $router->get('/messages', [MessagesController::class, '__invoke']);

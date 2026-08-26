@@ -38,6 +38,29 @@ import MohReportsRoutes from "../pages/moh-reports/MohReportsRoutes";
 import NHIFClaimsRoutes from "../pages/nhif/NHIFClaimsRoutes";
 import DentalDHIS2Summary from "../pages/reports/dental/DentalDHIS2Summary";
 
+const MODULE_DASHBOARD_MAP = {
+  reception: "/reception/dashboard",
+  payment_center: "/payment-center/dashboard",
+  consultation_room: "/consultation-room/dashboard",
+  dental_lab: "/dental-lab/dashboard",
+  medicine_center: "/medicine-center/dashboard",
+  procedure_room: "/procedure-room/dashboard",
+  dispensing: "/dispensing/dashboard",
+  other_dispensing: "/other-dispensing/dashboard",
+  inventory_management: "/inventory-management/dashboard",
+  marketing: "/marketing/dashboard",
+  financial_management: "/financial-management/dashboard",
+};
+
+const getHomeRoute = (user) => {
+  if (user?.privileges?.dashboard) return "/dashboard";
+  const privs = Object.keys(user?.privileges || {});
+  for (const key of Object.keys(MODULE_DASHBOARD_MAP)) {
+    if (privs.includes(key)) return MODULE_DASHBOARD_MAP[key];
+  }
+  return "/login";
+};
+
 const App = () => {
   const [themeMode, setThemeMode] = useState(
     window.localStorage.getItem("theme_mode") || "light"
@@ -97,7 +120,13 @@ const App = () => {
               <React.Fragment>
                 <Route
                   path="dashboard"
-                  element={<Dashboard setSmsBalance={setSmsBalance} />}
+                  element={
+                    user?.privileges?.dashboard ? (
+                      <Dashboard setSmsBalance={setSmsBalance} />
+                    ) : (
+                      <Navigate to={getHomeRoute(user)} />
+                    )
+                  }
                 />
                 <Route
                   path="patient-records/*"
