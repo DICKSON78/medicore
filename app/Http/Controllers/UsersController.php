@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\RolePrivileges;
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\UserPrivilege;
@@ -20,12 +21,11 @@ class UsersController extends Controller
         'financial_management', 'user_management', 'settings',
     ];
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
+    public function roles()
+    {
+        return $this->sendResponse(RolePrivileges::ROLES, Response::HTTP_OK, 'Success.');
+    }
+
     public function index(Request $request)
     {
         $request->validate([
@@ -94,12 +94,6 @@ class UsersController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $user = $request->user();
@@ -113,6 +107,8 @@ class UsersController extends Controller
             $clinic_id = $user->clinic_id;
         }
 
+        $roleKeys = implode(',', RolePrivileges::getRoleKeys());
+
         $request->validate([
             'first_name' => 'required',
             'last_name' => 'required',
@@ -124,7 +120,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number',
             'password' => 'required',
-            'role' => 'nullable|in:Admin,Doctor,Client',
+            'role' => 'required|in:' . $roleKeys,
             'privileges' => 'sometimes|array',
         ]);
 
@@ -138,41 +134,36 @@ class UsersController extends Controller
         $input['created_by'] = $request->user()->id;
         $data = User::create($input);
 
-        if ($data && $request->privileges) {
-            $validPrivileges = array_intersect($request->privileges, $this->allowedPrivileges);
+        if ($data) {
+            $privilegesToAssign = $request->privileges;
+
+            if (empty($privilegesToAssign)) {
+                $privilegesToAssign = RolePrivileges::getPrivilegesForRole($request->role);
+            }
+
+            $validPrivileges = array_intersect($privilegesToAssign, $this->allowedPrivileges);
             if (!empty($validPrivileges)) {
-                $privileges = array_map(function ($e) use ($data) {
+                $privilegeRows = array_map(function ($e) use ($data) {
                     return ['user_id' => $data->id, 'privilege' => $e];
                 }, $validPrivileges);
 
-                UserPrivilege::insert($privileges);
+                UserPrivilege::insert($privilegeRows);
             }
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $data = User::with(['job_title', 'privileges', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        $roleKeys = implode(',', RolePrivileges::getRoleKeys());
+
         $request->validate([
             'first_name' => 'sometimes|required',
             'last_name' => 'sometimes|required',
@@ -184,7 +175,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'sometimes|required|in:Active,Inactive',
-            'role' => 'nullable|in:Admin,Doctor,Client',
+            'role' => 'required|in:' . $roleKeys,
             'privileges' => 'sometimes|array',
         ]);
 
@@ -212,23 +203,17 @@ class UsersController extends Controller
 
             $validPrivileges = array_intersect($request->privileges, $this->allowedPrivileges);
             if (!empty($validPrivileges)) {
-                $privileges = array_map(function ($e) use ($data) {
+                $privilegeRows = array_map(function ($e) use ($data) {
                     return ['user_id' => $data->id, 'privilege' => $e];
                 }, $validPrivileges);
 
-                UserPrivilege::insert($privileges);
+                UserPrivilege::insert($privilegeRows);
             }
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

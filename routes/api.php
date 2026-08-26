@@ -391,6 +391,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     // ─── User Management ──────────────────────────────────────────────────────
 
     $router->group(['middleware' => 'privilege:user_management'], function ($router) {
+        $router->get('/users/roles', [UsersController::class, 'roles']);
         $router->apiResource('/users', UsersController::class);
     });
 

@@ -360,3 +360,29 @@ export const getPrivileges = (preferences) => {
     { label: "Settings", value: "settings" },
   ];
 };
+
+export const DEFAULT_ROLE_PRIVILEGES = {
+  Admin: [
+    "dashboard", "reception", "payment_center", "consultation_room",
+    "dental_lab", "medicine_center", "procedure_room", "dispensing",
+    "other_dispensing", "inventory_management", "marketing",
+    "financial_management", "user_management", "settings",
+  ],
+  Doctor: ["dashboard", "consultation_room", "dental_lab"],
+  Nurse: ["dashboard", "consultation_room", "procedure_room"],
+  Receptionist: ["dashboard", "reception"],
+  Cashier: ["dashboard", "payment_center", "dispensing", "other_dispensing"],
+  Pharmacist: ["dashboard", "medicine_center", "dispensing"],
+  "Dental Lab Technician": ["dashboard", "dental_lab"],
+  Accountant: ["dashboard", "financial_management"],
+  "Inventory Manager": ["dashboard", "inventory_management"],
+  "Marketing Officer": ["dashboard", "marketing"],
+};
+
+export const getRoleOptions = (preferences) => {
+  return Object.entries(DEFAULT_ROLE_PRIVILEGES).map(([role, privileges]) => ({
+    label: role,
+    value: role,
+    privileges,
+  }));
+};

@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Constants\RolePrivileges;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -85,6 +87,11 @@ class User extends Authenticatable
         }
 
         return $this->privileges()->where('privilege', $privilege)->exists();
+    }
+
+    public function getRolePrivilegesAttribute(): array
+    {
+        return RolePrivileges::getPrivilegesForRole($this->role);
     }
 
     public function getIsDoctorAttribute()

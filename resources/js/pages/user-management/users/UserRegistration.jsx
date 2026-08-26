@@ -27,7 +27,7 @@ import Select from "../../../components/Select";
 import SelectClinic from "../../../components/SelectClinic";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getPrivileges } from "../../../helpers";
+import { formatDateForDb, formatError, getPrivileges, DEFAULT_ROLE_PRIVILEGES } from "../../../helpers";
 
 const UserRegistration = () => {
   const addToast = useToast();
@@ -88,6 +88,7 @@ const UserRegistration = () => {
     national_id: undefined,
     phone: undefined,
     password: undefined,
+    role: undefined,
     privileges: [],
   });
 
@@ -96,6 +97,7 @@ const UserRegistration = () => {
     date_of_birth: formData.date_of_birth
       ? formatDateForDb(formData.date_of_birth)
       : null,
+    role: formData.role,
   });
 
   useEffect(() => {
@@ -456,6 +458,27 @@ const UserRegistration = () => {
                   }}
                   onChange={(value) =>
                     setFormData({ ...formData, password: value })
+                  }
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  label="Role"
+                  fullWidth
+                  required
+                  options={Object.keys(DEFAULT_ROLE_PRIVILEGES)}
+                  value={formData.role}
+                  onChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      role: value,
+                      privileges: DEFAULT_ROLE_PRIVILEGES[value] || [],
+                    })
                   }
                 />
               </Grid>

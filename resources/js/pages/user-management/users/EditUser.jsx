@@ -14,7 +14,7 @@ import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 
 import { useFetch, usePatch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { formatDateForDb, formatError, DEFAULT_ROLE_PRIVILEGES } from "../../../helpers";
 
 const EditUser = ({ item, modal, fetchUsers }) => {
   const addToast = useToast();
@@ -65,6 +65,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
     job_title_id: item.job_title_id,
     national_id: item.national_id,
     phone: item.phone,
+    role: item.role,
   });
 
   const { data, loading, error, handlePatch } = usePatch(
@@ -208,23 +209,40 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                 }
               />
             </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Select
-                ref={designationRef}
-                label="Designation"
-                fullWidth
-                options={["Doctor", "Other"]}
-                value={formData.designation}
-                onChange={(value) =>
-                  setFormData({ ...formData, designation: value })
-                }
-              />
-            </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={designationRef}
+                  label="Designation"
+                  fullWidth
+                  options={["Doctor", "Other"]}
+                  value={formData.designation}
+                  onChange={(value) =>
+                    setFormData({ ...formData, designation: value })
+                  }
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  label="Role"
+                  fullWidth
+                  required
+                  options={Object.keys(DEFAULT_ROLE_PRIVILEGES)}
+                  value={formData.role}
+                  onChange={(value) =>
+                    setFormData({ ...formData, role: value })
+                  }
+                />
+              </Grid>
             <Grid
               item
               md={4}

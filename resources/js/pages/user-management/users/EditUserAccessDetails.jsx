@@ -23,7 +23,8 @@ import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
 import { usePatch, useToast } from "../../../hooks";
-import { formatError, getPrivileges } from "../../../helpers";
+import { formatError, getPrivileges, DEFAULT_ROLE_PRIVILEGES } from "../../../helpers";
+import Select from "../../../components/Select";
 
 const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
   const addToast = useToast();
@@ -37,6 +38,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
   const [formData, setFormData] = useState({
     username: item.username,
     password: undefined,
+    role: item.role,
     privileges: item.privileges.map((e) => e.privilege),
     status: item.status,
   });
@@ -198,7 +200,35 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                 }
               />
             </Grid>
-          </Grid>
+            </Grid>
+
+            <Grid
+              container
+              spacing={2}
+              sx={{ mt: 0 }}
+            >
+              <Grid
+                item
+                md={6}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  label="Role"
+                  fullWidth
+                  required
+                  options={Object.keys(DEFAULT_ROLE_PRIVILEGES)}
+                  value={formData.role}
+                  onChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      role: value,
+                      privileges: DEFAULT_ROLE_PRIVILEGES[value] || [],
+                    })
+                  }
+                />
+              </Grid>
+            </Grid>
 
           <Card
             variant="outlined"
