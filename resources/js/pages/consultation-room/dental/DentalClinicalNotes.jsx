@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box, Button, Card, CardContent, Divider, Grid, LinearProgress,
-  Paper, Stack, Typography,
+  Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle,
+  Divider, Grid, LinearProgress, Paper, Stack, Typography,
 } from "@mui/material";
 import { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
-import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import ConsultationItemsCard from "../clinical-notes/ConsultationItemsCard";
 import SelectItems from "../clinical-notes/SelectItems";
 import DiagnosisCard from "../clinical-notes/DiagnosisCard";
@@ -509,15 +508,18 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         />
       </Stack>
 
-      <ConfirmationDialog
-        open={completeDialogOpen}
-        onClose={() => setCompleteDialogOpen(false)}
-        onConfirm={handleCompleteClinicalNotes}
-        title="Complete Clinical Notes"
-        message="Are you sure you want to complete these clinical notes? The consultation will be marked as 'Consulted'."
-        confirmLabel="Complete"
-        loading={completeLoading}
-      />
+      <Dialog open={completeDialogOpen} onClose={() => setCompleteDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Complete Clinical Notes</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to complete these clinical notes? The consultation will be marked as 'Consulted'.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCompleteDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCompleteClinicalNotes} disabled={completeLoading}>
+            {completeLoading ? "Saving..." : "Complete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Modal ref={modalRef} />
     </Paper>
   );

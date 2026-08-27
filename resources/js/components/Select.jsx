@@ -93,8 +93,11 @@ const Select = (
       return option;
     }
 
-    if (typeof optionsLabel === "string" && typeof option === "object") {
-      return option[optionsLabel] || "";
+    if (typeof option === "object") {
+      if (typeof optionsLabel === "string") {
+        return option[optionsLabel] || "";
+      }
+      return option.label || option.name || option.title || "";
     }
 
     return "";
