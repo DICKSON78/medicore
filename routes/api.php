@@ -366,6 +366,13 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->group(['middleware' => 'privilege:marketing'], function ($router) {
         $router->prefix('marketing')->group(function ($router) {
             $router->get('/dashboard', [MarketingDashboardController::class, '__invoke']);
+
+            $router->controller(\App\Http\Controllers\Marketing\MarketingReportsController::class)->group(function ($router) {
+                $router->get('/campaign-performance', 'campaignPerformance');
+                $router->get('/communication-analytics', 'communicationAnalytics');
+                $router->get('/lead-generation', 'leadGeneration');
+            });
+
             $router->apiResource('/daily-activities', DailyActivitiesController::class);
             $router->apiResource('/ideas', IdeasController::class);
             $router->apiResource('/events', EventsController::class);
