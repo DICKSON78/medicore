@@ -585,7 +585,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
   );
 };
 
-const PDFReport = ({ consultationId, patient, ...rest }) => {
+const PDFReport = ({ consultationId, consultation: consultationProp, patient, ...rest }) => {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -593,7 +593,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
     loading: loadingConsultation,
     handleFetch,
   } = useFetch(
-    `api/consultations/${consultationId}`,
+    consultationProp || !consultationId ? null : `api/consultations/${consultationId}`,
     {
       with_diagnoses: "Yes",
       with_items: "Yes",
@@ -604,6 +604,8 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
     (response) => response.data.data
   );
 
+  const currentConsultation = consultationProp || consultation;
+
   useEffect(() => {
     if (consultation) {
       generatePdfDocument();
@@ -611,20 +613,20 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
   }, [consultation]);
 
   const generatePdfDocument = useCallback(async () => {
-    if (consultation && patient) {
+    if (currentConsultation && patient) {
       setLoading(true);
       try {
-        console.log('Starting PDF generation...', { consultation, patient });
+        console.log('Starting PDF generation...', { consultation: currentConsultation, patient });
         
         // Validate required data
-        if (!consultation.id || !patient.id) {
+        if (!currentConsultation.id || !patient.id) {
           throw new Error('Missing consultation or patient ID');
         }
         
         // Create the PDF document with error handling
         const pdfDocument = (
           <PDFReportDocument
-            consultation={consultation}
+            consultation={currentConsultation}
             patient={patient}
           />
         );
@@ -662,7 +664,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
         console.error('Error details:', {
           message: error.message,
           stack: error.stack,
-          consultation: consultation,
+          consultation: currentConsultation,
           patient: patient,
           errorType: error.constructor.name
         });
@@ -682,10 +684,10 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
         setLoading(false);
       }
     } else {
-      console.error('Missing required data for PDF generation:', { consultation, patient });
+      console.error('Missing required data for PDF generation:', { consultation: currentConsultation, patient });
       alert('Missing consultation or patient data. Please refresh the page and try again.');
     }
-  }, [consultation, patient]);
+  }, [currentConsultation, patient]);
 
   return (
     <Button
@@ -693,7 +695,11 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
       variant="contained"
       color="secondary"
       startIcon={<DownloadIcon />}
-      onClick={handleFetch}
+      onClick={
+        consultationProp
+          ? generatePdfDocument
+          : handleFetch
+      }
       {...rest}
     >
       {loadingConsultation || loading ? "Generating PDF..." : "PDF"}
