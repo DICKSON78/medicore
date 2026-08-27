@@ -53,8 +53,8 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [radiographs, setRadiographs] = useState([]);
 
-  const [autoPatch, autoSaving] = usePatch();
-  const [completePatch, completing] = usePatch();
+  const { handlePatch: autoPatch } = usePatch();
+  const { handlePatch: completePatch, loading: completing } = usePatch();
 
   const fetchDiagnoses = async () => {
     if (!consultation?.id) return;

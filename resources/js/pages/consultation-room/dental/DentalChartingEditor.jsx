@@ -80,7 +80,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
     `/api/dental-charting/consultation/${consultationId}`,
     { loadOnMount: true, loadOnReload: true },
   );
-  const [patch, saving] = usePatch();
+  const { handlePatch: patch, loading: saving } = usePatch();
 
   useEffect(() => {
     if (fetchData?.data) {

@@ -18,7 +18,7 @@ const fields = [
 ];
 
 const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
-  const [patch, loading] = usePatch();
+  const { handlePatch: patch } = usePatch();
 
   const handleChange = useCallback((field, value) => {
     const payload = { what: "Dental Oral Examination", [field]: value };

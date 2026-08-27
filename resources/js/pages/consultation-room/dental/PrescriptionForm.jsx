@@ -21,7 +21,7 @@ const ROUTE_OPTIONS = [
 
 const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescriptionAdded }) => {
   const addToast = useToast();
-  const [post, saving] = usePost();
+  const { handlePost: post, loading: saving } = usePost();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     medicine_name: "",

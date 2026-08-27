@@ -21,7 +21,7 @@ const RADIOGRAPH_TYPES = [
 
 const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiographAdded }) => {
   const addToast = useToast();
-  const [post, saving] = usePost();
+  const { handlePost: post, loading: saving } = usePost();
   const fileInputRef = useRef();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
