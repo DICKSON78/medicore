@@ -471,6 +471,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Lab Orders",
           icon: <WaitingIcon />,
           to: "/dental-lab/lab-orders",
+          badge: Number(notifications?.patients_sent_to_lab) || 0,
           show: user.privileges.dental_lab,
         },
         {

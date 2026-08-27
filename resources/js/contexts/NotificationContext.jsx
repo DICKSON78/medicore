@@ -23,6 +23,7 @@ export const NotificationProvider = ({ children }) => {
     patients_to_return: 0,
     vip_patients: 0,
     waiting_patients: 0,
+    patients_sent_to_lab: 0,
   });
   const [loading, setLoading] = useState(false);
   const [currentParams, setCurrentParams] = useState({});
@@ -96,6 +97,7 @@ export const NotificationProvider = ({ children }) => {
         patients_to_return: 0,
         vip_patients: 0,
         waiting_patients: 0,
+        patients_sent_to_lab: 0,
       });
       return null;
     } finally {

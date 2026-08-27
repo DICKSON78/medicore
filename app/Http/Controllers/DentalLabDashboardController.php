@@ -109,6 +109,20 @@ class DentalLabDashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // Patients currently at the lab (have active lab orders not yet delivered)
+        $patients_at_lab = DentalLabOrder::query()
+            ->when($clinic_id, $baseQuery)
+            ->whereNotIn('status', ['Delivered'])
+            ->with([
+                'payment_cache_item' => function ($q) {
+                    $q->with(['payment_cache.check_in.patient', 'item', 'consultation_type']);
+                },
+                'consultation',
+            ])
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
         // Orders by status
         $orders_by_status = DentalLabOrder::query()
             ->when($clinic_id, $baseQuery)
@@ -173,6 +187,7 @@ class DentalLabDashboardController extends Controller
             'total_revenue' => (float) $total_revenue,
             'items_dispensed' => $items_dispensed,
             'recent_orders' => $recent_orders,
+            'patients_at_lab' => $patients_at_lab,
             'statistics' => [
                 'orders_by_status' => $orders_by_status,
                 'top_items_dispensed' => $top_items_dispensed,

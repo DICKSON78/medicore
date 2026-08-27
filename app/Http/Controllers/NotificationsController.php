@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
+use App\Models\DentalLabOrder;
 use App\Models\PatientPaymentCache;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class NotificationsController extends Controller
             'patients_to_return' => 0,
             'vip_patients' => 0,
             'waiting_patients' => 0,
+            'patients_sent_to_lab' => 0,
         ];
 
         $data['patients_sent_to_cashier'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
@@ -65,6 +67,17 @@ class NotificationsController extends Controller
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
+            ->count();
+
+        $data['patients_sent_to_lab'] = DentalLabOrder::whereHas('consultation', function ($query) use ($user) {
+            $query->whereHas('creator', function ($q) use ($user) {
+                $q->where('clinic_id', $user->clinic_id);
+            });
+        })
+            ->whereNotIn('status', ['Delivered'])
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->distinct('consultation_id')
             ->count();
 
         $data['dispensing_requests'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {

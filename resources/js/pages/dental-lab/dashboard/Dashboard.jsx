@@ -126,6 +126,60 @@ const Dashboard = () => {
 
           <Card sx={{ mb: 2 }}>
             <CardContent>
+              <Typography variant="h6" gutterBottom>Patients at the Lab</Typography>
+              {stats.patients_at_lab?.length > 0 ? (
+                <Grid container spacing={2}>
+                  {stats.patients_at_lab.map((order) => {
+                    const patient = order.payment_cache_item?.payment_cache?.check_in?.patient;
+                    const patientId = order.payment_cache_item?.payment_cache?.check_in?.patient_id;
+                    const consultationId = order.consultation_id;
+                    return (
+                      <Grid item xs={12} sm={6} md={4} key={order.id}>
+                        <Card
+                          variant="outlined"
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => {
+                            if (patientId && consultationId) {
+                              navigate(`/dental-lab/lab-orders/${patientId}/${consultationId}`);
+                            }
+                          }}
+                        >
+                          <CardContent>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              {patient?.full_name || "Unknown Patient"}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Order: DL-{order.id} - {order.order_type}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Item: {order.payment_cache_item?.item?.name || "N/A"}
+                            </Typography>
+                            <Box sx={{ mt: 0.5 }}>
+                              <Box
+                                component="span"
+                                sx={{
+                                  px: 1, py: 0.25, borderRadius: 1, fontSize: "0.7rem", fontWeight: 600,
+                                  color: order.status === "Delivered" ? "#2e7d32" : order.status === "Ready" ? "#6a1b9a" : order.status === "In Progress" ? "#0277bd" : "#e65100",
+                                  bgcolor: order.status === "Delivered" ? "#e8f5e9" : order.status === "Ready" ? "#f3e5f5" : order.status === "In Progress" ? "#e1f5fe" : "#fff3e0",
+                                }}
+                              >
+                                {order.status}
+                              </Box>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              ) : (
+                <Typography color="text.secondary">No patients currently at the lab</Typography>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
               <Typography variant="h6" gutterBottom>Recent Lab Orders</Typography>
               {stats.recent_orders?.length > 0 ? (
                 <Grid container spacing={2}>
