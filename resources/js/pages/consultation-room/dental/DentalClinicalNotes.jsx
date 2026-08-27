@@ -56,6 +56,51 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
   const [autoPatch, autoSaving] = usePatch();
   const [completePatch, completing] = usePatch();
 
+  const fetchDiagnoses = async () => {
+    if (!consultation?.id) return;
+    try {
+      const res = await fetch(`/api/consultation-diagnoses?consultation_id=${consultation.id}&per_page=500`);
+      const json = await res.json();
+      const data = json?.data?.data?.data || json?.data?.data || json?.data || [];
+      setDiagnoses(Array.isArray(data) ? data : []);
+    } catch {}
+  };
+
+  const fetchConsItems = async () => {
+    if (!consultation?.id) return;
+    try {
+      const res = await fetch(`/api/patient-payment-cache-items?consultation_id=${consultation.id}&per_page=100`);
+      const json = await res.json();
+      if (json.data?.data) setConsItems(json.data.data);
+    } catch {}
+  };
+
+  const openSelectDiagnosesModal = (title, type) => {
+    const component = (
+      <SelectDiagnoses
+        modal={modalRef.current}
+        consultationId={consultation.id}
+        diagnosisType={type}
+        selected={(diagnoses || []).filter((e) => e.diagnosis_type === type)}
+        fetchDiagnoses={fetchDiagnoses}
+      />
+    );
+    modalRef.current.open(title, component, "md");
+  };
+
+  const openSelectItemsModal = (title, type) => {
+    const component = (
+      <SelectItems
+        modal={modalRef.current}
+        consultation={consultation}
+        consultationType={type}
+        selected={(consItems || []).filter((e) => e.consultation_type?.name === type)}
+        fetchItems={fetchConsItems}
+      />
+    );
+    modalRef.current.open(title, component, "lg");
+  };
+
   const autoSaveTimer = useRef(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState("");
 
@@ -381,36 +426,37 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <DiagnosisCard
+              title="Principal Diagnosis"
               consultationId={consultation.id}
-              diagnoses={diagnoses}
+              items={diagnoses || []}
               diagnosisType="Principal"
+              onClickAdd={(title, type) => openSelectDiagnosesModal(title, type)}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <DiagnosisCard
+              title="Additional Diagnosis"
               consultationId={consultation.id}
-              diagnoses={diagnoses}
+              items={diagnoses || []}
               diagnosisType="Additional"
+              onClickAdd={(title, type) => openSelectDiagnosesModal(title, type)}
             />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 1 }}>
-          <SelectDiagnoses consultationId={consultation.id} />
-        </Box>
       </Box>
 
       <Box sx={{ my: 2 }}>
         <Subheader title="Treatment Items" />
-        <ConsultationItemsCard items={consItems} consultationId={consultation.id} />
+        <ConsultationItemsCard
+          title="Treatment Items"
+          items={consItems || []}
+          consultationId={consultation.id}
+          showAllTypes={true}
+        />
         <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-          <SelectItems
-            consultationId={consultation.id}
-            onRefresh={() => {
-              fetch(`/api/patient-payment-cache-items?consultation_id=${consultation.id}&per_page=100`)
-                .then((r) => r.json())
-                .then((d) => { if (d.data?.data) setConsItems(d.data.data); });
-            }}
-          />
+          <Button variant="contained" size="small" onClick={() => openSelectItemsModal("Add Treatment Item", "Dental Lab")}>
+            + Add Item
+          </Button>
         </Box>
       </Box>
 
@@ -472,6 +518,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         confirmLabel="Complete"
         loading={completeLoading}
       />
+      <Modal ref={modalRef} />
     </Paper>
   );
 };
