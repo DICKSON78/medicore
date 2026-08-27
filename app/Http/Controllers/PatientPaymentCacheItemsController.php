@@ -395,7 +395,6 @@ class PatientPaymentCacheItemsController extends Controller
                             $item->payment_cache->save();
                         }
                     }
-                    }
                 }
             }
 
