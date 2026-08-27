@@ -273,55 +273,54 @@ class PatientPaymentCacheItemsController extends Controller
             $payment->amount = $amount;
             $payment->save();
 
-            // Create a bill record (Cleared since payment is made in full)
-            $bill = PatientItemBill::create([
-                'amount' => $amount,
-                'discount' => $request->discount ?? 0,
-                'status' => 'Cleared',
-                'cleared_at' => Carbon::now(),
-                'cleared_by' => $user->id,
-                'created_by' => $user->id,
-            ]);
+            // Create or reuse bill record (Cleared since payment is made in full)
+            $paidItems = PatientPaymentCacheItem::where('item_payment_id', $payment->id)->get();
+            $existingBillId = $paidItems->first()?->bill_id;
+
+            if ($existingBillId) {
+                $bill = PatientItemBill::find($existingBillId);
+                $bill->update([
+                    'amount' => $amount,
+                    'discount' => $request->discount ?? 0,
+                    'status' => 'Cleared',
+                    'cleared_at' => Carbon::now(),
+                    'cleared_by' => $user->id,
+                ]);
+            } else {
+                $bill = PatientItemBill::create([
+                    'amount' => $amount,
+                    'discount' => $request->discount ?? 0,
+                    'status' => 'Cleared',
+                    'cleared_at' => Carbon::now(),
+                    'cleared_by' => $user->id,
+                    'created_by' => $user->id,
+                ]);
+            }
 
             // Link paid items to the bill and create bill payment record
             if ($bill) {
-                $paidItems = PatientPaymentCacheItem::where('item_payment_id', $payment->id)->get();
                 foreach ($paidItems as $paidItem) {
                     $paidItem->bill_id = $bill->id;
                     $paidItem->save();
                 }
 
-                PatientItemBillPayment::create([
-                    'bill_id' => $bill->id,
-                    'channel_id' => $request->payment_channel_id,
-                    'amount' => $amount - ($request->discount ?? 0),
-                    'created_by' => $user->id,
-                ]);
+                // Only create bill payment if one doesn't exist yet for this bill
+                $existingPayment = PatientItemBillPayment::where('bill_id', $bill->id)->first();
+                if (!$existingPayment) {
+                    PatientItemBillPayment::create([
+                        'bill_id' => $bill->id,
+                        'channel_id' => $request->payment_channel_id,
+                        'amount' => $amount - ($request->discount ?? 0),
+                        'created_by' => $user->id,
+                    ]);
+                }
             }
 
             $payment->items = PatientPaymentCacheItem::with(['item.unit_of_measure'])
                 ->where('item_payment_id', $payment->id)
                 ->get();
 
-        // Create a bill record (Pending since credit payment)
-        $bill = PatientItemBill::create([
-            'amount' => $amount,
-            'discount' => 0,
-            'status' => 'Pending',
-            'created_by' => $user->id,
-        ]);
-
-        if ($bill) {
-            foreach ($items as &$request_item) {
-                $item = PatientPaymentCacheItem::find($request_item);
-                if ($item) {
-                    $item->bill_id = $bill->id;
-                    $item->save();
-                }
-            }
-        }
-
-        // Trigger notification refresh for real-time updates
+            // Trigger notification refresh for real-time updates
             try {
                 event(new \App\Events\NotificationUpdate());
                 \Log::info('Payment completed - notification refresh triggered', [
