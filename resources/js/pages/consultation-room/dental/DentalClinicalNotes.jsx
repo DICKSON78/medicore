@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box, Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle,
+  Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
   Divider, Grid, LinearProgress, Paper, Stack, Typography,
 } from "@mui/material";
 import { Header as PageHeader } from "../../../components/Page";
@@ -19,7 +19,8 @@ import DentalChartingEditor from "./DentalChartingEditor";
 import PrescriptionForm from "./PrescriptionForm";
 import DentalRadiographs from "./DentalRadiographs";
 import { useFetch, usePatch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
+import { formatDateForDb, formatDate, formatError, getValidationError } from "../../../helpers";
+import { DENTAL_TREATMENT_OPTIONS } from "../../../constants";
 
 const Subheader = ({ title, sx }) => (
   <Box sx={{
@@ -51,6 +52,15 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
   const [oralExamData, setOralExamData] = useState(null);
   const [prescriptions, setPrescriptions] = useState([]);
   const [radiographs, setRadiographs] = useState([]);
+  const [labOrders, setLabOrders] = useState([]);
+  const [labFormOpen, setLabFormOpen] = useState(false);
+  const [labEditingId, setLabEditingId] = useState(null);
+  const [labForm, setLabForm] = useState({
+    order_type: "", description: "", material: "", shade: "",
+    tooth_number: "", teeth_involved: [], lab_name: "", lab_notes: "",
+    cost: "", technician_charges: "", impression_date: "", delivery_date: "",
+  });
+  const [labSaving, setLabSaving] = useState(false);
 
   const { handlePatch: autoPatch } = usePatch();
   const { handlePatch: completePatch, loading: completing } = usePatch();
@@ -72,6 +82,94 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
       const json = await res.json();
       if (json.data?.data) setConsItems(json.data.data);
     } catch {}
+  };
+
+  const fetchLabOrders = async () => {
+    if (!consultation?.id) return;
+    try {
+      const res = await fetch(`/api/dental-lab-orders?consultation_id=${consultation.id}&per_page=50`);
+      const json = await res.json();
+      const data = json?.data?.data?.data || json?.data?.data || [];
+      setLabOrders(Array.isArray(data) ? data : []);
+    } catch {}
+  };
+
+  const handleSaveLabOrder = async () => {
+    if (!labForm.order_type) {
+      addToast({ message: "Order type is required", severity: "error" });
+      return;
+    }
+    setLabSaving(true);
+    try {
+      const isEdit = !!labEditingId;
+      const payload = {
+        consultation_id: consultation.id,
+        ...labForm,
+        teeth_involved: Array.isArray(labForm.teeth_involved) && labForm.teeth_involved.length > 0 ? labForm.teeth_involved : undefined,
+        tooth_number: labForm.tooth_number ? parseInt(labForm.tooth_number) || labForm.tooth_number : undefined,
+      };
+      const url = isEdit ? `/api/dental-lab-orders/${labEditingId}` : "/api/dental-lab-orders";
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + localStorage.getItem("token") },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        addToast({ message: json.message || "Failed to save lab order", severity: "error" });
+        return;
+      }
+      addToast({ message: isEdit ? "Lab order updated" : "Lab order sent to lab", severity: "success" });
+      setLabFormOpen(false);
+      setLabEditingId(null);
+      setLabForm({ order_type: "", description: "", material: "", shade: "", tooth_number: "", teeth_involved: [], lab_name: "", lab_notes: "", cost: "", technician_charges: "", impression_date: "", delivery_date: "" });
+      fetchLabOrders();
+    } catch (e) {
+      addToast({ message: "Failed to save lab order", severity: "error" });
+    } finally {
+      setLabSaving(false);
+    }
+  };
+
+  const handleLabStatus = async (order, status) => {
+    try {
+      if (status === "Ready") {
+        await fetch(`/api/dental-lab-orders/${order.id}/mark-ready`, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
+        });
+      } else {
+        const res = await fetch(`/api/dental-lab-orders/${order.id}/mark-delivered`, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
+        });
+        if (!res.ok) {
+          await fetch(`/api/dental-lab-orders/${order.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + localStorage.getItem("token") },
+            body: JSON.stringify({ status }),
+          });
+        }
+      }
+      addToast({ message: "Lab order status updated", severity: "success" });
+      fetchLabOrders();
+    } catch {
+      addToast({ message: "Failed to update status", severity: "error" });
+    }
+  };
+
+  const handleDeleteLabOrder = async (id) => {
+    if (!window.confirm("Delete this lab order?")) return;
+    try {
+      await fetch(`/api/dental-lab-orders/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
+      });
+      setLabOrders(labOrders.filter((o) => o.id !== id));
+      addToast({ message: "Lab order deleted", severity: "success" });
+    } catch {
+      addToast({ message: "Failed to delete", severity: "error" });
+    }
   };
 
   const openSelectDiagnosesModal = (title, type) => {
@@ -144,6 +242,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         .then((d) => {
           if (d.data?.data) setRadiographs(d.data.data);
         });
+      fetchLabOrders();
     }
   }, [consultation?.id]);
 
@@ -459,6 +558,82 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         </Box>
       </Box>
 
+      <Subheader title="Dental Lab Orders" />
+      <Card variant="outlined" sx={{ mb: 2 }}>
+        <CardContent>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+            <Typography variant="subtitle1" fontWeight={600}>Lab Orders</Typography>
+            <Button size="small" variant="outlined" onClick={() => {
+              setLabForm({ order_type: "", description: "", material: "", shade: "", tooth_number: "", teeth_involved: [], lab_name: "", lab_notes: "", cost: "", technician_charges: "", impression_date: "", delivery_date: "" });
+              setLabEditingId(null);
+              setLabFormOpen(true);
+            }}>
+              + New Lab Order
+            </Button>
+          </Box>
+          {labOrders && labOrders.length > 0 ? (
+            <Stack spacing={1}>
+              {labOrders.map((order) => (
+                <Paper key={order.id} variant="outlined" sx={{ p: 1.5 }}>
+                  <Grid container spacing={1} alignItems="center">
+                    <Grid item xs={12} sm={3}>
+                      <Typography variant="body2" fontWeight={600}>DL-{order.id} — {order.order_type}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <Typography variant="caption" color="text.secondary">{order.material || ""} {order.shade ? `(${order.shade})` : ""}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <Typography variant="caption" color="text.secondary">
+                        {order.tooth_number ? `Tooth ${order.tooth_number}` : (order.teeth_involved ? (Array.isArray(order.teeth_involved) ? `${order.teeth_involved.length} teeth` : order.teeth_involved) : "")}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <Chip label={order.status} size="small" color={order.status === "Delivered" ? "success" : order.status === "Ready" ? "secondary" : order.status === "In Progress" ? "info" : "warning"} />
+                    </Grid>
+                    <Grid item xs={12} sm={3} sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
+                      {order.status === "Ordered" && (
+                        <Button size="small" variant="outlined" onClick={() => handleLabStatus(order, "In Progress")}>In Progress</Button>
+                      )}
+                      {order.status === "In Progress" && (
+                        <Button size="small" variant="outlined" onClick={() => handleLabStatus(order, "Ready")}>Mark Ready</Button>
+                      )}
+                      {order.status === "Ready" && (
+                        <Button size="small" variant="outlined" onClick={() => handleLabStatus(order, "Delivered")}>Deliver</Button>
+                      )}
+                      <Button size="small" variant="text" onClick={() => {
+                        setLabForm({
+                          order_type: order.order_type || "",
+                          description: order.description || "",
+                          material: order.material || "",
+                          shade: order.shade || "",
+                          tooth_number: order.tooth_number || "",
+                          teeth_involved: order.teeth_involved || [],
+                          lab_name: order.lab_name || "",
+                          lab_notes: order.lab_notes || "",
+                          cost: order.cost || "",
+                          technician_charges: order.technician_charges || "",
+                          impression_date: order.impression_date || "",
+                          delivery_date: order.delivery_date || "",
+                        });
+                        setLabEditingId(order.id);
+                        setLabFormOpen(true);
+                      }}>Edit</Button>
+                      {order.status === "Ordered" && (
+                        <Button size="small" variant="text" color="error" onClick={() => handleDeleteLabOrder(order.id)}>Delete</Button>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Paper>
+              ))}
+            </Stack>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+              No lab orders yet. Add a dental prosthetic item and create a lab order.
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+
       <Subheader title="Prescriptions" />
       <PrescriptionForm
         consultationId={consultation.id}
@@ -507,6 +682,130 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           items={consItems}
         />
       </Stack>
+
+      <Dialog open={labFormOpen} onClose={() => setLabFormOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>{labEditingId ? `Edit Lab Order #DL-${labEditingId}` : "New Dental Lab Order"}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid item xs={12} sm={4}>
+              <Select
+                label="Order Type"
+                value={labForm.order_type}
+                options={[
+                  { label: "Crown", value: "Crown" },
+                  { label: "Bridge", value: "Bridge" },
+                  { label: "Denture", value: "Denture" },
+                  { label: "Partial Denture", value: "Partial Denture" },
+                  { label: "Full Denture", value: "Full Denture" },
+                  { label: "Dental Implant", value: "Implant" },
+                  { label: "Veneer", value: "Veneer" },
+                  { label: "Inlay/Onlay", value: "Inlay/Onlay" },
+                  { label: "Night Guard", value: "Night Guard" },
+                  { label: "Mouth Guard", value: "Mouth Guard" },
+                  { label: "Space Maintainer", value: "Space Maintainer" },
+                  { label: "Orthodontic Appliance", value: "Orthodontic" },
+                  { label: "Model/Cast (Study)", value: "Model" },
+                  { label: "Wax-up", value: "WaxUp" },
+                  { label: "Other", value: "Other" },
+                ]}
+                onChange={(e) => setLabForm({ ...labForm, order_type: e.target.value })}
+                fullWidth size="small" required
+              />
+            </Grid>
+            <Grid item xs={6} sm={2}>
+              <Select
+                label="Tooth #"
+                value={labForm.tooth_number}
+                options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
+                onChange={(e) => setLabForm({ ...labForm, tooth_number: e.target.value })}
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <TextField
+                label="Material"
+                value={labForm.material}
+                onChange={(e) => setLabForm({ ...labForm, material: e.target.value })}
+                placeholder="e.g. PFM, Zirconia, Acrylic"
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <TextField
+                label="Shade"
+                value={labForm.shade}
+                onChange={(e) => setLabForm({ ...labForm, shade: e.target.value })}
+                placeholder="e.g. A2"
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Lab Name"
+                value={labForm.lab_name}
+                onChange={(e) => setLabForm({ ...labForm, lab_name: e.target.value })}
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                label="Impression Date"
+                type="date"
+                value={labForm.impression_date}
+                onChange={(e) => setLabForm({ ...labForm, impression_date: e.target.value })}
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                label="Delivery Date"
+                type="date"
+                value={labForm.delivery_date}
+                onChange={(e) => setLabForm({ ...labForm, delivery_date: e.target.value })}
+                fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                value={labForm.description}
+                onChange={(e) => setLabForm({ ...labForm, description: e.target.value })}
+                multiline rows={2} fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Cost (TZS)"
+                value={labForm.cost}
+                onChange={(e) => setLabForm({ ...labForm, cost: e.target.value })}
+                type="number" fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Technician Charges (TZS)"
+                value={labForm.technician_charges}
+                onChange={(e) => setLabForm({ ...labForm, technician_charges: e.target.value })}
+                type="number" fullWidth size="small"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Lab Notes"
+                value={labForm.lab_notes}
+                onChange={(e) => setLabForm({ ...labForm, lab_notes: e.target.value })}
+                multiline rows={2} fullWidth size="small"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLabFormOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveLabOrder} disabled={labSaving}>
+            {labSaving ? "Saving..." : labEditingId ? "Update" : "Send to Lab"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={completeDialogOpen} onClose={() => setCompleteDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Complete Clinical Notes</DialogTitle>
