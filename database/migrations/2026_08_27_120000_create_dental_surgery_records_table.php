@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('cataract_surgery_records', function (Blueprint $table) {
+        Schema::create('dental_surgery_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_cache_item_id');
+            $table->foreignId('payment_cache_item_id')->nullable();
             $table->foreignId('patient_id')->nullable();
             $table->string('surgery_type')->nullable();
             $table->string('tooth_number')->nullable();
@@ -39,7 +39,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('patient_payment_cache_items')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->nullOnDelete();
             $table->foreign('patient_id')
                 ->references('id')
                 ->on('patients')
@@ -70,6 +70,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('cataract_surgery_records');
+        Schema::dropIfExists('dental_surgery_records');
     }
 };

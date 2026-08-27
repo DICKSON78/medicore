@@ -28,7 +28,7 @@ const Dashboard = () => {
   const addToast = useToast();
 
   const { data, loading, error } = useFetch(
-    "api/dispensing-dashboard-public",
+    "api/dispensing/dashboard",
     {
       start_date: getWeekStartDate().toISOString().split('T')[0],
       end_date: getWeekEndDate().toISOString().split('T')[0],
