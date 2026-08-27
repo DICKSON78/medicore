@@ -87,9 +87,6 @@ class ConsultationsController extends Controller
             if ($status === 'Pending') {
                 $data->where('status', 'Pending')
                     ->whereHas('payment_cache_item', function ($query) {
-                        $query->whereHas('item', function ($itemQuery) {
-                            $itemQuery->where('is_consultation_item', 'Yes');
-                        });
                         $query->where('status', 'Paid');
                     });
             } else {

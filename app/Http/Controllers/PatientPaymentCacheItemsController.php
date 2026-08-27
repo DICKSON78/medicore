@@ -256,19 +256,15 @@ class PatientPaymentCacheItemsController extends Controller
 
                     $item->save();
 
-                    // if item was not created from consultation, i.e. on check-in, create consultation
+                    // create consultation if one doesn't exist yet for this payment cache
                     if (!$item->payment_cache->consultation_id) {
-                        if ($item->item->is_consultation_item == 'Yes') {
-                            $consultation = Consultation::create([
-                                'payment_cache_item_id' => $item->id,
-                                'created_by' => $user->id,
-                            ]);
-                            
-                            $item->payment_cache->consultation_id = $consultation->id;
-                            $item->payment_cache->save();
-                        }
-                    } else {
-                        // Consultation already exists
+                        $consultation = Consultation::create([
+                            'payment_cache_item_id' => $item->id,
+                            'created_by' => $user->id,
+                        ]);
+                        
+                        $item->payment_cache->consultation_id = $consultation->id;
+                        $item->payment_cache->save();
                     }
                 }
             }
@@ -325,14 +321,14 @@ class PatientPaymentCacheItemsController extends Controller
                 $item->status = 'Paid';
                 $item->save();
 
-                // if item was not created from consultation, i.e. on check-in, create consultation
+                // create consultation if one doesn't exist yet for this payment cache
                 if (!$item->payment_cache->consultation_id) {
-                    if ($item->item->is_consultation_item == 'Yes') {
-                        Consultation::create([
-                            'payment_cache_item_id' => $item->id,
-                            'created_by' => $user->id,
-                        ]);
-                    }
+                    Consultation::create([
+                        'payment_cache_item_id' => $item->id,
+                        'created_by' => $user->id,
+                    ]);
+                    $item->payment_cache->consultation_id = Consultation::where('payment_cache_item_id', $item->id)->value('id');
+                    $item->payment_cache->save();
                 }
             }
         }
@@ -383,17 +379,15 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->status = 'Billed';
                     $item->save();
 
-                    // if item was not created from consultation, i.e. on check-in, create consultation
+                    // create consultation if one doesn't exist yet for this payment cache
                     if (!$item->payment_cache->consultation_id) {
-                        if ($item->item->is_consultation_item == 'Yes') {
-                            $consultation = Consultation::create([
-                                'payment_cache_item_id' => $item->id,
-                                'created_by' => $user->id,
-                            ]);
-                            
-                            $item->payment_cache->consultation_id = $consultation->id;
-                            $item->payment_cache->save();
-                        }
+                        $consultation = Consultation::create([
+                            'payment_cache_item_id' => $item->id,
+                            'created_by' => $user->id,
+                        ]);
+                        
+                        $item->payment_cache->consultation_id = $consultation->id;
+                        $item->payment_cache->save();
                     }
                 }
             }
