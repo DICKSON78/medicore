@@ -18,18 +18,19 @@ const usePatch = (uri, payload = null) => {
     setLoading(true);
     setError(null);
 
-    // Use axios with its built-in timeout instead of race condition
-    window.axios.patch("/" + uri, payload, {
-      timeout: 45000 // 45 seconds timeout for complex operations
+    return window.axios.patch("/" + uri, payload, {
+      timeout: 45000
     })
       .then((response) => {
         setData(response.data);
         setLoading(false);
+        return response.data;
       })
       .catch((error) => {
         setLoading(false);
         setError(error);
         console.error('API Error:', error.message);
+        throw error;
       });
   };
 

@@ -27,8 +27,7 @@ const usePost = (uri, payload = null) => {
     // Normalize URI to avoid double slashes and protocol-relative URLs
     const normalizedUri = String(uri || "").replace(/^\/+/, "");
 
-    // Race between the actual request and timeout
-    Promise.race([
+    return Promise.race([
       window.axios.post("/" + normalizedUri, payload),
       timeoutPromise
     ])
@@ -51,11 +50,13 @@ const usePost = (uri, payload = null) => {
           // Trigger notification refresh immediately so badges update fast
           notificationEvents.refresh();
         }
+        return response.data;
       })
       .catch((error) => {
         setLoading(false);
         setError(error);
         console.error('API Error:', error.message);
+        throw error;
       });
   };
 
