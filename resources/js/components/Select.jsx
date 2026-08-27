@@ -106,13 +106,15 @@ const Select = (
   const _getSelectedOption = () => {
     if (!state.value) return null;
     
-    if (typeof optionsValue === "string") {
-      // For object options with optionsValue
-      return Array.isArray(options) ? options.find(option => option && option[optionsValue] === state.value) || null : null;
-    } else {
-      // For string options
-      return state.value;
+    // Object options: resolve the matching option object.
+    // optionsValue takes precedence; otherwise fall back to the "value" field.
+    if (Array.isArray(options) && options.length && typeof options[0] === "object") {
+      const key = typeof optionsValue === "string" ? optionsValue : "value";
+      return options.find(option => option && option[key] === state.value) || null;
     }
+
+    // For string options
+    return state.value;
   };
 
   useImperativeHandle(ref, () => ({
@@ -210,12 +212,9 @@ const Select = (
             />
           )}
           onChange={(event, value) => {
-            if (
-              typeof value === "object" &&
-              value &&
-              typeof optionsValue === "string"
-            ) {
-              _onChange(value[optionsValue] || "", true);
+            if (typeof value === "object" && value) {
+              const key = typeof optionsValue === "string" ? optionsValue : "value";
+              _onChange(value[key] || "", true);
             } else {
               _onChange(value || "", true);
             }
