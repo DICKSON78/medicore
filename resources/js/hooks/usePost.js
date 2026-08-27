@@ -40,6 +40,9 @@ const usePost = (uri, payload = null) => {
         const notificationEndpoints = [
           'api/patient-payment-cache-items/complete',
           'api/patient-payment-cache-items/dispense',
+          'api/patient-payment-cache-items/make-cash-payment',
+          'api/patient-payment-cache-items/approve-credit-payment',
+          'api/patient-payment-cache-items/create-bill',
           'api/consultations',
           'api/patient-check-ins'
         ];

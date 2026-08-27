@@ -60,10 +60,6 @@ class NotificationsController extends Controller
         })
             ->where('status', 'Pending')
             ->whereHas('payment_cache_item', function ($query) {
-                // Only show consultations for items that require consultation
-                $query->whereHas('item', function ($itemQuery) {
-                    $itemQuery->where('is_consultation_item', 'Yes');
-                });
                 // Ensure the payment cache item is paid (came from cashier)
                 $query->where('status', 'Paid');
             })
