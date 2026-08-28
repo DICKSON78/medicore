@@ -106,6 +106,10 @@ const Select = (
   const _getSelectedOption = () => {
     if (!state.value) return null;
     
+    // If we already hold the option object (e.g. no optionsValue was provided),
+    // return it as-is so it renders as selected.
+    if (typeof state.value === "object") return state.value;
+
     // Object options: resolve the matching option object.
     // optionsValue takes precedence; otherwise fall back to the "value" field.
     if (Array.isArray(options) && options.length && typeof options[0] === "object") {
@@ -213,8 +217,16 @@ const Select = (
           )}
           onChange={(event, value) => {
             if (typeof value === "object" && value) {
-              const key = typeof optionsValue === "string" ? optionsValue : "value";
-              _onChange(value[key] || "", true);
+              // When optionsValue is provided, emit/validate against that key.
+              // Otherwise no key was configured, so emit the whole option object
+              // (prevents storing "" which made required validation fail despite
+              // a visible selection, e.g. the Payment Mode select).
+              const key = typeof optionsValue === "string" ? optionsValue : null;
+              if (key) {
+                _onChange(value[key] || "", true);
+              } else {
+                _onChange(value, true);
+              }
             } else {
               _onChange(value || "", true);
             }

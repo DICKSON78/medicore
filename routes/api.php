@@ -124,8 +124,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->group(['middleware' => 'privilege:reception,consultation_room'], function ($router) {
         $router->get('/patients/test', [PatientsController::class, 'test']);
-        $router->apiResource('/patients', PatientsController::class);
         $router->get('/patients/vip', [PatientsController::class, 'vipPatients']);
+        $router->apiResource('/patients', PatientsController::class);
         $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
         $router->apiResource('/patient-attachments', PatientAttachmentsController::class);
     });
@@ -276,9 +276,9 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     // ─── Medicine Center ──────────────────────────────────────────────────────
 
     $router->group(['middleware' => 'privilege:medicine_center'], function ($router) {
+        $router->get('/medicines/selection', [MedicinesController::class, 'getForSelection']);
         $router->apiResource('/medicines', MedicinesController::class);
         $router->post('/medicines/bulk-create', [MedicinesController::class, 'bulkCreate']);
-        $router->get('/medicines/selection', [MedicinesController::class, 'getForSelection']);
 
         $router->group(['prefix' => 'medicine-taking'], function () use ($router) {
             $router->get('/', [MedicineTakingController::class, 'index']);

@@ -29,6 +29,18 @@ const PatientRecords = () => {
   const [patient, setPatient] = useState();
   const [selectedTab, setSelectedTab] = useState(0);
 
+  // Rebuild each tab's absolute path from the patient base instead of using
+  // relative navigation, which accumulated extra segments and broke the nested
+  // <Routes> matching (URLs like .../patient-file/payment-history/attachments).
+  const goToTab = (tab) => {
+    const TAB_SEGMENTS = ["patient-file", "payment-history", "attachments"];
+    const seg = (location.pathname || "").split("/").filter(Boolean);
+    while (seg.length && TAB_SEGMENTS.includes(seg[seg.length - 1])) {
+      seg.pop();
+    }
+    navigate("/" + [...seg, tab].join("/"));
+  };
+
   useEffect(() => {
     if (!patientId) {
       return navigate("/reception/patients");
@@ -77,15 +89,15 @@ const PatientRecords = () => {
           >
             <Tab
               label="Patient File"
-              onClick={() => navigate("patient-file")}
+              onClick={() => goToTab("patient-file")}
             />
             <Tab
               label="Payment History"
-              onClick={() => navigate("payment-history")}
+              onClick={() => goToTab("payment-history")}
             />
             <Tab
               label="Attachments"
-              onClick={() => navigate("attachments")}
+              onClick={() => goToTab("attachments")}
             />
           </Tabs>
           <Routes>
