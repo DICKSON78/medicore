@@ -26,6 +26,7 @@ class DentalLabOrdersController extends Controller
             'payment_cache_item' => function ($query) {
                 $query->with(['payment_cache.check_in.patient']);
             },
+            'consultation.payment_cache_item.payment_cache.check_in.patient',
         ]);
 
         if ($request->status) {
@@ -48,6 +49,7 @@ class DentalLabOrdersController extends Controller
             'payment_cache_item' => function ($query) {
                 $query->with(['payment_cache.check_in.patient']);
             },
+            'consultation.payment_cache_item.payment_cache.check_in.patient',
         ])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }

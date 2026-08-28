@@ -126,7 +126,8 @@ const LabOrders = () => {
             variant="contained"
             size="small"
             onClick={() => {
-              const patientId = item.payment_cache_item?.payment_cache?.check_in?.patient_id;
+              const patientId = item.payment_cache_item?.payment_cache?.check_in?.patient_id
+                || item.consultation?.payment_cache_item?.payment_cache?.check_in?.patient_id;
               const consultationId = item.consultation_id;
               if (patientId && consultationId) {
                 navigate(`/dental-lab/lab-orders/${patientId}/${consultationId}`);
