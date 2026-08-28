@@ -53,6 +53,8 @@ const MODULE_DASHBOARD_MAP = {
 };
 
 const getHomeRoute = (user) => {
+  // While the user/privileges are still loading, don't redirect yet
+  if (!user) return null;
   if (user?.privileges?.dashboard) return "/dashboard";
   const privs = Object.keys(user?.privileges || {});
   for (const key of Object.keys(MODULE_DASHBOARD_MAP)) {
@@ -121,11 +123,13 @@ const App = () => {
                 <Route
                   path="dashboard"
                   element={
-                    user?.privileges?.dashboard ? (
-                      <Dashboard setSmsBalance={setSmsBalance} />
-                    ) : (
-                      <Navigate to={getHomeRoute(user)} />
-                    )
+                    user ? (
+                      user?.privileges?.dashboard ? (
+                        <Dashboard setSmsBalance={setSmsBalance} />
+                      ) : (
+                        <Navigate to={getHomeRoute(user)} />
+                      )
+                    ) : null
                   }
                 />
                 <Route
