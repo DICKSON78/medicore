@@ -5,7 +5,7 @@ const useDelete = (uri = null) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
-  const handleDelete = (newUri) => {
+  const handleDelete = (newUri, onSuccess = null, onError = null) => {
     if (typeof newUri === "string") {
       uri = newUri;
     }
@@ -19,10 +19,19 @@ const useDelete = (uri = null) => {
       .then((response) => {
         setData(response.data);
         setLoading(false);
+
+        if (typeof onSuccess === "function") {
+          onSuccess(response);
+        }
+        return response.data;
       })
       .catch((error) => {
         setLoading(false);
         setError(error);
+
+        if (typeof onError === "function") {
+          onError(error);
+        }
       });
   };
 

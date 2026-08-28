@@ -5,7 +5,12 @@ const usePatch = (uri, payload = null) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
-  const handlePatch = (newUri, newPayload = null) => {
+  const handlePatch = (
+    newUri,
+    newPayload = null,
+    onSuccess = null,
+    onError = null
+  ) => {
     if (typeof newUri === "string") {
       uri = newUri;
     }
@@ -18,19 +23,30 @@ const usePatch = (uri, payload = null) => {
     setLoading(true);
     setError(null);
 
-    return window.axios.patch("/" + uri, payload, {
-      timeout: 45000
-    })
+    return window.axios
+      .patch("/" + uri, payload, {
+        timeout: 45000
+      })
       .then((response) => {
         setData(response.data);
         setLoading(false);
+
+        if (typeof onSuccess === "function") {
+          onSuccess(response);
+        }
         return response.data;
       })
       .catch((error) => {
         setLoading(false);
         setError(error);
-        console.error('API Error:', error.message);
-        throw error;
+
+        // See usePost: keep the returned promise always-resolving to avoid
+        // unhandled rejections across the app (callers use `error` state or an
+        // optional onError callback).
+        if (typeof onError === "function") {
+          onError(error);
+        }
+        return undefined;
       });
   };
 
