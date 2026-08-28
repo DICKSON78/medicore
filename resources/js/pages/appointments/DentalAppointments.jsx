@@ -179,7 +179,7 @@ const DentalAppointments = () => {
                   { label: "Cancelled", value: "Cancelled" },
                   { label: "No Show", value: "No Show" },
                 ]}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                onChange={(v) => setFilters({ ...filters, status: v })}
                 size="small"
                 fullWidth
               />
@@ -235,7 +235,7 @@ const DentalAppointments = () => {
                   { label: "Braces Works", value: "Braces Works" },
                   { label: "Ceramics Works", value: "Ceramics Works" },
                 ]}
-                onChange={(e) => setForm({ ...form, appointment_type: e.target.value })}
+                onChange={(v) => setForm({ ...form, appointment_type: v })}
                 fullWidth size="small"
               />
             </Grid>

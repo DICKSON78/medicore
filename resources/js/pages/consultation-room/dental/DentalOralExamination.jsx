@@ -41,7 +41,7 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
               label={label}
               value={data?.[key] || ""}
               options={options}
-              onChange={(e) => handleChange(key, e.target.value)}
+              onChange={(v) => handleChange(key, v)}
               size="small"
               fullWidth
             />

@@ -52,7 +52,7 @@ const LabOrders = () => {
     },
     true,
     { data: [], total: 0, page: 1 },
-    (response) => response.data
+    (response) => response.data.data
   );
 
   useEffect(() => {
@@ -173,7 +173,7 @@ const LabOrders = () => {
                 { label: "Ready", value: "Ready" },
                 { label: "Delivered", value: "Delivered" },
               ]}
-              onChange={(e) => setParams({ ...params, status: e.target.value })}
+              onChange={(v) => setParams({ ...params, status: v })}
               size="small"
               sx={{ minWidth: 150 }}
             />

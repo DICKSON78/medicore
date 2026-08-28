@@ -57,7 +57,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             label="Treatment Type"
             value={form.treatment_type}
             options={DENTAL_TREATMENT_OPTIONS.treatmentTypes}
-            onChange={(e) => setForm({ ...form, treatment_type: e.target.value })}
+            onChange={(v) => setForm({ ...form, treatment_type: v })}
             fullWidth size="small"
           />
         </Grid>
@@ -66,7 +66,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             label="Treatment Phase"
             value={form.phase}
             options={DENTAL_TREATMENT_OPTIONS.treatmentPhases}
-            onChange={(e) => setForm({ ...form, phase: e.target.value })}
+            onChange={(v) => setForm({ ...form, phase: v })}
             fullWidth size="small"
           />
         </Grid>
@@ -75,7 +75,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             label="Tooth Number"
             value={form.tooth_number}
             options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
-            onChange={(e) => setForm({ ...form, tooth_number: e.target.value })}
+            onChange={(v) => setForm({ ...form, tooth_number: v })}
             fullWidth size="small"
           />
         </Grid>
@@ -84,7 +84,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             label="Tooth Surface"
             value={form.tooth_surface}
             options={DENTAL_TREATMENT_OPTIONS.toothSurfaces}
-            onChange={(e) => setForm({ ...form, tooth_surface: e.target.value })}
+            onChange={(v) => setForm({ ...form, tooth_surface: v })}
             fullWidth size="small"
           />
         </Grid>
@@ -93,7 +93,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
             label="Anaesthesia"
             value={form.anaesthesia_type}
             options={DENTAL_TREATMENT_OPTIONS.anaesthesiaTypes}
-            onChange={(e) => setForm({ ...form, anaesthesia_type: e.target.value })}
+            onChange={(v) => setForm({ ...form, anaesthesia_type: v })}
             fullWidth size="small"
           />
         </Grid>

@@ -278,7 +278,7 @@ const LabOrderRoutes = () => {
                   label="Order Type"
                   value={orderForm.order_type}
                   options={DENTAL_TREATMENT_OPTIONS.labOrderTypes}
-                  onChange={(e) => setOrderForm({ ...orderForm, order_type: e.target.value })}
+                  onChange={(v) => setOrderForm({ ...orderForm, order_type: v })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -287,7 +287,7 @@ const LabOrderRoutes = () => {
                   label="Material"
                   value={orderForm.material}
                   options={DENTAL_TREATMENT_OPTIONS.labMaterials}
-                  onChange={(e) => setOrderForm({ ...orderForm, material: e.target.value })}
+                  onChange={(v) => setOrderForm({ ...orderForm, material: v })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -306,7 +306,7 @@ const LabOrderRoutes = () => {
                   label="Primary Tooth"
                   value={orderForm.tooth_number}
                   options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
-                  onChange={(e) => setOrderForm({ ...orderForm, tooth_number: e.target.value })}
+                  onChange={(v) => setOrderForm({ ...orderForm, tooth_number: v })}
                   fullWidth size="small"
                 />
               </Grid>
