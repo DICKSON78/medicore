@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Box, Button, Card, CardContent, Chip, Grid, LinearProgress,
-  Paper, Stack, Typography,
+  Avatar, Box, Button, Card, CardContent, Chip, Divider, Grid, LinearProgress,
+  Paper, Stack, Tooltip, Typography,
 } from "@mui/material";
+import {
+  ArrowBack as ArrowBackIcon,
+  PhoneRounded as PhoneIcon,
+  PersonRounded as PersonIcon,
+  PrintRounded as PrintIcon,
+  EditRounded as EditIcon,
+  DeleteRounded as DeleteIcon,
+  AddRounded as AddIcon,
+  CloseRounded as CloseIcon,
+  ScienceRounded as ScienceIcon,
+  CalendarTodayRounded as CalendarIcon,
+  MonetizationOnRounded as CostIcon,
+  PaletteRounded as ShadeIcon,
+  CategoryRounded as CategoryIcon,
+} from "@mui/icons-material";
 import { Header as PageHeader } from "../../components/Page";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import DatePicker from "../../components/DatePicker";
-import { useFetch, usePatch, useToast } from "../../hooks";
+import { usePatch, useToast } from "../../hooks";
 import { formatDate } from "../../helpers";
 import { DENTAL_TREATMENT_OPTIONS } from "../../constants";
 
@@ -18,6 +33,8 @@ const statusColors = {
   Ready: "success",
   Delivered: "secondary",
 };
+
+const STATUS_FLOW = ["Ordered", "In Progress", "Ready", "Delivered"];
 
 const LabOrderRoutes = () => {
   const { patientId, consultationId } = useParams();
@@ -226,52 +243,135 @@ const LabOrderRoutes = () => {
 
   if (loading) return <LinearProgress />;
 
+  const patientInitials = `${patient?.first_name?.[0] || ""}${patient?.last_name?.[0] || ""}`.toUpperCase();
+
+  const statCounts = STATUS_FLOW.reduce((acc, s) => {
+    acc[s] = orders.filter((o) => o.status === s).length;
+    return acc;
+  }, {});
+
+  const toothLabelFor = (order) => {
+    const tooth = order.teeth_involved?.length
+      ? String(order.teeth_involved[0])
+      : order.tooth_number;
+    if (!tooth) return "-";
+    return DENTAL_TREATMENT_OPTIONS.toothNumbers.find((tn) => tn.value === String(tooth))?.value || tooth;
+  };
+
+  const WorkflowButton = ({ order }) => {
+    const nextMap = {
+      Ordered: { label: "Start", variant: "outlined", color: "primary", next: "In Progress" },
+      "In Progress": { label: "Mark Ready", variant: "contained", color: "success", next: "Ready" },
+      Ready: { label: "Delivered", variant: "outlined", color: "secondary", next: "Delivered" },
+    };
+    const step = nextMap[order.status];
+    if (!step) return null;
+    return (
+      <Button
+        size="small"
+        variant={step.variant}
+        color={step.color}
+        onClick={() => handleStatus(order.id, step.next)}
+      >
+        {step.label}
+      </Button>
+    );
+  };
+
   return (
     <Box>
       <PageHeader
         title="Dental Lab - Order Management"
+        subtitle={`${orders.length} lab order${orders.length === 1 ? "" : "s"} for ${patient?.first_name || ""} ${patient?.last_name || ""}`}
         trailing={
-          <Button variant="outlined" size="small" onClick={() => navigate("/dental-lab/lab-orders")}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate("/dental-lab/lab-orders")}
+          >
             Back to Orders
           </Button>
         }
       />
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">Patient</Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {patient?.first_name} {patient?.last_name}
-            </Typography>
-          </Grid>
-          <Grid item xs={6} sm={2}>
-            <Typography variant="body2" color="text.secondary">Gender</Typography>
-            <Typography variant="body1">{patient?.gender}</Typography>
-          </Grid>
-          <Grid item xs={6} sm={2}>
-            <Typography variant="body2" color="text.secondary">Age</Typography>
-            <Typography variant="body1">{patient?.age || ""}</Typography>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="body2" color="text.secondary">Phone</Typography>
-            <Typography variant="body1">{patient?.phone}</Typography>
-          </Grid>
-        </Grid>
+
+      <Paper sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+        <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
+              {patientInitials || <PersonIcon />}
+            </Avatar>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h6" fontWeight={600} noWrap>
+                {patient?.first_name} {patient?.last_name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Patient #{patientId}
+              </Typography>
+            </Box>
+          </Stack>
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
+          <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <PersonIcon fontSize="inherit" /> Gender
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {patient?.gender || "-"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Age</Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {patient?.age || "-"}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <PhoneIcon fontSize="inherit" /> Phone
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {patient?.phone || "-"}
+              </Typography>
+            </Box>
+          </Stack>
+        </Stack>
       </Paper>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Grid container spacing={1} sx={{ mb: 2 }}>
+        {STATUS_FLOW.map((s) => (
+          <Grid item xs={6} sm={3} key={s}>
+            <Card variant="outlined" sx={{ borderRadius: 2 }}>
+              <CardContent sx={{ py: 1.5, px: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Typography variant="body2" fontWeight={500}>{s}</Typography>
+                <Chip label={statCounts[s] || 0} color={statusColors[s] || "default"} size="small" />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
         <Typography variant="h6">Lab Orders ({orders.length})</Typography>
-        <Button variant="contained" size="small" onClick={() => showForm ? handleCancelForm() : setShowForm(true)}>
+        <Button
+          variant={showForm ? "outlined" : "contained"}
+          size="small"
+          startIcon={showForm ? <CloseIcon /> : editingId ? <EditIcon /> : <AddIcon />}
+          onClick={() => (showForm ? handleCancelForm() : setShowForm(true))}
+        >
           {showForm ? "Cancel" : editingId ? "Editing..." : "New Order"}
         </Button>
       </Box>
 
       {showForm && (
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography variant="subtitle1" gutterBottom>
+        <Card sx={{ mb: 2, borderRadius: 2, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
+          <Box sx={{ px: 2.5, py: 1.5, bgcolor: "action.hover" }}>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <ScienceIcon color="primary" />
               {editingId ? `Edit Lab Order #DL-${editingId}` : "Create Lab Order"}
             </Typography>
+          </Box>
+          <CardContent>
             <Grid container spacing={2}>
               <Grid item xs={6} sm={3}>
                 <Select
@@ -366,7 +466,10 @@ const LabOrderRoutes = () => {
                   multiline rows={2} fullWidth size="small"
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                {editingId ? (
+                  <Button variant="outlined" size="small" onClick={handleCancelForm}>Cancel</Button>
+                ) : null}
                 <Button variant="contained" onClick={handleCreateOrder} disabled={saving}>
                   {editingId ? "Update Order" : "Create Order"}
                 </Button>
@@ -377,92 +480,120 @@ const LabOrderRoutes = () => {
       )}
 
       {orders.length === 0 ? (
-        <Typography color="text.secondary">No lab orders yet</Typography>
+        <Paper sx={{ p: 4, textAlign: "center", borderRadius: 2 }}>
+          <ScienceIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
+          <Typography color="text.secondary">No lab orders yet</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Create an order to send the patient's case to the lab.
+          </Typography>
+        </Paper>
       ) : (
         orders.map((order) => (
-          <Card key={order.id} sx={{ mb: 1.5 }}>
-            <CardContent sx={{ py: 1.5 }}>
-              <Grid container alignItems="center" spacing={2}>
-                <Grid item xs={12} sm={2}>
-                  <Typography variant="body2" fontWeight={600}>
-                    DL-{order.id}
-                  </Typography>
-                  {order.cost && (
-                    <Typography variant="caption" color="text.secondary">
-                      Cost: TZS {Number(order.cost).toLocaleString()}
-                    </Typography>
-                  )}
-                  {order.technician_charges && (
-                    <Typography variant="caption" color="text.secondary">
-                      Tech: TZS {Number(order.technician_charges).toLocaleString()}
-                    </Typography>
-                  )}
-                </Grid>
-                <Grid item xs={6} sm={1.5}>
-                  <Typography variant="caption" color="text.secondary">Type</Typography>
-                  <Typography variant="body2">{order.order_type}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={1.5}>
-                  <Typography variant="caption" color="text.secondary">Material</Typography>
-                  <Typography variant="body2">{order.material || "-"}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={1}>
-                  <Typography variant="caption" color="text.secondary">Shade</Typography>
-                  <Typography variant="body2">{order.shade || "-"}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={1}>
-                  <Typography variant="caption" color="text.secondary">Tooth</Typography>
-                  <Typography variant="body2">{order.tooth_number || "-"}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={1.5}>
-                  <Typography variant="caption" color="text.secondary">Lab</Typography>
-                  <Typography variant="body2">{order.lab_name || "-"}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={1.5}>
-                  <Typography variant="caption" color="text.secondary">Status</Typography>
+          <Card key={order.id} variant="outlined" sx={{ mb: 1.5, borderRadius: 2, overflow: "hidden" }}>
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ px: 2.5, py: 1.25, bgcolor: "action.hover", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap" }}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Typography variant="subtitle1" fontWeight={700}>DL-{order.id}</Typography>
                   <Chip label={order.status} color={statusColors[order.status] || "default"} size="small" />
+                </Stack>
+                <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                  <Tooltip title="Print lab slip">
+                    <Button size="small" startIcon={<PrintIcon />} onClick={() => handlePrintSlip(order)}>Print</Button>
+                  </Tooltip>
+                  <Tooltip title="Edit order">
+                    <Button size="small" startIcon={<EditIcon />} onClick={() => handleEditClick(order)}>Edit</Button>
+                  </Tooltip>
+                  {(order.status === "Ordered" || order.status === "In Progress") && (
+                    <Tooltip title="Delete order">
+                      <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(order.id)}>Delete</Button>
+                    </Tooltip>
+                  )}
+                </Stack>
+              </Box>
+              <Box sx={{ px: 2.5, py: 1.5 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={2.4}>
+                    <Stack direction="row" spacing={0.75} alignItems="center">
+                      <CategoryIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">Type</Typography>
+                        <Typography variant="body2" fontWeight={500}>{order.order_type || "-"}</Typography>
+                      </Box>
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={6} sm={2.4}>
+                    <Stack direction="row" spacing={0.75} alignItems="center">
+                      <ScienceIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">Material</Typography>
+                        <Typography variant="body2" fontWeight={500}>{order.material || "-"}</Typography>
+                      </Box>
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={6} sm={2.4}>
+                    <Stack direction="row" spacing={0.75} alignItems="center">
+                      <ShadeIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">Shade</Typography>
+                        <Typography variant="body2" fontWeight={500}>{order.shade || "-"}</Typography>
+                      </Box>
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={6} sm={2.4}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Tooth</Typography>
+                      <Typography variant="body2" fontWeight={500}>{toothLabelFor(order)}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6} sm={2.4}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Lab</Typography>
+                      <Typography variant="body2" fontWeight={500}>{order.lab_name || "-"}</Typography>
+                    </Box>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} sm={2.5}>
-                  <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                    {order.status === "Ordered" && (
-                      <Button size="small" variant="outlined" onClick={() => handleStatus(order.id, "In Progress")}>
-                        Start
-                      </Button>
-                    )}
-                    {order.status === "In Progress" && (
-                      <Button size="small" variant="contained" color="success" onClick={() => handleStatus(order.id, "Ready")}>
-                        Mark Ready
-                      </Button>
-                    )}
-                    {order.status === "Ready" && (
-                      <Button size="small" variant="outlined" color="secondary" onClick={() => handleStatus(order.id, "Delivered")}>
-                        Mark Delivered
-                      </Button>
-                    )}
-                    <Button size="small" variant="text" onClick={() => handlePrintSlip(order)}>
-                      Print
-                    </Button>
-                    <Button size="small" variant="text" onClick={() => handleEditClick(order)}>
-                      Edit
-                    </Button>
-                    {(order.status === "Ordered" || order.status === "In Progress") && (
-                      <Button size="small" variant="text" color="error" onClick={() => handleDelete(order.id)}>
-                        Delete
-                      </Button>
-                    )}
-                  </Stack>
-                </Grid>
-              </Grid>
-              {order.description && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, ml: 0.5 }}>
-                  {order.description}
-                </Typography>
-              )}
-              {order.lab_notes && (
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25, ml: 0.5, fontStyle: "italic" }}>
-                  Notes: {order.lab_notes}
-                </Typography>
-              )}
+                {(order.cost || order.technician_charges) && (
+                  <Box sx={{ mt: 1.5, pt: 1.5, borderTop: "1px dashed", borderColor: "divider" }}>
+                    <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+                      {order.cost && (
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <CostIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+                          <Typography variant="body2">
+                            Cost: <strong>TZS {Number(order.cost).toLocaleString()}</strong>
+                          </Typography>
+                        </Stack>
+                      )}
+                      {order.technician_charges && (
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <CostIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+                          <Typography variant="body2">
+                            Tech: <strong>TZS {Number(order.technician_charges).toLocaleString()}</strong>
+                          </Typography>
+                        </Stack>
+                      )}
+                      {order.impression_date && (
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <CalendarIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+                          <Typography variant="body2">Impression: {order.impression_date}</Typography>
+                        </Stack>
+                      )}
+                    </Stack>
+                  </Box>
+                )}
+                {order.description && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {order.description}
+                  </Typography>
+                )}
+                {order.lab_notes && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontStyle: "italic" }}>
+                    Notes: {order.lab_notes}
+                  </Typography>
+                )}
+                <Box sx={{ mt: 1.5, display: "flex", justifyContent: "flex-end" }}>
+                  <WorkflowButton order={order} />
+                </Box>
+              </Box>
             </CardContent>
           </Card>
         ))
