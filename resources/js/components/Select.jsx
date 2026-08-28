@@ -217,18 +217,23 @@ const Select = (
           )}
           onChange={(event, value) => {
             if (typeof value === "object" && value) {
-              // When optionsValue is provided, emit/validate against that key.
-              // Otherwise no key was configured, so emit the whole option object
-              // (prevents storing "" which made required validation fail despite
-              // a visible selection, e.g. the Payment Mode select).
               const key = typeof optionsValue === "string" ? optionsValue : null;
               if (key) {
-                _onChange(value[key] || "", true);
+                // optionsValue provided: emit/validate against that key.
+                _onChange(value[key] ?? "", true);
+              } else if ("value" in value) {
+                // MUI select-option style { label, value }: emit the value string
+                // (e.g. Order Type, Tooth #, Patient to Return).
+                _onChange(value["value"] ?? "", true);
               } else {
+                // Object option like { id, name } with no value field (e.g.
+                // Payment Mode): emit the whole option object so consumers can
+                // read the selected record (prevents storing "" which broke
+                // required validation despite a visible selection).
                 _onChange(value, true);
               }
             } else {
-              _onChange(value || "", true);
+              _onChange(value ?? "", true);
             }
           }}
         />

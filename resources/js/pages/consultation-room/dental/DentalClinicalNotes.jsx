@@ -490,9 +490,9 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               { label: "No", value: "No" },
               { label: "Yes", value: "Yes" },
             ]}
-            onChange={(e) => {
-              setFormData((prev) => ({ ...prev, patient_to_return: e.target.value }));
-              scheduleAutoSave({ ...formData, patient_to_return: e.target.value });
+            onChange={(v) => {
+              setFormData((prev) => ({ ...prev, patient_to_return: v }));
+              scheduleAutoSave({ ...formData, patient_to_return: v });
             }}
             fullWidth size="small" disabled={isCompleted}
           />
@@ -708,7 +708,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                   { label: "Wax-up", value: "WaxUp" },
                   { label: "Other", value: "Other" },
                 ]}
-                onChange={(e) => setLabForm({ ...labForm, order_type: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, order_type: v })}
                 fullWidth size="small" required
               />
             </Grid>
@@ -717,7 +717,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                 label="Tooth #"
                 value={labForm.tooth_number}
                 options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
-                onChange={(e) => setLabForm({ ...labForm, tooth_number: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, tooth_number: v })}
                 fullWidth size="small"
               />
             </Grid>
