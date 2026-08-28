@@ -10,7 +10,7 @@ import { DENTAL_TREATMENT_OPTIONS } from "../../../../constants";
 
 const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
   const addToast = useToast();
-  const [patch, saving] = usePatch();
+  const { handlePatch: patch, loading: saving } = usePatch();
 
   const [form, setForm] = useState({
     treatment_type: "",

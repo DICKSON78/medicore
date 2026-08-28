@@ -22,7 +22,7 @@ const statusColors = {
 
 const DentalAppointments = () => {
   const addToast = useToast();
-  const [patch, saving] = usePatch();
+  const { handlePatch: patch, loading: saving } = usePatch();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
     date: new Date().toISOString().split("T")[0],

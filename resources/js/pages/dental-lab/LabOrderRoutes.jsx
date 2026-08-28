@@ -27,7 +27,7 @@ const LabOrderRoutes = () => {
   const [consultation, setConsultation] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [patch, saving] = usePatch();
+  const { handlePatch: patch, loading: saving } = usePatch();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
