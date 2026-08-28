@@ -333,7 +333,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     // ─── Inventory Management ─────────────────────────────────────────────────
 
     $router->group(['middleware' => 'privilege:inventory_management'], function ($router) {
-        $router->apiResource('/items', ItemsController::class);
+        // Mutating item routes stay gated; read (index/show) moved below so other
+        // roles (clinical, dispensing, billing) can use items in selection dropdowns.
+        $router->post('/items', [ItemsController::class, 'store']);
+        $router->put('/items/{id}', [ItemsController::class, 'update']);
+        $router->patch('/items/{id}', [ItemsController::class, 'update']);
+        $router->delete('/items/{id}', [ItemsController::class, 'destroy']);
         $router->apiResource('/item-prices', ItemPricesController::class);
         $router->apiResource('/stocktakes', StocktakesController::class);
         $router->post('/stocktakes/{id}/apply', [StocktakesController::class, 'apply']);
@@ -360,6 +365,19 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     // Public index for units-of-measure (used by selection dropdowns)
     $router->get('/units-of-measure', [UnitsOfMeasureController::class, 'index']);
+
+    // Reference catalogs used in selection dropdowns (items, payment modes,
+    // staff/consultants). Read-only access for all authenticated roles; write
+    // operations (store/update/destroy) remain gated under their own privilege
+    // groups above.
+    $router->get('/items', [ItemsController::class, 'index']);
+    $router->get('/items/{id}', [ItemsController::class, 'show']);
+    $router->get('/payment-modes', [PaymentModesController::class, 'index']);
+    $router->get('/payment-modes/{id}', [PaymentModesController::class, 'show']);
+    $router->get('/users', [UsersController::class, 'index']);
+    $router->get('/users/{id}', [UsersController::class, 'show']);
+    $router->get('/collaborators', [CollaboratorsController::class, 'index']);
+    $router->get('/collaborators/{id}', [CollaboratorsController::class, 'show']);
 
     // ─── Marketing ────────────────────────────────────────────────────────────
 
@@ -399,7 +417,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->group(['middleware' => 'privilege:user_management'], function ($router) {
         $router->get('/users/roles', [UsersController::class, 'roles']);
-        $router->apiResource('/users', UsersController::class);
+        // GET index/show for /users are registered publicly above (for
+        // consultant selection). User management mutating routes stay gated.
+        $router->post('/users', [UsersController::class, 'store']);
+        $router->put('/users/{id}', [UsersController::class, 'update']);
+        $router->patch('/users/{id}', [UsersController::class, 'update']);
+        $router->delete('/users/{id}', [UsersController::class, 'destroy']);
     });
 
     // ─── Settings ─────────────────────────────────────────────────────────────
@@ -408,7 +431,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->apiResource('/clinics', ClinicsController::class);
         $router->apiResource('/departments', DepartmentsController::class);
         $router->apiResource('/job-titles', JobTitlesController::class);
-        $router->apiResource('/payment-modes', PaymentModesController::class);
+        // GET index/show for /payment-modes are registered publicly above (for
+        // selection dropdowns). Mutating routes stay gated.
+        $router->post('/payment-modes', [PaymentModesController::class, 'store']);
+        $router->put('/payment-modes/{id}', [PaymentModesController::class, 'update']);
+        $router->patch('/payment-modes/{id}', [PaymentModesController::class, 'update']);
+        $router->delete('/payment-modes/{id}', [PaymentModesController::class, 'destroy']);
         $router->apiResource('/payment-channels', PaymentChannelsController::class);
         $router->apiResource('/regions', RegionsController::class);
         $router->apiResource('/districts', DistrictsController::class);
@@ -416,7 +444,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->apiResource('/diseases', DiseasesController::class);
         $router->apiResource('/consultation-types', ConsultationTypesController::class);
         $router->apiResource('/preferences', PreferencesController::class);
-        $router->apiResource('/collaborators', CollaboratorsController::class);
+        // GET index/show for /collaborators are registered publicly above (for
+        // partner-lab selection). Mutating routes stay gated.
+        $router->post('/collaborators', [CollaboratorsController::class, 'store']);
+        $router->put('/collaborators/{id}', [CollaboratorsController::class, 'update']);
+        $router->patch('/collaborators/{id}', [CollaboratorsController::class, 'update']);
+        $router->delete('/collaborators/{id}', [CollaboratorsController::class, 'destroy']);
     });
 
     // Shared: item-types accessible by both settings and inventory_management

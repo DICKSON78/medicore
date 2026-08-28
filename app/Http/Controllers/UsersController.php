@@ -57,6 +57,20 @@ class UsersController extends Controller
             $data->where('role', '!=', 'Admin');
         }
 
+        // Expose full staff records only to admins or those managing users/settings.
+        // All other roles (clinical/dispensing/billing) get a sanitized list for
+        // consultant/staff selection dropdowns, without PII (phone/email/national id/DOB).
+        $isSensitiveReader = $user->is_admin
+            || $user->hasPrivilege('user_management')
+            || $user->hasPrivilege('settings');
+
+        if (!$isSensitiveReader) {
+            $data->select([
+                'id', 'clinic_id', 'first_name', 'middle_name', 'last_name',
+                'designation', 'role', 'status',
+            ]);
+        }
+
         if ($status) {
             $data->where('status', $status);
         }
@@ -154,9 +168,22 @@ class UsersController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $user = $request->user();
         $data = User::with(['job_title', 'privileges', 'creator'])->findOrFail($id);
+
+        $isSensitiveReader = $user && ($user->is_admin
+            || $user->hasPrivilege('user_management')
+            || $user->hasPrivilege('settings'));
+
+        if ($user && !$isSensitiveReader) {
+            $data->setVisible([
+                'id', 'clinic_id', 'first_name', 'middle_name', 'last_name',
+                'designation', 'role', 'status', 'full_name', 'is_admin',
+            ]);
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
