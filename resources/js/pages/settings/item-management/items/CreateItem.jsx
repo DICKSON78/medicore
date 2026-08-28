@@ -70,7 +70,6 @@ const CreateItem = ({ modal, fetchItems }) => {
     item_type_id: undefined,
     consultation_type_id: undefined,
     unit_of_measure_id: undefined,
-    lens_type_id: null,
     is_consultation_item: "No",
     is_stock_item: "No",
     templates: [],

@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
   Container,
   Grid,
   Typography,
-  TextField,
   Button,
   Stack,
   IconButton,
   Divider,
-  Dialog,
-  DialogContent,
-  Fade,
 } from '@mui/material';
 import {
   Facebook as FacebookIcon,
   Instagram as InstagramIcon,
   YouTube as YouTubeIcon,
-  Send as SendIcon,
   ArrowForward as ArrowForwardIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
@@ -27,8 +22,6 @@ import {
   Google as GoogleIcon,
   WhatsApp as WhatsAppIcon,
   VideoLibrary as TikTokIcon,
-  CheckCircle as CheckCircleIcon,
-  Close as CloseIcon,
 } from '@mui/icons-material';
 
 // Color Scheme
@@ -41,58 +34,7 @@ const colors = {
   borderLight: '#E6E6E6',
 };
 
-import { usePost, useToast } from './hooks';
-import { formatError } from './helpers';
-
 const Footer = () => {
-  const [email, setEmail] = useState('');
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const addToast = useToast();
-  const { data, loading, error, handlePost, setData, setError } = usePost();
-
-  useEffect(() => {
-    if (data && (data.message || data.data)) {
-      setShowSuccessDialog(true);
-      setEmail('');
-      // Clear data after showing dialog to prevent re-triggering
-      setTimeout(() => {
-        setData(null);
-      }, 100);
-    }
-  }, [data, setData]);
-
-  useEffect(() => {
-    if (error) {
-      addToast({
-        message: formatError(error) || 'Failed to subscribe. Please try again.',
-        severity: 'error'
-      });
-      setError(null);
-    }
-  }, [error, addToast, setError]);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email) {
-      addToast({ message: 'Please enter your email address', severity: 'warning' });
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      addToast({ message: 'Please enter a valid email address', severity: 'warning' });
-      return;
-    }
-
-    handlePost("api/office-calendar/subscribers", { email });
-  };
-
-  const handleCloseSuccessDialog = () => {
-    setShowSuccessDialog(false);
-  };
-
-  // Only include links that have corresponding routes
   const quickLinks = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about' },
@@ -339,97 +281,8 @@ const Footer = () => {
             </Stack>
           </Grid>
 
-          {/* Column 4: Join Our Newsletter */}
+          {/* Column 4: Connect */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }} sx={{ pl: { md: 2 } }}>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 0.75,
-                fontSize: { xs: '0.95rem', md: '1rem' },
-                color: 'white',
-              }}
-            >
-              Join Our Newsletter
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 1.5,
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '0.8rem',
-                lineHeight: 1.4,
-              }}
-            >
-              Catch all our latest updates by newsletter.
-            </Typography>
-            <form onSubmit={handleSubscribe}>
-              <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
-                <TextField
-                  placeholder="Your email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  size="small"
-                  sx={{
-                    flex: 1,
-                    minWidth: 0, // Allow TextField to shrink and grow properly
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: 'rgba(255,255,255,0.1)',
-                      color: 'white',
-                      borderRadius: '4px',
-                      height: '36px',
-                      '& fieldset': {
-                        borderColor: 'rgba(255,255,255,0.2)',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(255,255,255,0.4)',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: colors.primaryOrange,
-                      },
-                    },
-                    '& .MuiInputBase-input': {
-                      color: 'white',
-                      py: 0.5,
-                      fontSize: '0.9rem',
-                      padding: '8px 12px',
-                      '&::placeholder': {
-                        color: 'rgba(255,255,255,0.6)',
-                        opacity: 1,
-                      },
-                    },
-                  }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  sx={{
-                    bgcolor: colors.primaryOrange,
-                    color: 'white',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    px: 1.5,
-                    py: 0.5,
-                    minWidth: 'auto',
-                    height: '36px',
-                    borderRadius: '4px',
-                    fontSize: '0.85rem',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    '&:hover': {
-                      bgcolor: '#E55A2B',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  {loading ? 'Subscribing...' : 'Subscribe'}
-                </Button>
-              </Stack>
-            </form>
-
             {/* Google Reviews Button */}
             <Button
               component="a"
@@ -595,131 +448,6 @@ const Footer = () => {
           </Stack>
         </Box>
       </Container>
-
-      {/* Success Dialog - SweetAlert Style */}
-      <Dialog
-        open={showSuccessDialog}
-        onClose={handleCloseSuccessDialog}
-        maxWidth="sm"
-        fullWidth
-        TransitionComponent={Fade}
-        TransitionProps={{ timeout: 300 }}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            overflow: 'hidden',
-          },
-        }}
-      >
-        <DialogContent sx={{ p: 0 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              p: 4,
-              textAlign: 'center',
-              background: 'linear-gradient(135deg, #E8F4F8 0%, #F0E8FF 100%)',
-            }}
-          >
-            {/* Close Button */}
-            <IconButton
-              onClick={handleCloseSuccessDialog}
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                color: 'text.secondary',
-                '&:hover': {
-                  bgcolor: 'action.hover',
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-
-            {/* Success Icon */}
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                bgcolor: '#4CAF50',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 2,
-                boxShadow: '0 4px 20px rgba(76, 175, 80, 0.4)',
-                animation: 'scaleIn 0.3s ease-out',
-                '@keyframes scaleIn': {
-                  '0%': {
-                    transform: 'scale(0)',
-                  },
-                  '50%': {
-                    transform: 'scale(1.1)',
-                  },
-                  '100%': {
-                    transform: 'scale(1)',
-                  },
-                },
-              }}
-            >
-              <CheckCircleIcon sx={{ fontSize: 48, color: 'white' }} />
-            </Box>
-
-            {/* Success Message */}
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-                color: 'text.primary',
-                fontSize: { xs: '1.3rem', sm: '1.5rem' },
-              }}
-            >
-              Successfully Subscribed!
-            </Typography>
-
-            <Typography
-              variant="body1"
-              sx={{
-                color: 'text.secondary',
-                mb: 3,
-                fontSize: '0.95rem',
-                lineHeight: 1.6,
-              }}
-            >
-              Thank you for subscribing to our newsletter. You'll receive updates about our latest news, services, and special offers.
-            </Typography>
-
-            {/* Action Button */}
-            <Button
-              variant="contained"
-              onClick={handleCloseSuccessDialog}
-              sx={{
-                bgcolor: colors.primaryOrange,
-                color: 'white',
-                fontWeight: 600,
-                px: 4,
-                py: 1,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '0.95rem',
-                boxShadow: `0 4px 12px ${colors.primaryOrange}40`,
-                '&:hover': {
-                  bgcolor: '#E55A2B',
-                  boxShadow: `0 6px 16px ${colors.primaryOrange}50`,
-                  transform: 'translateY(-2px)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Awesome!
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 };
