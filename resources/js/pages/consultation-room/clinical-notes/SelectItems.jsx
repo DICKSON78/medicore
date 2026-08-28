@@ -54,7 +54,7 @@ const SelectItems = ({
   const [error, setError] = useState();
 
   const [paymentMode, setPaymentMode] = useState(
-    consultation.payment_cache_item.payment_mode
+    consultation.payment_cache_item?.payment_mode
   );
   const [consultant, setConsultant] = useState(window.user);
   const [itemName, setItemName] = useState();
@@ -125,20 +125,16 @@ const SelectItems = ({
   } = useDelete();
 
   useEffect(() => {
-    if (paymentMode) {
-      setSelectedItem(null);
-      setQuantity(1);
-      setDosage(null);
-      setComments(null);
-      setItems([]);
-      fetchItems();
-    }
+    setSelectedItem(null);
+    setQuantity(1);
+    setDosage(null);
+    setComments(null);
+    setItems([]);
+    fetchItems();
   }, [paymentMode]);
 
   useEffect(() => {
-    if (paymentMode) {
-      fetchItems();
-    }
+    fetchItems();
   }, [itemName, itemType]);
 
   useEffect(() => {
