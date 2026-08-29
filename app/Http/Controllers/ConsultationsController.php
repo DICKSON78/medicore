@@ -589,8 +589,26 @@ class ConsultationsController extends Controller
                         ->whereDate('registration_time', $data->created_at->format('Y-m-d'))
                         ->where('status', 'in_treatment')
                         ->first();
-                        
-                    if ($waitingTime && $waitingTime->hasCompletedFullJourney()) {
+
+                    // If new unpaid (e.g. medicine) items were added, route the patient
+                    // to the cashier so they can be paid before dispensing.
+                    $pendingCount = $data->payment_cache_item?->payment_cache?->items()
+                        ->where('status', 'Pending')
+                        ->count() ?? 0;
+
+                    if ($waitingTime && $pendingCount > 0) {
+                        $waitingTime->moveToDepartment('cashier', 'Sent to cashier for medicine payment');
+
+                        \Log::info('Consultation completed - patient routed to cashier for pending items', [
+                            'patient_id' => $patient->id,
+                            'patient_name' => $patient->full_name ?? 'Unknown',
+                            'consultation_id' => $data->id,
+                            'pending_items' => $pendingCount,
+                            'current_department' => $waitingTime->current_department,
+                        ]);
+                    }
+
+                    if ($waitingTime && $pendingCount === 0 && $waitingTime->hasCompletedFullJourney()) {
                         $waitingTime->endTreatment();
                         
                         \Log::info('Auto-completed patient treatment after consultation completion', [

@@ -122,7 +122,48 @@ class DentalLabOrdersController extends Controller
         $data->update([
             'status' => 'Delivered',
         ]);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Marked as delivered.');
+
+        // Return the patient to the doctor so they can continue the visit
+        try {
+            $consultation = $data->consultation;
+            if ($consultation) {
+                $consultation->update(['status' => 'Pending']);
+
+                $patient = $consultation->payment_cache_item?->payment_cache?->check_in?->patient;
+                if ($patient) {
+                    $waitingTime = $patient->waiting_times()
+                        ->whereDate('registration_time', $consultation->created_at->format('Y-m-d'))
+                        ->whereIn('status', ['waiting', 'in_treatment'])
+                        ->latest()
+                        ->first();
+
+                    if ($waitingTime) {
+                        $waitingTime->moveToDepartment('consultation', 'Patient returned from dental lab');
+                    }
+                }
+
+                \Log::info('Lab order delivered - patient returned to doctor', [
+                    'lab_order_id' => $data->id,
+                    'consultation_id' => $consultation->id,
+                    'patient_id' => $patient->id ?? null,
+                    'patient_name' => $patient?->full_name ?? 'Unknown',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to return patient to doctor after lab delivery', [
+                'lab_order_id' => $data->id,
+                'error' => $e->getMessage(),
+                'exception_type' => get_class($e),
+            ]);
+        }
+
+        // Trigger notification refresh for the doctor's pending badge
+        try {
+            event(new \App\Events\NotificationUpdate());
+        } catch (\Exception $e) {
+        }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Marked as delivered. Patient returned to doctor.');
     }
 
     public function destroy($id)

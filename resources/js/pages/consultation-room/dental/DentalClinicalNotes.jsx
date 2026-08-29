@@ -291,9 +291,8 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         patient_to_return: formData.patient_to_return,
         to_return_date: formData.patient_to_return === "Yes" ? formData.to_return_date : null,
       };
-      await completePatch(`/api/consultations/${consultation.id}`, {
+      await completePatch(`/api/consultations/${consultation.id}/complete-clinical-notes`, {
         ...payload,
-        status: "Consulted",
       });
       addToast("Clinical notes saved successfully", { variant: "success" });
       setCompleteDialogOpen(false);
