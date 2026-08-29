@@ -390,6 +390,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->get('/items/{id}', [ItemsController::class, 'show']);
     $router->get('/payment-modes', [PaymentModesController::class, 'index']);
     $router->get('/payment-modes/{id}', [PaymentModesController::class, 'show']);
+    $router->get('/payment-channels', [PaymentChannelsController::class, 'index']);
+    $router->get('/payment-channels/{id}', [PaymentChannelsController::class, 'show']);
     $router->get('/users', [UsersController::class, 'index']);
     $router->get('/users/{id}', [UsersController::class, 'show']);
     $router->get('/collaborators', [CollaboratorsController::class, 'index']);
@@ -453,7 +455,13 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->put('/payment-modes/{id}', [PaymentModesController::class, 'update']);
         $router->patch('/payment-modes/{id}', [PaymentModesController::class, 'update']);
         $router->delete('/payment-modes/{id}', [PaymentModesController::class, 'destroy']);
-        $router->apiResource('/payment-channels', PaymentChannelsController::class);
+
+        // GET index/show for /payment-channels are registered above (for
+        // payment center selection dropdowns). Mutating routes stay gated.
+        $router->post('/payment-channels', [PaymentChannelsController::class, 'store']);
+        $router->put('/payment-channels/{id}', [PaymentChannelsController::class, 'update']);
+        $router->patch('/payment-channels/{id}', [PaymentChannelsController::class, 'update']);
+        $router->delete('/payment-channels/{id}', [PaymentChannelsController::class, 'destroy']);
         $router->apiResource('/regions', RegionsController::class);
         $router->apiResource('/districts', DistrictsController::class);
         $router->apiResource('/wards', WardsController::class);
