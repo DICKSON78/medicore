@@ -4,7 +4,6 @@ import Page, { Header as PageHeader } from "../../components/Page";
 import DatePicker from "../../components/DatePicker";
 import Select from "../../components/Select";
 import Report from "../../components/reports/Report";
-import { NHIF_CLAIM_STATUSES } from "../../constants";
 import { numberFormat } from "../../helpers";
 
 const NHIFClaims = () => {
@@ -26,7 +25,7 @@ const NHIFClaims = () => {
                 placeholder="Status"
                 fullWidth
                 clearable
-                options={NHIF_CLAIM_STATUSES.map(s => ({ label: s.label, value: s.value }))}
+                category="nhifClaimStatuses"
                 onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
               />
             </Grid>

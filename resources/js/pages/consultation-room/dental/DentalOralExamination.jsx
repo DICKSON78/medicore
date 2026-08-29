@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
-import { usePatch, useDentalOptions } from "../../../hooks";
+import { usePatch, useOptions } from "../../../hooks";
 
 const fields = [
   { key: "lips", label: "Lips", category: "lips" },
@@ -18,7 +18,7 @@ const fields = [
 
 const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
   const { handlePatch: patch } = usePatch();
-  const { options } = useDentalOptions();
+  const { options } = useOptions();
 
   const handleChange = useCallback((field, value) => {
     const payload = { what: "Dental Oral Examination", [field]: value };

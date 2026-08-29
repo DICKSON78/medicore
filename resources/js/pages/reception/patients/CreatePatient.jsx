@@ -211,7 +211,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                 label="Gender"
                 fullWidth
                 required
-                options={["Male", "Female"]}
+                category="gender"
                 onChange={(value) =>
                   setFormData({ ...formData, gender: value })
                 }

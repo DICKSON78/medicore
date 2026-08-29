@@ -63,10 +63,7 @@ const DentalExaminationsList = () => {
         <Select
           label="Status"
           value={filters.status}
-          options={[
-            { label: "Pending", value: "Pending" },
-            { label: "Consulted", value: "Consulted" },
-          ]}
+          category="dentalExamStatus"
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           size="small" sx={{ minWidth: 150 }}
         />

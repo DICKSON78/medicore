@@ -114,7 +114,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               label="Communication Type"
               fullWidth
-              options={["Phone", "Chat", "Email"]}
+              category="communicationChannel"
               clearable
               value={params.communication_type || null}
               onChange={(value) =>

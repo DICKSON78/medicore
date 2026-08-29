@@ -114,7 +114,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               label="Status"
               fullWidth
-              options={["Open", "Cancelled", "Closed"]}
+              category="marketingStrategyStatus"
               clearable
               value={params.status}
               onChange={(value) => setParams({ ...params, status: value })}

@@ -196,7 +196,7 @@ const EditMedicine = () => {
                     label="Has Expiry"
                     value={form.has_expiry || "No"}
                     onChange={(v) => handleChange("has_expiry", v)}
-                    options={["Yes", "No"]}
+                    category="yesNo"
                     fullWidth
                   />
                 </Grid>

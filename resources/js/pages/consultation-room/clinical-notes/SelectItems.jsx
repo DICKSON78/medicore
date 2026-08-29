@@ -288,7 +288,7 @@ const SelectItems = ({
                       placeholder="Item Type"
                       fullWidth
                       clearable
-                      options={["Dental Materials", "Dental Prosthetics"]}
+                      category="itemCategory"
                       onChange={(value) => {
                         setItemType(value);
                         setIsPartnerItem(false);

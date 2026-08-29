@@ -160,7 +160,7 @@ const EditEvent = ({ eventType, item, modal, fetchEvents }) => {
                 ref={statusRef}
                 label="Status"
                 fullWidth
-                options={["Pending", "Cancelled", "Completed"]}
+                category="activityStatus"
                 required
                 value={formData.status}
                 onChange={(value) =>

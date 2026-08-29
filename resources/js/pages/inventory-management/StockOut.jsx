@@ -240,7 +240,7 @@ const StockOut = () => {
                     placeholder="Item Type"
                     fullWidth
                     clearable
-                    options={["Medicine", "Pharmaceutical", "Dental Materials", "Dental Prosthetics", "Equipment", "Materials", "Others", "Service"]}
+                    category="itemCategory"
                     onChange={(value) => { setItemType(value); setSelectedItem(null); }}
                   />
                 </CardContent>

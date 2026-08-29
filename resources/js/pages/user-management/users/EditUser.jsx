@@ -186,7 +186,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                 label="Gender"
                 fullWidth
                 required
-                options={["Male", "Female"]}
+                category="gender"
                 value={formData.gender}
                 onChange={(value) =>
                   setFormData({ ...formData, gender: value })
@@ -219,7 +219,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                   ref={designationRef}
                   label="Designation"
                   fullWidth
-                  options={["Doctor", "Other"]}
+                  category="userOccupation"
                   value={formData.designation}
                   onChange={(value) =>
                     setFormData({ ...formData, designation: value })

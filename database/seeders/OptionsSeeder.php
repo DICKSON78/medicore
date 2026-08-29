@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\DentalOption;
+use App\Models\Option;
 use Illuminate\Database\Seeder;
 
-class DentalOptionsSeeder extends Seeder
+class OptionsSeeder extends Seeder
 {
     public function run()
     {
@@ -311,10 +311,128 @@ class DentalOptionsSeeder extends Seeder
         ['category' => 'labOrderTypesDialog', 'label' => 'Model/Cast (Study)', 'value' => 'Model', 'sort_order' => 12],
         ['category' => 'labOrderTypesDialog', 'label' => 'Wax-up', 'value' => 'WaxUp', 'sort_order' => 13],
         ['category' => 'labOrderTypesDialog', 'label' => 'Other', 'value' => 'Other', 'sort_order' => 14],
+        // ─── nhifClaimStatuses ── (5)
+        ['category' => 'nhifClaimStatuses', 'label' => 'Draft', 'value' => 'draft', 'sort_order' => 0],
+        ['category' => 'nhifClaimStatuses', 'label' => 'Submitted', 'value' => 'submitted', 'sort_order' => 1],
+        ['category' => 'nhifClaimStatuses', 'label' => 'Approved', 'value' => 'approved', 'sort_order' => 2],
+        ['category' => 'nhifClaimStatuses', 'label' => 'Rejected', 'value' => 'rejected', 'sort_order' => 3],
+        ['category' => 'nhifClaimStatuses', 'label' => 'Paid', 'value' => 'paid', 'sort_order' => 4],
+        // ─── hmisCancerTypes ── (10)
+        ['category' => 'hmisCancerTypes', 'label' => 'Oral Cavity Cancer', 'value' => 'OralCavity', 'sort_order' => 0],
+        ['category' => 'hmisCancerTypes', 'label' => 'Lip Cancer', 'value' => 'Lip', 'sort_order' => 1],
+        ['category' => 'hmisCancerTypes', 'label' => 'Tongue Cancer', 'value' => 'Tongue', 'sort_order' => 2],
+        ['category' => 'hmisCancerTypes', 'label' => 'Salivary Gland Cancer', 'value' => 'SalivaryGland', 'sort_order' => 3],
+        ['category' => 'hmisCancerTypes', 'label' => 'Oropharyngeal Cancer', 'value' => 'Oropharynx', 'sort_order' => 4],
+        ['category' => 'hmisCancerTypes', 'label' => 'Nasopharyngeal Cancer', 'value' => 'Nasopharynx', 'sort_order' => 5],
+        ['category' => 'hmisCancerTypes', 'label' => 'Laryngeal Cancer', 'value' => 'Larynx', 'sort_order' => 6],
+        ['category' => 'hmisCancerTypes', 'label' => 'Thyroid Cancer', 'value' => 'Thyroid', 'sort_order' => 7],
+        ['category' => 'hmisCancerTypes', 'label' => 'Skin Cancer (Head & Neck)', 'value' => 'SkinHeadNeck', 'sort_order' => 8],
+        ['category' => 'hmisCancerTypes', 'label' => 'Other (Specify)', 'value' => 'Other', 'sort_order' => 9],
+        // ─── appointmentStatus ── (7)
+        ['category' => 'appointmentStatus', 'label' => 'All', 'value' => '', 'sort_order' => 0],
+        ['category' => 'appointmentStatus', 'label' => 'Scheduled', 'value' => 'Scheduled', 'sort_order' => 1],
+        ['category' => 'appointmentStatus', 'label' => 'Confirmed', 'value' => 'Confirmed', 'sort_order' => 2],
+        ['category' => 'appointmentStatus', 'label' => 'In Progress', 'value' => 'In Progress', 'sort_order' => 3],
+        ['category' => 'appointmentStatus', 'label' => 'Completed', 'value' => 'Completed', 'sort_order' => 4],
+        ['category' => 'appointmentStatus', 'label' => 'Cancelled', 'value' => 'Cancelled', 'sort_order' => 5],
+        ['category' => 'appointmentStatus', 'label' => 'No Show', 'value' => 'No Show', 'sort_order' => 6],
+        // ─── appointmentType ── (6)
+        ['category' => 'appointmentType', 'label' => 'Check-up', 'value' => 'Check-up', 'sort_order' => 0],
+        ['category' => 'appointmentType', 'label' => 'Treatment', 'value' => 'Treatment', 'sort_order' => 1],
+        ['category' => 'appointmentType', 'label' => 'Follow-up', 'value' => 'Follow-up', 'sort_order' => 2],
+        ['category' => 'appointmentType', 'label' => 'Emergency', 'value' => 'Emergency', 'sort_order' => 3],
+        ['category' => 'appointmentType', 'label' => 'Braces Works', 'value' => 'Braces Works', 'sort_order' => 4],
+        ['category' => 'appointmentType', 'label' => 'Ceramics Works', 'value' => 'Ceramics Works', 'sort_order' => 5],
+        // ─── dentalExamStatus ── (2)
+        ['category' => 'dentalExamStatus', 'label' => 'Pending', 'value' => 'Pending', 'sort_order' => 0],
+        ['category' => 'dentalExamStatus', 'label' => 'Consulted', 'value' => 'Consulted', 'sort_order' => 1],
+        // ─── labOrderStatusFilter ── (5)
+        ['category' => 'labOrderStatusFilter', 'label' => 'All', 'value' => '', 'sort_order' => 0],
+        ['category' => 'labOrderStatusFilter', 'label' => 'Ordered', 'value' => 'Ordered', 'sort_order' => 1],
+        ['category' => 'labOrderStatusFilter', 'label' => 'In Progress', 'value' => 'In Progress', 'sort_order' => 2],
+        ['category' => 'labOrderStatusFilter', 'label' => 'Ready', 'value' => 'Ready', 'sort_order' => 3],
+        ['category' => 'labOrderStatusFilter', 'label' => 'Delivered', 'value' => 'Delivered', 'sort_order' => 4],
+        // ─── labReportStatus ── (4)
+        ['category' => 'labReportStatus', 'label' => 'Ordered', 'value' => 'Ordered', 'sort_order' => 0],
+        ['category' => 'labReportStatus', 'label' => 'In Progress', 'value' => 'In Progress', 'sort_order' => 1],
+        ['category' => 'labReportStatus', 'label' => 'Ready', 'value' => 'Ready', 'sort_order' => 2],
+        ['category' => 'labReportStatus', 'label' => 'Delivered', 'value' => 'Delivered', 'sort_order' => 3],
+        // ─── stockMovementType ── (3)
+        ['category' => 'stockMovementType', 'label' => 'Stock In', 'value' => 'in', 'sort_order' => 0],
+        ['category' => 'stockMovementType', 'label' => 'Stock Out', 'value' => 'out', 'sort_order' => 1],
+        ['category' => 'stockMovementType', 'label' => 'Adjustment', 'value' => 'adjustment', 'sort_order' => 2],
+        // ─── stockLevel ── (3)
+        ['category' => 'stockLevel', 'label' => 'In Stock', 'value' => 'In Stock', 'sort_order' => 0],
+        ['category' => 'stockLevel', 'label' => 'Low Stock', 'value' => 'Low Stock', 'sort_order' => 1],
+        ['category' => 'stockLevel', 'label' => 'Out of Stock', 'value' => 'Out of Stock', 'sort_order' => 2],
+        // ─── itemCategory ── (8)
+        ['category' => 'itemCategory', 'label' => 'Medicine', 'value' => 'Medicine', 'sort_order' => 0],
+        ['category' => 'itemCategory', 'label' => 'Pharmaceutical', 'value' => 'Pharmaceutical', 'sort_order' => 1],
+        ['category' => 'itemCategory', 'label' => 'Dental Materials', 'value' => 'Dental Materials', 'sort_order' => 2],
+        ['category' => 'itemCategory', 'label' => 'Dental Prosthetics', 'value' => 'Dental Prosthetics', 'sort_order' => 3],
+        ['category' => 'itemCategory', 'label' => 'Equipment', 'value' => 'Equipment', 'sort_order' => 4],
+        ['category' => 'itemCategory', 'label' => 'Materials', 'value' => 'Materials', 'sort_order' => 5],
+        ['category' => 'itemCategory', 'label' => 'Others', 'value' => 'Others', 'sort_order' => 6],
+        ['category' => 'itemCategory', 'label' => 'Service', 'value' => 'Service', 'sort_order' => 7],
+        // ─── recordStatus ── (2)
+        ['category' => 'recordStatus', 'label' => 'Active', 'value' => 'Active', 'sort_order' => 0],
+        ['category' => 'recordStatus', 'label' => 'Inactive', 'value' => 'Inactive', 'sort_order' => 1],
+        // ─── communicationChannel ── (3)
+        ['category' => 'communicationChannel', 'label' => 'Phone', 'value' => 'Phone', 'sort_order' => 0],
+        ['category' => 'communicationChannel', 'label' => 'Chat', 'value' => 'Chat', 'sort_order' => 1],
+        ['category' => 'communicationChannel', 'label' => 'Email', 'value' => 'Email', 'sort_order' => 2],
+        // ─── communicationDirection ── (2)
+        ['category' => 'communicationDirection', 'label' => 'Incoming', 'value' => 'Incoming', 'sort_order' => 0],
+        ['category' => 'communicationDirection', 'label' => 'Outgoing', 'value' => 'Outgoing', 'sort_order' => 1],
+        // ─── activityStatus ── (3)
+        ['category' => 'activityStatus', 'label' => 'Pending', 'value' => 'Pending', 'sort_order' => 0],
+        ['category' => 'activityStatus', 'label' => 'Cancelled', 'value' => 'Cancelled', 'sort_order' => 1],
+        ['category' => 'activityStatus', 'label' => 'Completed', 'value' => 'Completed', 'sort_order' => 2],
+        // ─── ideaStatus ── (3)
+        ['category' => 'ideaStatus', 'label' => 'Pending', 'value' => 'Pending', 'sort_order' => 0],
+        ['category' => 'ideaStatus', 'label' => 'Cancelled', 'value' => 'Cancelled', 'sort_order' => 1],
+        ['category' => 'ideaStatus', 'label' => 'Implemented', 'value' => 'Implemented', 'sort_order' => 2],
+        // ─── marketingStrategyStatus ── (3)
+        ['category' => 'marketingStrategyStatus', 'label' => 'Open', 'value' => 'Open', 'sort_order' => 0],
+        ['category' => 'marketingStrategyStatus', 'label' => 'Cancelled', 'value' => 'Cancelled', 'sort_order' => 1],
+        ['category' => 'marketingStrategyStatus', 'label' => 'Closed', 'value' => 'Closed', 'sort_order' => 2],
+        // ─── expenseStatus ── (2)
+        ['category' => 'expenseStatus', 'label' => 'Pending', 'value' => 'Pending', 'sort_order' => 0],
+        ['category' => 'expenseStatus', 'label' => 'Cleared', 'value' => 'Cleared', 'sort_order' => 1],
+        // ─── paymentModeType ── (2)
+        ['category' => 'paymentModeType', 'label' => 'Cash', 'value' => 'Cash', 'sort_order' => 0],
+        ['category' => 'paymentModeType', 'label' => 'Credit', 'value' => 'Credit', 'sort_order' => 1],
+        // ─── gender ── (2)
+        ['category' => 'gender', 'label' => 'Male', 'value' => 'Male', 'sort_order' => 0],
+        ['category' => 'gender', 'label' => 'Female', 'value' => 'Female', 'sort_order' => 1],
+        // ─── reportPeriod ── (4)
+        ['category' => 'reportPeriod', 'label' => 'Daily', 'value' => 'daily', 'sort_order' => 0],
+        ['category' => 'reportPeriod', 'label' => 'Weekly', 'value' => 'weekly', 'sort_order' => 1],
+        ['category' => 'reportPeriod', 'label' => 'Monthly', 'value' => 'monthly', 'sort_order' => 2],
+        ['category' => 'reportPeriod', 'label' => 'Yearly', 'value' => 'yearly', 'sort_order' => 3],
+        // ─── returnPeriod ── (3)
+        ['category' => 'returnPeriod', 'label' => 'Daily', 'value' => 'Daily', 'sort_order' => 0],
+        ['category' => 'returnPeriod', 'label' => 'Weekly', 'value' => 'Weekly', 'sort_order' => 1],
+        ['category' => 'returnPeriod', 'label' => 'Monthly', 'value' => 'Monthly', 'sort_order' => 2],
+        // ─── filterPeriod ── (3)
+        ['category' => 'filterPeriod', 'label' => 'Daily', 'value' => 'daily', 'sort_order' => 0],
+        ['category' => 'filterPeriod', 'label' => 'Weekly', 'value' => 'weekly', 'sort_order' => 1],
+        ['category' => 'filterPeriod', 'label' => 'Monthly', 'value' => 'monthly', 'sort_order' => 2],
+        // ─── yesNo ── (2)
+        ['category' => 'yesNo', 'label' => 'Yes', 'value' => 'Yes', 'sort_order' => 0],
+        ['category' => 'yesNo', 'label' => 'No', 'value' => 'No', 'sort_order' => 1],
+        // ─── userOccupation ── (2)
+        ['category' => 'userOccupation', 'label' => 'Doctor', 'value' => 'Doctor', 'sort_order' => 0],
+        ['category' => 'userOccupation', 'label' => 'Other', 'value' => 'Other', 'sort_order' => 1],
+        // ─── waitingTimeStatus ── (4)
+        ['category' => 'waitingTimeStatus', 'label' => 'All Statuses', 'value' => 'all', 'sort_order' => 0],
+        ['category' => 'waitingTimeStatus', 'label' => 'Waiting', 'value' => 'waiting', 'sort_order' => 1],
+        ['category' => 'waitingTimeStatus', 'label' => 'In Treatment', 'value' => 'in_treatment', 'sort_order' => 2],
+        ['category' => 'waitingTimeStatus', 'label' => 'Completed', 'value' => 'completed', 'sort_order' => 3],
         ];
 
         foreach ($options as $option) {
-            DentalOption::updateOrCreate(
+            Option::updateOrCreate(
                 ['category' => $option['category'], 'value' => $option['value']],
                 ['label' => $option['label'], 'sort_order' => $option['sort_order'], 'status' => 'Active']
             );

@@ -5,12 +5,12 @@ import {
 import { Header as PageHeader } from "../../../../components/Page";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
-import { useFetch, usePatch, useToast, useDentalOptions } from "../../../../hooks";
+import { useFetch, usePatch, useToast, useOptions } from "../../../../hooks";
 
 const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
   const addToast = useToast();
   const { handlePatch: patch, loading: saving } = usePatch();
-  const { options } = useDentalOptions();
+  const { options } = useOptions();
 
   const [form, setForm] = useState({
     treatment_type: "",

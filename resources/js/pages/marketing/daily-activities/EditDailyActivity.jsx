@@ -119,7 +119,7 @@ const EditDailyActivity = ({ item, modal, fetchDailyActivities }) => {
                 ref={statusRef}
                 label="Status"
                 fullWidth
-                options={["Pending", "Cancelled", "Completed"]}
+                category="activityStatus"
                 required
                 value={formData.status}
                 onChange={(value) =>

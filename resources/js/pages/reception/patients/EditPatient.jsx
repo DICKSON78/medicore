@@ -198,7 +198,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 label="Gender"
                 fullWidth
                 required
-                options={["Male", "Female"]}
+                category="gender"
                 value={formData.gender}
                 onChange={(value) =>
                   setFormData({ ...formData, gender: value })

@@ -90,7 +90,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               label="Status"
               fullWidth
-              options={["Pending", "Cleared"]}
+              category="expenseStatus"
               clearable
               value={params.status}
               onChange={(value) => setParams({ ...params, status: value })}

@@ -52,14 +52,7 @@ const LabOrdersReport = () => {
                   <Select
                     label="Report Period"
                     fullWidth
-                    options={[
-                      { id: "daily", name: "Daily" },
-                      { id: "weekly", name: "Weekly" },
-                      { id: "monthly", name: "Monthly" },
-                      { id: "yearly", name: "Yearly" },
-                    ]}
-                    optionsLabel="name"
-                    optionsValue="id"
+                    category="reportPeriod"
                     value={params.report_period}
                     onChange={(value) => setParams({ ...params, report_period: value })}
                   />
@@ -83,12 +76,7 @@ const LabOrdersReport = () => {
                     label="Status"
                     fullWidth
                     clearable
-                    options={[
-                      { label: "Ordered", value: "Ordered" },
-                      { label: "In Progress", value: "In Progress" },
-                      { label: "Ready", value: "Ready" },
-                      { label: "Delivered", value: "Delivered" },
-                    ]}
+                    category="labReportStatus"
                     value={params.status}
                     onChange={(value) => setParams({ ...params, status: value })}
                   />

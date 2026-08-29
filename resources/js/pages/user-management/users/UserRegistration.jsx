@@ -304,7 +304,7 @@ const UserRegistration = () => {
                   label="Gender"
                   fullWidth
                   required
-                  options={["Male", "Female"]}
+                  category="gender"
                   onChange={(value) =>
                     setFormData({ ...formData, gender: value })
                   }
@@ -339,7 +339,7 @@ const UserRegistration = () => {
                   ref={designationRef}
                   label="Designation"
                   fullWidth
-                  options={["Doctor", "Other"]}
+                  category="userOccupation"
                   onChange={(value) =>
                     setFormData({ ...formData, designation: value })
                   }

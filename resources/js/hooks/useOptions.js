@@ -4,7 +4,7 @@ let optionsCache = null;
 let optionsPromise = null;
 const subscribers = new Set();
 
-const useDentalOptions = () => {
+const useOptions = () => {
   const [state, setState] = useState({
     loading: optionsCache === null,
     options: optionsCache || {},
@@ -20,7 +20,7 @@ const useDentalOptions = () => {
 
     if (!optionsPromise) {
       optionsPromise = window.axios
-        .get("/api/dental-options")
+        .get("/api/options")
         .then((response) => response.data?.data || {})
         .catch(() => ({}))
         .then((data) => {
@@ -36,4 +36,4 @@ const useDentalOptions = () => {
   return state;
 };
 
-export default useDentalOptions;
+export default useOptions;

@@ -93,7 +93,7 @@ const EditIdea = ({ item, modal, fetchIdeas }) => {
                 ref={statusRef}
                 label="Status"
                 fullWidth
-                options={["Pending", "Cancelled", "Implemented"]}
+                category="ideaStatus"
                 required
                 value={formData.status}
                 onChange={(value) =>

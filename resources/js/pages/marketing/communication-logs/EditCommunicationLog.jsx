@@ -128,7 +128,7 @@ const EditCommunicationLog = ({ item, modal, fetchCommunicationLogs }) => {
                 ref={communicationTypeRef}
                 label="Communication Type"
                 fullWidth
-                options={["Phone", "Chat", "Email"]}
+                category="communicationChannel"
                 required
                 value={formData.communication_type}
                 onChange={(value) =>
@@ -146,7 +146,7 @@ const EditCommunicationLog = ({ item, modal, fetchCommunicationLogs }) => {
                 ref={communicationDirectionRef}
                 label="Communication Direction"
                 fullWidth
-                options={["Incoming", "Outgoing"]}
+                category="communicationDirection"
                 required
                 value={formData.communication_direction}
                 onChange={(value) =>

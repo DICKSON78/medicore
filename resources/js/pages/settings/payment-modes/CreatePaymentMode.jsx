@@ -122,7 +122,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
                 label="Transaction Type"
                 fullWidth
                 required
-                options={["Cash", "Credit"]}
+                category="paymentModeType"
                 onChange={(value) =>
                   setFormData({ ...formData, transaction_type: value })
                 }

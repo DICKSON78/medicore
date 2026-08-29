@@ -92,11 +92,7 @@ const StockMovements = () => {
                 placeholder="Movement Type"
                 fullWidth
                 clearable
-                options={[
-                  { label: "Stock In", value: "in" },
-                  { label: "Stock Out", value: "out" },
-                  { label: "Adjustment", value: "adjustment" },
-                ]}
+                category="stockMovementType"
                 optionsLabel="label"
                 optionsValue="value"
                 onChange={(value) => setFilters((prev) => ({ ...prev, type: value }))}

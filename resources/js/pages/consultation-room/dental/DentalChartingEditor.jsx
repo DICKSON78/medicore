@@ -6,7 +6,7 @@ import {
   TableContainer, TableHead, TableRow, Tooltip, Typography, Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useFetch, usePatch, useToast, useDentalOptions } from "../../../hooks";
+import { useFetch, usePatch, useToast, useOptions } from "../../../hooks";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
@@ -80,7 +80,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
     { loadOnMount: true, loadOnReload: true },
   );
   const { handlePatch: patch, loading: saving } = usePatch();
-  const { options } = useDentalOptions();
+  const { options } = useOptions();
 
   useEffect(() => {
     if (fetchData?.data) {

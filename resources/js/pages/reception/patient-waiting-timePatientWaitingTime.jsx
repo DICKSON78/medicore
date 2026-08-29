@@ -609,12 +609,7 @@ const PatientWaitingTime = () => {
                 label="Status Filter"
                 fullWidth
                 value={statusFilter}
-                options={[
-                  { value: "all", label: "All Statuses" },
-                  { value: "waiting", label: "Waiting" },
-                  { value: "in_treatment", label: "In Treatment" },
-                  { value: "completed", label: "Completed" },
-                ]}
+                category="waitingTimeStatus"
                 optionsLabel="label"
                 optionsValue="value"
                 onChange={handleStatusFilter}

@@ -187,7 +187,7 @@ const EditMarketingStrategy = ({ item, modal, fetchMarketingStrategies }) => {
                 ref={statusRef}
                 label="Status"
                 fullWidth
-                options={["Open", "Cancelled", "Closed"]}
+                category="marketingStrategyStatus"
                 required
                 value={formData.status}
                 onChange={(value) =>

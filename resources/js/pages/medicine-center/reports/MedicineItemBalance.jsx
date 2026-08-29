@@ -43,14 +43,7 @@ const MedicineItemBalance = ({ module, consultationType }) => {
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 2 }}>
             <Select
               label="Report Period"
-              options={[
-                { id: "daily", name: "Daily" },
-                { id: "weekly", name: "Weekly" },
-                { id: "monthly", name: "Monthly" },
-                { id: "yearly", name: "Yearly" },
-              ]}
-              optionsLabel="name"
-              optionsValue="id"
+              category="reportPeriod"
               value={params.report_period}
               onChange={(value) => setParams({ ...params, report_period: value })}
               sx={{ minWidth: 180 }}

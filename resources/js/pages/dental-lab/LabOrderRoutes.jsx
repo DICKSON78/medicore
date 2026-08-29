@@ -22,7 +22,7 @@ import PatientDetails from "../reception/patients/PatientDetails";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import DatePicker from "../../components/DatePicker";
-import { usePatch, useToast, useDentalOptions } from "../../hooks";
+import { usePatch, useToast, useOptions } from "../../hooks";
 import { formatDate } from "../../helpers";
 
 const statusColors = {
@@ -43,7 +43,7 @@ const LabOrderRoutes = () => {
   const [loading, setLoading] = useState(true);
   const [loadingPatient, setLoadingPatient] = useState(true);
   const { handlePatch: patch, loading: saving } = usePatch();
-  const { options: dentalOptions } = useDentalOptions();
+  const { options: dentalOptions } = useOptions();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);

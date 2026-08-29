@@ -35,7 +35,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               fullWidth
               label="View Period"
-              options={["Daily", "Weekly", "Monthly"]}
+              category="returnPeriod"
               value={params.view_period === 'daily' ? 'Daily' : params.view_period === 'weekly' ? 'Weekly' : 'Monthly'}
               onChange={(value) => {
                 console.log('View Period Select - onChange called with value:', value);
@@ -135,7 +135,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               label="Gender"
               fullWidth
-              options={["Male", "Female"]}
+              category="gender"
               clearable
               onChange={(value) =>
                 setParams({ ...params, patient_gender: value })

@@ -53,13 +53,7 @@ const PatientFilters = ({ params, setParams, showViewPeriod, ...rest }) => {
               <Select
                 label="View Period"
                 fullWidth
-                options={[
-                  { id: 'daily', name: 'Daily' },
-                  { id: 'weekly', name: 'Weekly' },
-                  { id: 'monthly', name: 'Monthly' },
-                ]}
-                optionsLabel="name"
-                optionsValue="id"
+                category="filterPeriod"
                 value={params.view_period || 'daily'}
                 onChange={(value) => {
                   const now = new Date();

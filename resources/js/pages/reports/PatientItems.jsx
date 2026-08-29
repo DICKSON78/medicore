@@ -158,14 +158,7 @@ const PatientItems = ({
                     <Select
                       label="Report Period"
                       fullWidth
-                      options={[
-                        { id: "daily", name: "Daily" },
-                        { id: "weekly", name: "Weekly" },
-                        { id: "monthly", name: "Monthly" },
-                        { id: "yearly", name: "Yearly" },
-                      ]}
-                      optionsLabel="name"
-                      optionsValue="id"
+                      category="reportPeriod"
                       value={params.report_period}
                       onChange={(value) =>
                         setParams({ ...params, report_period: value })
@@ -292,7 +285,7 @@ const PatientItems = ({
                     <Select
                       label="Gender"
                       fullWidth
-                      options={["Male", "Female"]}
+                      category="gender"
                       clearable
                       onChange={(value) =>
                         setParams({ ...params, patient_gender: value })

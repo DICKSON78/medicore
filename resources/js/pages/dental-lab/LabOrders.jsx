@@ -167,13 +167,7 @@ const LabOrders = () => {
             <Select
               label="Status"
               value={params.status}
-              options={[
-                { label: "All", value: "" },
-                { label: "Ordered", value: "Ordered" },
-                { label: "In Progress", value: "In Progress" },
-                { label: "Ready", value: "Ready" },
-                { label: "Delivered", value: "Delivered" },
-              ]}
+              category="labOrderStatusFilter"
               onChange={(v) => setParams({ ...params, status: v })}
               size="small"
               sx={{ minWidth: 150 }}

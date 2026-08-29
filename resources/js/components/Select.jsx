@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
 import ClearIcon from "@mui/icons-material/CloseRounded";
+import useOptions from "../hooks/useOptions";
 
 const Select = (
   {
@@ -28,6 +29,7 @@ const Select = (
     value,
     onChange,
     options,
+    category,
     optionsLabel,
     optionsValue,
     clearable,
@@ -38,6 +40,9 @@ const Select = (
   },
   ref
 ) => {
+  const { options: dbOptions } = useOptions();
+  const effectiveOptions = category ? dbOptions[category] || [] : options;
+
   const [state, setState] = useState({
     value,
     error: null,
@@ -112,9 +117,9 @@ const Select = (
 
     // Object options: resolve the matching option object.
     // optionsValue takes precedence; otherwise fall back to the "value" field.
-    if (Array.isArray(options) && options.length && typeof options[0] === "object") {
+    if (Array.isArray(effectiveOptions) && effectiveOptions.length && typeof effectiveOptions[0] === "object") {
       const key = typeof optionsValue === "string" ? optionsValue : "value";
-      return options.find(option => option && option[key] === state.value) || null;
+      return effectiveOptions.find(option => option && option[key] === state.value) || null;
     }
 
     // For string options
@@ -168,7 +173,7 @@ const Select = (
         <Autocomplete
           {...rest}
           getOptionLabel={_getOptionLabel}
-          options={Array.isArray(options) ? options : []}
+          options={Array.isArray(effectiveOptions) ? effectiveOptions : []}
           disableClearable={!clearable}
           loading={loading}
           value={_getSelectedOption()}

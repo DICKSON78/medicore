@@ -3,6 +3,6 @@ import usePost from "./usePost";
 import usePatch from "./usePatch";
 import useDelete from "./useDelete";
 import useToast from "./useToast";
-import useDentalOptions from "./useDentalOptions";
+import useOptions from "./useOptions";
 
-export { useFetch, usePost, usePatch, useDelete, useToast, useDentalOptions };
+export { useFetch, usePost, usePatch, useDelete, useToast, useOptions };

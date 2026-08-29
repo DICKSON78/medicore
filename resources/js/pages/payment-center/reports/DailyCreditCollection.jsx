@@ -145,7 +145,7 @@ const DailyCreditCollection = ({ module }) => {
                     <Select
                       label="Gender"
                       fullWidth
-                      options={["Male", "Female"]}
+                      category="gender"
                       clearable
                       onChange={(value) =>
                         setParams({ ...params, patient_gender: value })

@@ -170,15 +170,7 @@ const DentalAppointments = () => {
               <Select
                 label="Status"
                 value={filters.status}
-                options={[
-                  { label: "All", value: "" },
-                  { label: "Scheduled", value: "Scheduled" },
-                  { label: "Confirmed", value: "Confirmed" },
-                  { label: "In Progress", value: "In Progress" },
-                  { label: "Completed", value: "Completed" },
-                  { label: "Cancelled", value: "Cancelled" },
-                  { label: "No Show", value: "No Show" },
-                ]}
+                category="appointmentStatus"
                 onChange={(v) => setFilters({ ...filters, status: v })}
                 size="small"
                 fullWidth
@@ -227,14 +219,7 @@ const DentalAppointments = () => {
               <Select
                 label="Type"
                 value={form.appointment_type}
-                options={[
-                  { label: "Check-up", value: "Check-up" },
-                  { label: "Treatment", value: "Treatment" },
-                  { label: "Follow-up", value: "Follow-up" },
-                  { label: "Emergency", value: "Emergency" },
-                  { label: "Braces Works", value: "Braces Works" },
-                  { label: "Ceramics Works", value: "Ceramics Works" },
-                ]}
+                category="appointmentType"
                 onChange={(v) => setForm({ ...form, appointment_type: v })}
                 fullWidth size="small"
               />

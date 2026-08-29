@@ -175,7 +175,7 @@ const PatientRegistration = () => {
                     <Select
                       label="Gender"
                       fullWidth
-                      options={["Male", "Female"]}
+                      category="gender"
                       clearable
                       onChange={(value) =>
                         setParams({ ...params, gender: value })

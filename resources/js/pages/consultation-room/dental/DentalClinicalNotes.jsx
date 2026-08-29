@@ -18,7 +18,7 @@ import DentalOralExamination from "./DentalOralExamination";
 import DentalChartingEditor from "./DentalChartingEditor";
 import PrescriptionForm from "./PrescriptionForm";
 import DentalRadiographs from "./DentalRadiographs";
-import { useFetch, usePatch, useToast, useDentalOptions } from "../../../hooks";
+import { useFetch, usePatch, useToast, useOptions } from "../../../hooks";
 import { formatDateForDb, formatDate, formatError, getValidationError } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => (
@@ -63,7 +63,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
 
   const { handlePatch: autoPatch } = usePatch();
   const { handlePatch: completePatch, loading: completing } = usePatch();
-  const { options } = useDentalOptions();
+  const { options } = useOptions();
 
   const fetchDiagnoses = async () => {
     if (!consultation?.id) return;

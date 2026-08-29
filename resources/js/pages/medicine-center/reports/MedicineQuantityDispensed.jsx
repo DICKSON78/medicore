@@ -51,14 +51,7 @@ const MedicineQuantityDispensed = ({ module, consultationType }) => {
           <React.Fragment>
             <Select
               label="Report Period"
-              options={[
-                { id: "daily", name: "Daily" },
-                { id: "weekly", name: "Weekly" },
-                { id: "monthly", name: "Monthly" },
-                { id: "yearly", name: "Yearly" },
-              ]}
-              optionsLabel="name"
-              optionsValue="id"
+              category="reportPeriod"
               value={params.report_period}
               onChange={(value) =>
                 setParams({ ...params, report_period: value })

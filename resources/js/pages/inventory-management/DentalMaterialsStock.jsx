@@ -179,13 +179,7 @@ const DentalMaterialsStock = () => {
             <Select
               label="Stock Status"
               placeholder="Filter by Stock Status"
-              options={[
-                { id: "In Stock", name: "In Stock" },
-                { id: "Low Stock", name: "Low Stock" },
-                { id: "Out of Stock", name: "Out of Stock" },
-              ]}
-              optionsLabel="name"
-              optionsValue="id"
+              category="stockLevel"
               value={stockStatusFilter}
               clearable
               onChange={(value) => { setStockStatusFilter(value); setPage(1); }}
