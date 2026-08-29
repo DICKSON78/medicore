@@ -22,9 +22,8 @@ import PatientDetails from "../reception/patients/PatientDetails";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import DatePicker from "../../components/DatePicker";
-import { usePatch, useToast } from "../../hooks";
+import { usePatch, useToast, useDentalOptions } from "../../hooks";
 import { formatDate } from "../../helpers";
-import { DENTAL_TREATMENT_OPTIONS } from "../../constants";
 
 const statusColors = {
   Ordered: "warning",
@@ -44,6 +43,7 @@ const LabOrderRoutes = () => {
   const [loading, setLoading] = useState(true);
   const [loadingPatient, setLoadingPatient] = useState(true);
   const { handlePatch: patch, loading: saving } = usePatch();
+  const { options: dentalOptions } = useDentalOptions();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -182,11 +182,11 @@ const LabOrderRoutes = () => {
     const teethLabels = order.teeth_involved
       ? (Array.isArray(order.teeth_involved) ? order.teeth_involved : [order.teeth_involved])
           .map((t) => {
-            const found = DENTAL_TREATMENT_OPTIONS.toothNumbers.find((tn) => tn.value === String(t));
+            const found = dentalOptions.toothNumbers.find((tn) => tn.value === String(t));
             return found ? found.label : `Tooth ${t}`;
           }).join(", ")
       : (order.tooth_number
-          ? (DENTAL_TREATMENT_OPTIONS.toothNumbers.find((tn) => tn.value === order.tooth_number)?.label || `Tooth ${order.tooth_number}`)
+          ? (dentalOptions.toothNumbers.find((tn) => tn.value === order.tooth_number)?.label || `Tooth ${order.tooth_number}`)
           : "N/A");
 
     printWindow.document.write(`
@@ -243,7 +243,7 @@ const LabOrderRoutes = () => {
       ? String(order.teeth_involved[0])
       : order.tooth_number;
     if (!tooth) return "-";
-    return DENTAL_TREATMENT_OPTIONS.toothNumbers.find((tn) => tn.value === String(tooth))?.value || tooth;
+    return dentalOptions.toothNumbers.find((tn) => tn.value === String(tooth))?.value || tooth;
   };
 
   const WorkflowButton = ({ order }) => {
@@ -355,7 +355,7 @@ const LabOrderRoutes = () => {
                         <Select
                           label="Order Type"
                           value={orderForm.order_type}
-                          options={DENTAL_TREATMENT_OPTIONS.labOrderTypes}
+                          options={dentalOptions.labOrderTypes || []}
                           onChange={(v) => setOrderForm({ ...orderForm, order_type: v })}
                           fullWidth size="small"
                         />
@@ -364,7 +364,7 @@ const LabOrderRoutes = () => {
                         <Select
                           label="Material"
                           value={orderForm.material}
-                          options={DENTAL_TREATMENT_OPTIONS.labMaterials}
+                          options={dentalOptions.labMaterials || []}
                           onChange={(v) => setOrderForm({ ...orderForm, material: v })}
                           fullWidth size="small"
                         />
@@ -374,7 +374,7 @@ const LabOrderRoutes = () => {
                           label="Shade"
                           value={orderForm.shade}
                           onChange={(value) => setOrderForm({ ...orderForm, shade: value })}
-                          options={DENTAL_TREATMENT_OPTIONS.labShadeGuide}
+                          options={dentalOptions.labShadeGuide || []}
                           fullWidth size="small"
                           clearable
                         />
@@ -383,7 +383,7 @@ const LabOrderRoutes = () => {
                         <Select
                           label="Primary Tooth"
                           value={orderForm.tooth_number}
-                          options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
+                          options={dentalOptions.toothNumbers || []}
                           onChange={(v) => setOrderForm({ ...orderForm, tooth_number: v })}
                           fullWidth size="small"
                         />

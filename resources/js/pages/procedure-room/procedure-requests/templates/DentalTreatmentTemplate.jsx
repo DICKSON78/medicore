@@ -5,12 +5,12 @@ import {
 import { Header as PageHeader } from "../../../../components/Page";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
-import { useFetch, usePatch, useToast } from "../../../../hooks";
-import { DENTAL_TREATMENT_OPTIONS } from "../../../../constants";
+import { useFetch, usePatch, useToast, useDentalOptions } from "../../../../hooks";
 
 const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
   const addToast = useToast();
   const { handlePatch: patch, loading: saving } = usePatch();
+  const { options } = useDentalOptions();
 
   const [form, setForm] = useState({
     treatment_type: "",
@@ -56,7 +56,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <Select
             label="Treatment Type"
             value={form.treatment_type}
-            options={DENTAL_TREATMENT_OPTIONS.treatmentTypes}
+            options={options.treatmentTypes || []}
             onChange={(v) => setForm({ ...form, treatment_type: v })}
             fullWidth size="small"
           />
@@ -65,7 +65,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <Select
             label="Treatment Phase"
             value={form.phase}
-            options={DENTAL_TREATMENT_OPTIONS.treatmentPhases}
+            options={options.treatmentPhases || []}
             onChange={(v) => setForm({ ...form, phase: v })}
             fullWidth size="small"
           />
@@ -74,7 +74,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <Select
             label="Tooth Number"
             value={form.tooth_number}
-            options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
+            options={options.toothNumbers || []}
             onChange={(v) => setForm({ ...form, tooth_number: v })}
             fullWidth size="small"
           />
@@ -83,7 +83,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <Select
             label="Tooth Surface"
             value={form.tooth_surface}
-            options={DENTAL_TREATMENT_OPTIONS.toothSurfaces}
+            options={options.toothSurfaces || []}
             onChange={(v) => setForm({ ...form, tooth_surface: v })}
             fullWidth size="small"
           />
@@ -92,7 +92,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <Select
             label="Anaesthesia"
             value={form.anaesthesia_type}
-            options={DENTAL_TREATMENT_OPTIONS.anaesthesiaTypes}
+            options={options.anaesthesiaTypes || []}
             onChange={(v) => setForm({ ...form, anaesthesia_type: v })}
             fullWidth size="small"
           />

@@ -18,9 +18,8 @@ import DentalOralExamination from "./DentalOralExamination";
 import DentalChartingEditor from "./DentalChartingEditor";
 import PrescriptionForm from "./PrescriptionForm";
 import DentalRadiographs from "./DentalRadiographs";
-import { useFetch, usePatch, useToast } from "../../../hooks";
+import { useFetch, usePatch, useToast, useDentalOptions } from "../../../hooks";
 import { formatDateForDb, formatDate, formatError, getValidationError } from "../../../helpers";
-import { DENTAL_TREATMENT_OPTIONS } from "../../../constants";
 
 const Subheader = ({ title, sx }) => (
   <Box sx={{
@@ -64,6 +63,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
 
   const { handlePatch: autoPatch } = usePatch();
   const { handlePatch: completePatch, loading: completing } = usePatch();
+  const { options } = useDentalOptions();
 
   const fetchDiagnoses = async () => {
     if (!consultation?.id) return;
@@ -392,13 +392,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           <Select
             label="Tobacco Use"
             value={formData.tobacco_use}
-            options={[
-              { label: "None", value: "None" },
-              { label: "Current Smoker", value: "Current" },
-              { label: "Former Smoker", value: "Former" },
-              { label: "Smokeless Tobacco", value: "Smokeless" },
-              { label: "Passive Smoker", value: "Passive" },
-            ]}
+            options={options.tobaccoUse || []}
             onChange={handleChange("tobacco_use")}
             fullWidth size="small" disabled={isCompleted}
           />
@@ -407,12 +401,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           <Select
             label="Alcohol Use"
             value={formData.alcohol_use}
-            options={[
-              { label: "None", value: "None" },
-              { label: "Social", value: "Social" },
-              { label: "Moderate", value: "Moderate" },
-              { label: "Heavy", value: "Heavy" },
-            ]}
+            options={options.alcoholUse || []}
             onChange={handleChange("alcohol_use")}
             fullWidth size="small" disabled={isCompleted}
           />
@@ -472,12 +461,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           <Select
             label="Oral Hygiene Status"
             value={formData.oral_hygiene_status}
-            options={[
-              { label: "Good", value: "Good" },
-              { label: "Fair", value: "Fair" },
-              { label: "Poor", value: "Poor" },
-              { label: "Very Poor", value: "VeryPoor" },
-            ]}
+            options={options.oralHygieneStatus || []}
             onChange={handleChange("oral_hygiene_status")}
             fullWidth size="small" disabled={isCompleted}
           />
@@ -486,10 +470,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           <Select
             label="Patient to Return"
             value={formData.patient_to_return}
-            options={[
-              { label: "No", value: "No" },
-              { label: "Yes", value: "Yes" },
-            ]}
+            options={options.patientToReturn || []}
             onChange={(v) => {
               setFormData((prev) => ({ ...prev, patient_to_return: v }));
               scheduleAutoSave({ ...formData, patient_to_return: v });
@@ -691,23 +672,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <Select
                 label="Order Type"
                 value={labForm.order_type}
-                options={[
-                  { label: "Crown", value: "Crown" },
-                  { label: "Bridge", value: "Bridge" },
-                  { label: "Denture", value: "Denture" },
-                  { label: "Partial Denture", value: "Partial Denture" },
-                  { label: "Full Denture", value: "Full Denture" },
-                  { label: "Dental Implant", value: "Implant" },
-                  { label: "Veneer", value: "Veneer" },
-                  { label: "Inlay/Onlay", value: "Inlay/Onlay" },
-                  { label: "Night Guard", value: "Night Guard" },
-                  { label: "Mouth Guard", value: "Mouth Guard" },
-                  { label: "Space Maintainer", value: "Space Maintainer" },
-                  { label: "Orthodontic Appliance", value: "Orthodontic" },
-                  { label: "Model/Cast (Study)", value: "Model" },
-                  { label: "Wax-up", value: "WaxUp" },
-                  { label: "Other", value: "Other" },
-                ]}
+                options={options.labOrderTypesDialog || []}
                 onChange={(v) => setLabForm({ ...labForm, order_type: v })}
                 fullWidth size="small" required
               />
@@ -716,7 +681,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <Select
                 label="Tooth #"
                 value={labForm.tooth_number}
-                options={DENTAL_TREATMENT_OPTIONS.toothNumbers}
+                options={options.toothNumbers || []}
                 onChange={(v) => setLabForm({ ...labForm, tooth_number: v })}
                 fullWidth size="small"
               />

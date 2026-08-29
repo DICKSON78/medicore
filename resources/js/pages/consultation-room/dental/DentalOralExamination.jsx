@@ -2,23 +2,23 @@ import React, { useCallback } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
-import { usePatch } from "../../../hooks";
-import { ORAL_EXAMINATION_FINDINGS } from "../../../constants";
+import { usePatch, useDentalOptions } from "../../../hooks";
 
 const fields = [
-  { key: "lips", label: "Lips", options: ORAL_EXAMINATION_FINDINGS.lips },
-  { key: "buccal_mucosa", label: "Buccal Mucosa", options: ORAL_EXAMINATION_FINDINGS.buccalMucosa },
-  { key: "tongue", label: "Tongue", options: ORAL_EXAMINATION_FINDINGS.tongue },
-  { key: "floor_of_mouth", label: "Floor of Mouth", options: ORAL_EXAMINATION_FINDINGS.floorOfMouth },
-  { key: "hard_palate", label: "Hard Palate", options: ORAL_EXAMINATION_FINDINGS.palate },
-  { key: "soft_palate", label: "Soft Palate", options: ORAL_EXAMINATION_FINDINGS.palate },
-  { key: "oropharynx", label: "Oropharynx", options: ORAL_EXAMINATION_FINDINGS.oropharynx },
-  { key: "gingiva", label: "Gingiva", options: ORAL_EXAMINATION_FINDINGS.gingiva },
-  { key: "salivary_glands", label: "Salivary Glands", options: ORAL_EXAMINATION_FINDINGS.salivaryGlands },
+  { key: "lips", label: "Lips", category: "lips" },
+  { key: "buccal_mucosa", label: "Buccal Mucosa", category: "buccalMucosa" },
+  { key: "tongue", label: "Tongue", category: "tongue" },
+  { key: "floor_of_mouth", label: "Floor of Mouth", category: "floorOfMouth" },
+  { key: "hard_palate", label: "Hard Palate", category: "palate" },
+  { key: "soft_palate", label: "Soft Palate", category: "palate" },
+  { key: "oropharynx", label: "Oropharynx", category: "oropharynx" },
+  { key: "gingiva", label: "Gingiva", category: "gingiva" },
+  { key: "salivary_glands", label: "Salivary Glands", category: "salivaryGlands" },
 ];
 
 const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
   const { handlePatch: patch } = usePatch();
+  const { options } = useDentalOptions();
 
   const handleChange = useCallback((field, value) => {
     const payload = { what: "Dental Oral Examination", [field]: value };
@@ -35,12 +35,12 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
         Intra-Oral Soft Tissue Examination
       </Typography>
       <Grid container spacing={2}>
-        {fields.map(({ key, label, options }) => (
+        {fields.map(({ key, label, category }) => (
           <Grid item xs={12} sm={6} md={4} key={key}>
             <Select
               label={label}
               value={data?.[key] || ""}
-              options={options}
+              options={options[category] || []}
               onChange={(v) => handleChange(key, v)}
               size="small"
               fullWidth

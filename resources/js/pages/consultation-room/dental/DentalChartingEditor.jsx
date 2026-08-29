@@ -6,10 +6,9 @@ import {
   TableContainer, TableHead, TableRow, Tooltip, Typography, Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useFetch, usePatch, useToast } from "../../../hooks";
+import { useFetch, usePatch, useToast, useDentalOptions } from "../../../hooks";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
-import { DENTAL_TREATMENT_OPTIONS, DENTAL_CHART_OPTIONS } from "../../../constants";
 
 const FDI_QUADRANTS = {
   UR: [18, 17, 16, 15, 14, 13, 12, 11],
@@ -81,6 +80,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
     { loadOnMount: true, loadOnReload: true },
   );
   const { handlePatch: patch, loading: saving } = usePatch();
+  const { options } = useDentalOptions();
 
   useEffect(() => {
     if (fetchData?.data) {
@@ -257,7 +257,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Tooth Status"
                   value={toothForm.status || ""}
-                  options={DENTAL_CHART_OPTIONS.toothStatus}
+                  options={options.toothStatus || []}
                   onChange={(e) => setToothForm({ ...toothForm, status: e.target.value })}
                   fullWidth
                   size="small"
@@ -267,7 +267,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Caries Status"
                   value={toothForm.caries_status || ""}
-                  options={DENTAL_CHART_OPTIONS.cariesStatus}
+                  options={options.cariesStatus || []}
                   onChange={(e) => setToothForm({ ...toothForm, caries_status: e.target.value })}
                   fullWidth
                   size="small"
@@ -277,7 +277,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Restoration Type"
                   value={toothForm.restoration_type || ""}
-                  options={DENTAL_TREATMENT_OPTIONS.treatmentTypes}
+                  options={options.treatmentTypes || []}
                   onChange={(e) => setToothForm({ ...toothForm, restoration_type: e.target.value })}
                   fullWidth
                   size="small"
@@ -287,7 +287,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Surface(s) Involved"
                   value={toothForm.surface_involved || ""}
-                  options={DENTAL_TREATMENT_OPTIONS.toothSurfaces}
+                  options={options.toothSurfaces || []}
                   onChange={(e) => setToothForm({ ...toothForm, surface_involved: e.target.value })}
                   fullWidth
                   size="small"
@@ -297,7 +297,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Mobility"
                   value={toothForm.mobility || ""}
-                  options={DENTAL_CHART_OPTIONS.mobility}
+                  options={options.mobility || []}
                   onChange={(e) => setToothForm({ ...toothForm, mobility: e.target.value })}
                   fullWidth
                   size="small"
@@ -317,7 +317,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <Select
                   label="Furcation"
                   value={toothForm.furcation_involvement || ""}
-                  options={DENTAL_CHART_OPTIONS.furcationInvolvement}
+                  options={options.furcationInvolvement || []}
                   onChange={(e) => setToothForm({ ...toothForm, furcation_involvement: e.target.value })}
                   fullWidth
                   size="small"

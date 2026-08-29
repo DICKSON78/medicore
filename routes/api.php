@@ -11,6 +11,7 @@ use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DentalAppointmentsController;
 use App\Http\Controllers\DentalChartingController;
 use App\Http\Controllers\DentalLabOrdersController;
+use App\Http\Controllers\DentalOptionsController;
 use App\Http\Controllers\DentalOralExaminationsController;
 use App\Http\Controllers\DentalRadiographsController;
 use App\Http\Controllers\DentalTreatmentRecordsController;
@@ -119,6 +120,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->get('/notifications', [NotificationsController::class, '__invoke']);
     $router->get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications']);
     $router->get('/messages', [MessagesController::class, '__invoke']);
+
+    $router->controller(DentalOptionsController::class)->prefix('dental-options')->group(function ($router) {
+        $router->get('/', 'index');
+    });
 
     // ─── Reception ────────────────────────────────────────────────────────────
 
