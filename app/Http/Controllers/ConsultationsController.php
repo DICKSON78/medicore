@@ -590,25 +590,40 @@ class ConsultationsController extends Controller
                         ->where('status', 'in_treatment')
                         ->first();
 
-                    // If new unpaid (e.g. medicine) items were added, route the patient
-                    // to the cashier so they can be paid before dispensing.
+                    // Route the patient to the right department after completion:
+                    // 1. If unpaid (e.g. medicine) items were added -> pharmacy/cashier so they
+                    //    can be paid before dispensing.
+                    // 2. Else if a dental lab order is still outstanding -> sent to dental lab,
+                    //    which on delivery returns the patient to the doctor.
+                    // 3. Otherwise end the treatment when the full journey is complete.
                     $pendingCount = $data->payment_cache_item?->payment_cache?->items()
                         ->where('status', 'Pending')
                         ->count() ?? 0;
 
-                    if ($waitingTime && $pendingCount > 0) {
-                        $waitingTime->moveToDepartment('cashier', 'Sent to cashier for medicine payment');
+                    $outstandingLab = \App\Models\DentalLabOrder::where('consultation_id', $data->id)
+                        ->whereNotIn('status', ['Delivered'])
+                        ->exists();
 
-                        \Log::info('Consultation completed - patient routed to cashier for pending items', [
+                    if ($waitingTime && $pendingCount > 0) {
+                        $waitingTime->moveToDepartment('cashier', 'Sent to pharmacy/cashier for medicine payment');
+
+                        \Log::info('Consultation completed - patient routed to pharmacy for pending items', [
                             'patient_id' => $patient->id,
                             'patient_name' => $patient->full_name ?? 'Unknown',
                             'consultation_id' => $data->id,
                             'pending_items' => $pendingCount,
                             'current_department' => $waitingTime->current_department,
                         ]);
-                    }
+                    } elseif ($waitingTime && $outstandingLab) {
+                        $waitingTime->moveToDepartment('dental_lab', 'Sent to dental lab');
 
-                    if ($waitingTime && $pendingCount === 0 && $waitingTime->hasCompletedFullJourney()) {
+                        \Log::info('Consultation completed - patient routed to dental lab', [
+                            'patient_id' => $patient->id,
+                            'patient_name' => $patient->full_name ?? 'Unknown',
+                            'consultation_id' => $data->id,
+                            'current_department' => $waitingTime->current_department,
+                        ]);
+                    } elseif ($waitingTime && $pendingCount === 0 && $waitingTime->hasCompletedFullJourney()) {
                         $waitingTime->endTreatment();
                         
                         \Log::info('Auto-completed patient treatment after consultation completion', [

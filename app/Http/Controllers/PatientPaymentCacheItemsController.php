@@ -461,6 +461,7 @@ class PatientPaymentCacheItemsController extends Controller
         $data = [];
         $user = $request->user();
         $items = $request->json('items');
+        $dispensedStockItem = false;
 
         foreach ($items as &$request_item) {
             $item = PatientPaymentCacheItem::find($request_item);
@@ -474,11 +475,41 @@ class PatientPaymentCacheItemsController extends Controller
 
                     if ($item->item && $item->item->is_stock_item === 'Yes') {
                         $item->item->decrement('balance', $item->quantity);
+                        $dispensedStockItem = true;
                     }
                 }
 
                 $item->save();
                 $data[] = $item;
+            }
+        }
+
+        // Move the patient's waiting time to dispensing when pharmacy items are served,
+        // so the journey can be completed after the consultation.
+        if ($status == 'Served' && $dispensedStockItem) {
+            try {
+                $patient = $payment_cache->check_in->patient ?? null;
+                if ($patient) {
+                    $waitingTime = $patient->waiting_times()
+                        ->where('status', 'in_treatment')
+                        ->latest()
+                        ->first();
+
+                    if ($waitingTime) {
+                        $waitingTime->moveToDepartment('dispensing', 'Dispensed to patient');
+
+                        \Log::info('Pharmacy items served - patient moved to dispensing', [
+                            'patient_id' => $patient->id,
+                            'patient_name' => $patient->full_name ?? 'Unknown',
+                            'payment_cache_id' => $payment_cache->id,
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to move patient to dispensing after serving items', [
+                    'payment_cache_id' => $payment_cache->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
