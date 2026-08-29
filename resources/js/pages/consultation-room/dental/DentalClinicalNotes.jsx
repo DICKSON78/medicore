@@ -690,7 +690,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Material"
                 value={labForm.material}
-                onChange={(e) => setLabForm({ ...labForm, material: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, material: v || "" })}
                 placeholder="e.g. PFM, Zirconia, Acrylic"
                 fullWidth size="small"
               />
@@ -699,7 +699,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Shade"
                 value={labForm.shade}
-                onChange={(e) => setLabForm({ ...labForm, shade: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, shade: v || "" })}
                 placeholder="e.g. A2"
                 fullWidth size="small"
               />
@@ -708,7 +708,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Lab Name"
                 value={labForm.lab_name}
-                onChange={(e) => setLabForm({ ...labForm, lab_name: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, lab_name: v || "" })}
                 fullWidth size="small"
               />
             </Grid>
@@ -717,7 +717,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                 label="Impression Date"
                 type="date"
                 value={labForm.impression_date}
-                onChange={(e) => setLabForm({ ...labForm, impression_date: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, impression_date: v || "" })}
                 fullWidth size="small"
               />
             </Grid>
@@ -726,7 +726,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                 label="Delivery Date"
                 type="date"
                 value={labForm.delivery_date}
-                onChange={(e) => setLabForm({ ...labForm, delivery_date: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, delivery_date: v || "" })}
                 fullWidth size="small"
               />
             </Grid>
@@ -734,7 +734,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Description"
                 value={labForm.description}
-                onChange={(e) => setLabForm({ ...labForm, description: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, description: v || "" })}
                 multiline rows={2} fullWidth size="small"
               />
             </Grid>
@@ -742,7 +742,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Cost (TZS)"
                 value={labForm.cost}
-                onChange={(e) => setLabForm({ ...labForm, cost: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, cost: v || "" })}
                 type="number" fullWidth size="small"
               />
             </Grid>
@@ -750,7 +750,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Technician Charges (TZS)"
                 value={labForm.technician_charges}
-                onChange={(e) => setLabForm({ ...labForm, technician_charges: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, technician_charges: v || "" })}
                 type="number" fullWidth size="small"
               />
             </Grid>
@@ -758,7 +758,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
               <TextField
                 label="Lab Notes"
                 value={labForm.lab_notes}
-                onChange={(e) => setLabForm({ ...labForm, lab_notes: e.target.value })}
+                onChange={(v) => setLabForm({ ...labForm, lab_notes: v || "" })}
                 multiline rows={2} fullWidth size="small"
               />
             </Grid>

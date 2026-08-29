@@ -7,18 +7,6 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import { useFetch, usePost, useToast } from "../../../hooks";
 
-const ROUTE_OPTIONS = [
-  { label: "Oral", value: "Oral" },
-  { label: "Topical", value: "Topical" },
-  { label: "IV", value: "IV" },
-  { label: "IM", value: "IM" },
-  { label: "Sublingual", value: "Sublingual" },
-  { label: "Inhalation", value: "Inhalation" },
-  { label: "Subcutaneous", value: "Subcutaneous" },
-  { label: "Intradermal", value: "Intradermal" },
-  { label: "Intrathecal", value: "Intrathecal" },
-];
-
 const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescriptionAdded }) => {
   const addToast = useToast();
   const { handlePost: post, loading: saving } = usePost();
@@ -71,7 +59,7 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                 <TextField
                   label="Medicine Name"
                   value={form.medicine_name}
-                  onChange={(e) => setForm({ ...form, medicine_name: e.target.value })}
+                  onChange={(v) => setForm({ ...form, medicine_name: v || "" })}
                   fullWidth size="small" required
                 />
               </Grid>
@@ -80,7 +68,7 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                   label="Dosage"
                   placeholder="e.g. 500mg"
                   value={form.dosage}
-                  onChange={(e) => setForm({ ...form, dosage: e.target.value })}
+                  onChange={(v) => setForm({ ...form, dosage: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -89,7 +77,7 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                   label="Frequency"
                   placeholder="e.g. 3x daily"
                   value={form.frequency}
-                  onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                  onChange={(v) => setForm({ ...form, frequency: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -98,7 +86,7 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                   label="Duration"
                   placeholder="e.g. 7 days"
                   value={form.duration}
-                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                  onChange={(v) => setForm({ ...form, duration: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -106,8 +94,8 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                 <Select
                   label="Route"
                   value={form.route}
-                  options={ROUTE_OPTIONS}
-                  onChange={(e) => setForm({ ...form, route: e.target.value })}
+                  category="prescriptionRoute"
+                  onChange={(v) => setForm({ ...form, route: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -115,7 +103,7 @@ const PrescriptionForm = ({ consultationId, patientId, prescriptions, onPrescrip
                 <TextField
                   label="Instructions"
                   value={form.instructions}
-                  onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                  onChange={(v) => setForm({ ...form, instructions: v || "" })}
                   multiline rows={2} fullWidth size="small"
                 />
               </Grid>

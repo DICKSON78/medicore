@@ -51,7 +51,7 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
           <TextField
             label="Other Findings"
             value={data?.other_findings || ""}
-            onChange={(e) => handleChange("other_findings", e.target.value)}
+            onChange={(v) => handleChange("other_findings", v || "")}
             multiline
             rows={2}
             size="small"
@@ -63,7 +63,7 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
             <TextField
               label="Occlusion"
               value={data.occlusion || ""}
-              onChange={(e) => handleChange("occlusion", e.target.value)}
+              onChange={(v) => handleChange("occlusion", v || "")}
               size="small"
               fullWidth
             />

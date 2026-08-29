@@ -64,7 +64,7 @@ const DentalExaminationsList = () => {
           label="Status"
           value={filters.status}
           category="dentalExamStatus"
-          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          onChange={(v) => setFilters({ ...filters, status: v || "" })}
           size="small" sx={{ minWidth: 150 }}
         />
         <DatePicker label="Start Date" value={filters.start_date} onChange={(v) => setFilters({ ...filters, start_date: v })} size="small" />

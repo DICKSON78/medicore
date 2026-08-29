@@ -188,7 +188,7 @@ const CreateMedicineTaking = () => {
                   fullWidth
                   label="Dosage"
                   value={formData.dosage}
-                  onChange={(e) => handleInputChange('dosage', e.target.value)}
+                  onChange={(v) => handleInputChange('dosage', v || '')}
                   required
                   placeholder="e.g., 1 tablet, 2 capsules"
                 />
@@ -200,7 +200,7 @@ const CreateMedicineTaking = () => {
                   label="Scheduled Date"
                   type="date"
                   value={formData.scheduled_date}
-                  onChange={(e) => handleInputChange('scheduled_date', e.target.value)}
+                  onChange={(v) => handleInputChange('scheduled_date', v || '')}
                   required
                   InputLabelProps={{ shrink: true }}
                 />
@@ -212,7 +212,7 @@ const CreateMedicineTaking = () => {
                   label="Scheduled Time"
                   type="time"
                   value={formData.scheduled_time}
-                  onChange={(e) => handleInputChange('scheduled_time', e.target.value)}
+                  onChange={(v) => handleInputChange('scheduled_time', v || '')}
                   required
                   InputLabelProps={{ shrink: true }}
                 />
@@ -223,7 +223,7 @@ const CreateMedicineTaking = () => {
                   fullWidth
                   label="Notes"
                   value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  onChange={(v) => handleInputChange('notes', v || '')}
                   multiline
                   rows={3}
                   placeholder="Additional instructions or notes..."

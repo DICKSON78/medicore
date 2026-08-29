@@ -102,7 +102,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Pre-operative Notes"
             value={form.preoperative_notes}
-            onChange={(e) => setForm({ ...form, preoperative_notes: e.target.value })}
+            onChange={(v) => setForm({ ...form, preoperative_notes: v || "" })}
             multiline rows={3} fullWidth size="small"
           />
         </Grid>
@@ -110,7 +110,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Intra-operative Notes"
             value={form.intraoperative_notes}
-            onChange={(e) => setForm({ ...form, intraoperative_notes: e.target.value })}
+            onChange={(v) => setForm({ ...form, intraoperative_notes: v || "" })}
             multiline rows={3} fullWidth size="small"
           />
         </Grid>
@@ -118,7 +118,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Post-operative Notes"
             value={form.postoperative_notes}
-            onChange={(e) => setForm({ ...form, postoperative_notes: e.target.value })}
+            onChange={(v) => setForm({ ...form, postoperative_notes: v || "" })}
             multiline rows={3} fullWidth size="small"
           />
         </Grid>
@@ -127,7 +127,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Material Used"
             value={form.material_used}
-            onChange={(e) => setForm({ ...form, material_used: e.target.value })}
+            onChange={(v) => setForm({ ...form, material_used: v || "" })}
             fullWidth size="small"
           />
         </Grid>
@@ -135,7 +135,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Prescription"
             value={form.prescription}
-            onChange={(e) => setForm({ ...form, prescription: e.target.value })}
+            onChange={(v) => setForm({ ...form, prescription: v || "" })}
             multiline rows={3} fullWidth size="small"
           />
         </Grid>
@@ -144,7 +144,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Treatment Date"
             value={form.treatment_date}
-            onChange={(e) => setForm({ ...form, treatment_date: e.target.value })}
+            onChange={(v) => setForm({ ...form, treatment_date: v || "" })}
             type="date" fullWidth size="small"
           />
         </Grid>
@@ -152,7 +152,7 @@ const DentalTreatmentTemplate = ({ patient, paymentCacheitem }) => {
           <TextField
             label="Treated By (Doctor ID)"
             value={form.treated_by}
-            onChange={(e) => setForm({ ...form, treated_by: e.target.value })}
+            onChange={(v) => setForm({ ...form, treated_by: v || "" })}
             fullWidth size="small"
           />
         </Grid>

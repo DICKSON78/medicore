@@ -429,6 +429,16 @@ class OptionsSeeder extends Seeder
         ['category' => 'waitingTimeStatus', 'label' => 'Waiting', 'value' => 'waiting', 'sort_order' => 1],
         ['category' => 'waitingTimeStatus', 'label' => 'In Treatment', 'value' => 'in_treatment', 'sort_order' => 2],
         ['category' => 'waitingTimeStatus', 'label' => 'Completed', 'value' => 'completed', 'sort_order' => 3],
+        // ─── prescriptionRoute ── (9)
+        ['category' => 'prescriptionRoute', 'label' => 'Oral', 'value' => 'Oral', 'sort_order' => 0],
+        ['category' => 'prescriptionRoute', 'label' => 'Topical', 'value' => 'Topical', 'sort_order' => 1],
+        ['category' => 'prescriptionRoute', 'label' => 'IV', 'value' => 'IV', 'sort_order' => 2],
+        ['category' => 'prescriptionRoute', 'label' => 'IM', 'value' => 'IM', 'sort_order' => 3],
+        ['category' => 'prescriptionRoute', 'label' => 'Sublingual', 'value' => 'Sublingual', 'sort_order' => 4],
+        ['category' => 'prescriptionRoute', 'label' => 'Inhalation', 'value' => 'Inhalation', 'sort_order' => 5],
+        ['category' => 'prescriptionRoute', 'label' => 'Subcutaneous', 'value' => 'Subcutaneous', 'sort_order' => 6],
+        ['category' => 'prescriptionRoute', 'label' => 'Intradermal', 'value' => 'Intradermal', 'sort_order' => 7],
+        ['category' => 'prescriptionRoute', 'label' => 'Intrathecal', 'value' => 'Intrathecal', 'sort_order' => 8],
         ];
 
         foreach ($options as $option) {

@@ -198,7 +198,7 @@ const InventoryItemForm = ({
                 fullWidth
                 label="Item Name"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(v) => handleInputChange('name', v || '')}
                 error={!!errors.name}
                 helperText={errors.name}
                 required
@@ -210,7 +210,7 @@ const InventoryItemForm = ({
                 fullWidth
                 label="Item Code"
                 value={formData.code}
-                onChange={(e) => handleInputChange('code', e.target.value)}
+                onChange={(v) => handleInputChange('code', v || '')}
                 error={!!errors.code}
                 helperText={errors.code}
                 required
@@ -274,7 +274,7 @@ const InventoryItemForm = ({
                 label="Current Stock"
                 type="number"
                 value={formData.current_stock}
-                onChange={(e) => handleInputChange('current_stock', parseInt(e.target.value) || 0)}
+                onChange={(v) => handleInputChange('current_stock', parseInt(v || 0, 10) || 0)}
                 error={!!errors.current_stock}
                 helperText={errors.current_stock}
                 InputProps={{ inputProps: { min: 0 } }}
@@ -287,7 +287,7 @@ const InventoryItemForm = ({
                 label="Minimum Stock"
                 type="number"
                 value={formData.min_stock}
-                onChange={(e) => handleInputChange('min_stock', parseInt(e.target.value) || 0)}
+                onChange={(v) => handleInputChange('min_stock', parseInt(v || 0, 10) || 0)}
                 error={!!errors.min_stock}
                 helperText={errors.min_stock}
                 InputProps={{ inputProps: { min: 0 } }}
@@ -300,7 +300,7 @@ const InventoryItemForm = ({
                 label="Maximum Stock"
                 type="number"
                 value={formData.max_stock}
-                onChange={(e) => handleInputChange('max_stock', parseInt(e.target.value) || 0)}
+                onChange={(v) => handleInputChange('max_stock', parseInt(v || 0, 10) || 0)}
                 error={!!errors.max_stock}
                 helperText={errors.max_stock}
                 InputProps={{ inputProps: { min: 1 } }}
@@ -337,7 +337,7 @@ const InventoryItemForm = ({
                 label="Buying Price"
                 type="number"
                 value={formData.buying_price || 0}
-                onChange={(e) => handleInputChange('buying_price', parseFloat(e.target.value) || 0)}
+                onChange={(v) => handleInputChange('buying_price', parseFloat(v || 0) || 0)}
                 error={!!errors.buying_price}
                 helperText={errors.buying_price}
                 InputProps={{ 
@@ -353,7 +353,7 @@ const InventoryItemForm = ({
                 label="Selling Price"
                 type="number"
                 value={formData.selling_price || 0}
-                onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
+                onChange={(v) => handleInputChange('selling_price', parseFloat(v || 0) || 0)}
                 error={!!errors.selling_price}
                 helperText={errors.selling_price}
                 InputProps={{ 
@@ -369,7 +369,7 @@ const InventoryItemForm = ({
                 label="Expiry Date"
                 type="date"
                 value={formData.expiry_date}
-                onChange={(e) => handleInputChange('expiry_date', e.target.value)}
+                onChange={(v) => handleInputChange('expiry_date', v || '')}
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
@@ -381,7 +381,7 @@ const InventoryItemForm = ({
                 multiline
                 rows={3}
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(v) => handleInputChange('description', v || '')}
                 placeholder="Enter item description..."
               />
             </Grid>

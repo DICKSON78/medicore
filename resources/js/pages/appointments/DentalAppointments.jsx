@@ -202,7 +202,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Patient ID"
                 value={form.patient_id}
-                onChange={(e) => setForm({ ...form, patient_id: e.target.value })}
+                onChange={(v) => setForm({ ...form, patient_id: v || "" })}
                 fullWidth size="small"
                 placeholder="Enter patient ID number"
               />
@@ -211,7 +211,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Dentist ID"
                 value={form.user_id}
-                onChange={(e) => setForm({ ...form, user_id: e.target.value })}
+                onChange={(v) => setForm({ ...form, user_id: v || "" })}
                 fullWidth size="small"
               />
             </Grid>
@@ -228,7 +228,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Date & Time"
                 value={form.appointment_date}
-                onChange={(e) => setForm({ ...form, appointment_date: e.target.value })}
+                onChange={(v) => setForm({ ...form, appointment_date: v || "" })}
                 type="datetime-local" fullWidth size="small"
                 InputLabelProps={{ shrink: true }}
               />
@@ -237,7 +237,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Duration (min)"
                 value={form.duration_minutes}
-                onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
+                onChange={(v) => setForm({ ...form, duration_minutes: v || "" })}
                 type="number" fullWidth size="small"
               />
             </Grid>
@@ -245,7 +245,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Chair #"
                 value={form.chair_number}
-                onChange={(e) => setForm({ ...form, chair_number: e.target.value })}
+                onChange={(v) => setForm({ ...form, chair_number: v || "" })}
                 fullWidth size="small"
               />
             </Grid>
@@ -253,7 +253,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Reason"
                 value={form.reason}
-                onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                onChange={(v) => setForm({ ...form, reason: v || "" })}
                 multiline rows={2} fullWidth size="small"
               />
             </Grid>
@@ -261,7 +261,7 @@ const DentalAppointments = () => {
               <TextField
                 label="Notes"
                 value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                onChange={(v) => setForm({ ...form, notes: v || "" })}
                 multiline rows={2} fullWidth size="small"
               />
             </Grid>

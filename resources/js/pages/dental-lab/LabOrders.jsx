@@ -175,7 +175,7 @@ const LabOrders = () => {
             <TextField
               label="Lab Name"
               value={params.lab_name}
-              onChange={(e) => setParams({ ...params, lab_name: e.target.value })}
+              onChange={(v) => setParams({ ...params, lab_name: v || "" })}
               size="small"
               sx={{ minWidth: 150 }}
             />

@@ -132,6 +132,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     // ─── Reception ────────────────────────────────────────────────────────────
 
+    // Patient record read access is shared with the Payment Center (cashier)
+    // so patient details can be shown on cashier/collection screens.
+    $router->group(['middleware' => 'privilege:reception,consultation_room,payment_center'], function ($router) {
+        $router->get('/patients/{id}', [PatientsController::class, 'show']);
+    });
+
     $router->group(['middleware' => 'privilege:reception,consultation_room'], function ($router) {
         $router->get('/patients/test', [PatientsController::class, 'test']);
         $router->get('/patients/vip', [PatientsController::class, 'vipPatients']);

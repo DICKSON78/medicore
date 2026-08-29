@@ -392,7 +392,7 @@ const LabOrderRoutes = () => {
                         <TextField
                           label="Lab Name"
                           value={orderForm.lab_name}
-                          onChange={(e) => setOrderForm({ ...orderForm, lab_name: e.target.value })}
+                          onChange={(v) => setOrderForm({ ...orderForm, lab_name: v || "" })}
                           fullWidth size="small"
                         />
                       </Grid>
@@ -400,7 +400,7 @@ const LabOrderRoutes = () => {
                         <TextField
                           label="Description"
                           value={orderForm.description}
-                          onChange={(e) => setOrderForm({ ...orderForm, description: e.target.value })}
+                          onChange={(v) => setOrderForm({ ...orderForm, description: v || "" })}
                           multiline rows={2} fullWidth size="small"
                         />
                       </Grid>
@@ -424,7 +424,7 @@ const LabOrderRoutes = () => {
                         <TextField
                           label="Cost (TZS)"
                           value={orderForm.cost}
-                          onChange={(e) => setOrderForm({ ...orderForm, cost: e.target.value })}
+                          onChange={(v) => setOrderForm({ ...orderForm, cost: v || "" })}
                           type="number" fullWidth size="small"
                         />
                       </Grid>
@@ -432,7 +432,7 @@ const LabOrderRoutes = () => {
                         <TextField
                           label="Technician Charges (TZS)"
                           value={orderForm.technician_charges}
-                          onChange={(e) => setOrderForm({ ...orderForm, technician_charges: e.target.value })}
+                          onChange={(v) => setOrderForm({ ...orderForm, technician_charges: v || "" })}
                           type="number" fullWidth size="small"
                         />
                       </Grid>
@@ -440,7 +440,7 @@ const LabOrderRoutes = () => {
                         <TextField
                           label="Lab Notes"
                           value={orderForm.lab_notes}
-                          onChange={(e) => setOrderForm({ ...orderForm, lab_notes: e.target.value })}
+                          onChange={(v) => setOrderForm({ ...orderForm, lab_notes: v || "" })}
                           multiline rows={2} fullWidth size="small"
                         />
                       </Grid>

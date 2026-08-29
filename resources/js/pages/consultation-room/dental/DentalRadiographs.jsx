@@ -10,15 +10,6 @@ import Select from "../../../components/Select";
 import DatePicker from "../../../components/DatePicker";
 import { useFetch, usePost, useToast } from "../../../hooks";
 
-const RADIOGRAPH_TYPES = [
-  { label: "IOPA (Intraoral Periapical)", value: "IOPA" },
-  { label: "Bitewing", value: "Bitewing" },
-  { label: "Occlusal", value: "Occlusal" },
-  { label: "OPG / Panoramic", value: "OPG" },
-  { label: "Cephalometric", value: "Cephalometric" },
-  { label: "CBCT", value: "CBCT" },
-];
-
 const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiographAdded }) => {
   const addToast = useToast();
   const { handlePost: post, loading: saving } = usePost();
@@ -100,8 +91,8 @@ const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiograp
                 <Select
                   label="Radiograph Type"
                   value={form.radiograph_type}
-                  options={RADIOGRAPH_TYPES}
-                  onChange={(e) => setForm({ ...form, radiograph_type: e.target.value })}
+                  category="radiographTypes"
+                  onChange={(v) => setForm({ ...form, radiograph_type: v || "" })}
                   fullWidth size="small" required
                 />
               </Grid>
@@ -109,7 +100,7 @@ const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiograp
                 <TextField
                   label="Tooth Number"
                   value={form.tooth_number}
-                  onChange={(e) => setForm({ ...form, tooth_number: e.target.value })}
+                  onChange={(v) => setForm({ ...form, tooth_number: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -118,7 +109,7 @@ const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiograp
                   label="Taken Date"
                   type="date"
                   value={form.taken_date}
-                  onChange={(e) => setForm({ ...form, taken_date: e.target.value })}
+                  onChange={(v) => setForm({ ...form, taken_date: v || "" })}
                   fullWidth size="small"
                 />
               </Grid>
@@ -132,7 +123,7 @@ const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiograp
                 <TextField
                   label="Findings"
                   value={form.findings}
-                  onChange={(e) => setForm({ ...form, findings: e.target.value })}
+                  onChange={(v) => setForm({ ...form, findings: v || "" })}
                   multiline rows={2} fullWidth size="small"
                 />
               </Grid>
@@ -140,7 +131,7 @@ const DentalRadiographs = ({ consultationId, patientId, radiographs, onRadiograp
                 <TextField
                   label="Impression"
                   value={form.impression}
-                  onChange={(e) => setForm({ ...form, impression: e.target.value })}
+                  onChange={(v) => setForm({ ...form, impression: v || "" })}
                   multiline rows={2} fullWidth size="small"
                 />
               </Grid>

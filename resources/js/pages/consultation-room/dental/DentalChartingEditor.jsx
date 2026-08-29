@@ -32,8 +32,8 @@ const TOOTH_NAMES = {
   47: "2nd Molar", 48: "3rd Molar",
 };
 
-const ToothBox = styled(Box, { shouldForwardProp: (prop) => prop !== "selected" && prop !== "status" })(
-  ({ theme, selected, status }) => ({
+const ToothBox = styled(Box, { shouldForwardProp: (prop) => prop !== "selected" })(
+  ({ theme, selected }) => ({
     width: 52,
     height: 52,
     border: "2px solid",
@@ -45,20 +45,26 @@ const ToothBox = styled(Box, { shouldForwardProp: (prop) => prop !== "selected" 
     cursor: "pointer",
     fontWeight: 600,
     fontSize: "0.85rem",
+    position: "relative",
     transition: "all 0.2s",
-    backgroundColor: status === "Missing" ? "#f5f5f5"
-      : status === "Decayed" ? "#ffcdd2"
-      : status === "Filled" ? "#B2DFDB"
-      : status === "RootStump" ? "#d7ccc8"
-      : status === "FilledDecay" ? "#ce93d8"
-      : selected ? theme.palette.primary.light
-      : theme.palette.background.paper,
-    color: status === "Missing" ? theme.palette.text.disabled
-      : selected ? theme.palette.primary.contrastText
-      : theme.palette.text.primary,
     "&:hover": { borderColor: theme.palette.primary.main, boxShadow: 1 },
   }),
 );
+
+const CHARTED_CARIES = ["Sound", "Decayed", "Filled", "FilledDecay", "Sealant"];
+
+const getToothVisual = (data) => {
+  if (!data) return null;
+  let key;
+  if (data.status === "Missing" || data.caries_status === "MissingCaries") {
+    key = "Missing";
+  } else if (CHARTED_CARIES.includes(data.caries_status)) {
+    key = data.caries_status;
+  } else {
+    key = "Sound";
+  }
+  return { ...statusColors[key], key };
+};
 
 const statusColors = {
   Sound: { bg: "#e8f5e9", color: "#2e7d32", label: "H" },
@@ -133,7 +139,9 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
           ...toothForm,
         });
       }
-      const res = await fetch(`/api/dental-charting/consultation/${consultationId}`);
+      const res = await fetch(`/api/dental-charting/consultation/${consultationId}`, {
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
+      });
       const json = await res.json();
       if (json.data) setChartData(json.data);
       setToothDialogOpen(false);
@@ -170,21 +178,29 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
 
   const renderTooth = (num) => {
     const data = getToothStatus(num);
+    const visual = getToothVisual(data);
+    const missing = !!data && (data.status === "Missing" || data.caries_status === "MissingCaries");
+    const detail = !data
+      ? " — not charted"
+      : missing
+        ? ` — Missing`
+        : ` — ${data.caries_status || data.status || "Sound"}${data.status && data.status !== "Present" ? ` (${data.status})` : ""}${data.restoration_type ? `, ${data.restoration_type}` : ""}${data.surface_involved ? `, ${data.surface_involved}` : ""}`;
     return (
-      <Tooltip key={num} title={`Tooth ${num} (${TOOTH_NAMES[num] || ""})${data?.status === "Missing" ? " - MISSING" : ""} - ${data?.caries_status || "Sound"}`}>
+      <Tooltip key={num} title={`Tooth ${num} (${TOOTH_NAMES[num] || ""})${detail}`}>
         <ToothBox
           selected={selectedTooth === num}
-          status={data?.status}
           onClick={() => handleToothClick(num)}
           sx={{
-            bgcolor: data?.status === "Missing" ? "#f5f5f5"
-              : data?.caries_status === "Decayed" ? "#ffcdd2"
-              : data?.caries_status === "Filled" ? "#B2DFDB"
-              : data?.caries_status === "FilledDecay" ? "#ce93d8"
-              : "#e8f5e9",
+            bgcolor: (t) => (visual ? visual.bg : t.palette.background.paper),
+            color: (t) => (visual ? visual.color : t.palette.text.primary),
           }}
         >
           {num}
+          {visual && (
+            <Box sx={{ position: "absolute", bottom: 1, right: 5, fontSize: "0.62rem", fontWeight: 700, lineHeight: 1 }}>
+              {visual.label}
+            </Box>
+          )}
         </ToothBox>
       </Tooltip>
     );
@@ -258,7 +274,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Tooth Status"
                   value={toothForm.status || ""}
                   options={options.toothStatus || []}
-                  onChange={(e) => setToothForm({ ...toothForm, status: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, status: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -268,7 +284,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Caries Status"
                   value={toothForm.caries_status || ""}
                   options={options.cariesStatus || []}
-                  onChange={(e) => setToothForm({ ...toothForm, caries_status: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, caries_status: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -278,7 +294,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Restoration Type"
                   value={toothForm.restoration_type || ""}
                   options={options.treatmentTypes || []}
-                  onChange={(e) => setToothForm({ ...toothForm, restoration_type: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, restoration_type: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -288,7 +304,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Surface(s) Involved"
                   value={toothForm.surface_involved || ""}
                   options={options.toothSurfaces || []}
-                  onChange={(e) => setToothForm({ ...toothForm, surface_involved: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, surface_involved: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -298,7 +314,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Mobility"
                   value={toothForm.mobility || ""}
                   options={options.mobility || []}
-                  onChange={(e) => setToothForm({ ...toothForm, mobility: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, mobility: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -307,7 +323,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <TextField
                   label="Pocket Depth (mm)"
                   value={toothForm.periodontal_pocket_depth || ""}
-                  onChange={(e) => setToothForm({ ...toothForm, periodontal_pocket_depth: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, periodontal_pocket_depth: val || "" })}
                   fullWidth
                   size="small"
                   type="number"
@@ -318,7 +334,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                   label="Furcation"
                   value={toothForm.furcation_involvement || ""}
                   options={options.furcationInvolvement || []}
-                  onChange={(e) => setToothForm({ ...toothForm, furcation_involvement: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, furcation_involvement: val || "" })}
                   fullWidth
                   size="small"
                 />
@@ -338,7 +354,7 @@ const DentalChartingEditor = ({ consultationId, readOnly }) => {
                 <TextField
                   label="Notes"
                   value={toothForm.notes || ""}
-                  onChange={(e) => setToothForm({ ...toothForm, notes: e.target.value })}
+                  onChange={(val) => setToothForm({ ...toothForm, notes: val || "" })}
                   fullWidth
                   size="small"
                   multiline
