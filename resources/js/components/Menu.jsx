@@ -19,7 +19,6 @@ import {
   DoneAllRounded as DoneIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
-  EventNoteRounded as AppointmentsIcon,
   GroupRounded as PeopleIcon,
   HomeRounded as HomeIcon,
   HourglassBottomRounded as WaitingIcon,
@@ -422,12 +421,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Consulted Patients",
           icon: <DoneIcon />,
           to: "/consultation-room/consultation-patients/consulted",
-          show: user.privileges.consultation_room,
-        },
-        {
-          title: "Dental Appointments",
-          icon: <AppointmentsIcon />,
-          to: "/dental-appointments",
           show: user.privileges.consultation_room,
         },
         {
