@@ -119,15 +119,22 @@ class DentalLabOrdersController extends Controller
     public function markDelivered($id)
     {
         $data = DentalLabOrder::findOrFail($id);
+        $wasDelivered = $data->status === 'Delivered';
         $data->update([
             'status' => 'Delivered',
         ]);
+
+        if ($wasDelivered) {
+            return $this->sendResponse($data, Response::HTTP_OK, 'Already delivered.');
+        }
 
         // Return the patient to the doctor so they can continue the visit
         try {
             $consultation = $data->consultation;
             if ($consultation) {
-                $consultation->update(['status' => 'Pending']);
+                if ($consultation->status !== 'Pending') {
+                    $consultation->update(['status' => 'Pending']);
+                }
 
                 $patient = $consultation->payment_cache_item?->payment_cache?->check_in?->patient;
                 if ($patient) {
