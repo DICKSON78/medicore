@@ -65,7 +65,7 @@ class Medicine extends Model
     {
         return $this->hasMany(PatientPaymentCacheItem::class, 'item_id')
             ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Pharmacy');
+                $query->whereKey(ConsultationType::idForCode(ConsultationType::CODE_PHARMACY));
             });
     }
 
@@ -73,7 +73,7 @@ class Medicine extends Model
     {
         return $this->hasMany(PatientPaymentCacheItem::class, 'item_id')
             ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Pharmacy');
+                $query->whereKey(ConsultationType::idForCode(ConsultationType::CODE_PHARMACY));
             })
             ->where('status', 'Served');
     }

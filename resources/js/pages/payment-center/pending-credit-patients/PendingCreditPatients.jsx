@@ -18,7 +18,7 @@ const PendingCreditPatients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending",
+    billing_queue: 1,
     item_transaction_type: "Credit",
     patient_id: undefined,
     patient_name: undefined,

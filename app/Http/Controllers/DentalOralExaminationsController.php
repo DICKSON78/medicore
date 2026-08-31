@@ -75,6 +75,10 @@ class DentalOralExaminationsController extends Controller
 
     public function destroy($id)
     {
+        if (!auth()->user()->is_admin) {
+            return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
+        }
+
         DentalOralExamination::findOrFail($id)->delete();
         return $this->sendResponse(null, Response::HTTP_OK, 'Deleted successfully.');
     }

@@ -85,7 +85,7 @@ const PendingPatientItems = () => {
   } = useFetch(
     "api/patient-payment-cache-items",
     {
-      status: "Pending",
+      status: "Pending,Served,Billed",
       per_page: 500,
       payment_cache_id: paymentCacheId,
     },

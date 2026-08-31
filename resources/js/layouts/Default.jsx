@@ -310,7 +310,7 @@ const Default = ({ setUser, smsBalance }) => {
           ) : null}
           {/*****/}
 
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: "flex", flexGrow: 1, alignSelf: "stretch" }}>
             {/* Drawer for large screens */}
             {breakpointUpMedium ? (
               <Drawer

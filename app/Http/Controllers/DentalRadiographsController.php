@@ -100,6 +100,10 @@ class DentalRadiographsController extends Controller
 
     public function destroy($id)
     {
+        if (!auth()->user()->is_admin) {
+            return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
+        }
+
         $data = DentalRadiograph::findOrFail($id);
         if ($data->image_path) {
             Storage::disk('public')->delete($data->image_path);

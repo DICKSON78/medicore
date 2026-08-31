@@ -5,12 +5,25 @@ namespace App\Models;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasWorkflowCode;
 
 class PaymentChannel extends Model
 {
     use HasFactory;
+    use HasWorkflowCode;
 
-    protected $fillable = ['clinic_id', 'name', 'description', 'status'];
+    public const CODE_CASH = 'cash';
+    public const CODE_CREDIT = 'credit';
+
+    protected $fillable = ['clinic_id', 'name', 'code', 'description', 'status'];
+
+    public static function codeAliases(): array
+    {
+        return [
+            self::CODE_CASH => ['Cash'],
+            self::CODE_CREDIT => ['Credit'],
+        ];
+    }
 
     public function clinic()
     {

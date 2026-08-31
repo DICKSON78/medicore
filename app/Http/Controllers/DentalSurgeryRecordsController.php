@@ -144,6 +144,10 @@ class DentalSurgeryRecordsController extends Controller
 
     public function destroy($id)
     {
+        if (!auth()->user()->is_admin) {
+            return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
+        }
+
         //
     }
 }

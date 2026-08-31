@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Constants\RolePrivileges;
 use App\Models\Clinic;
 use App\Models\ConsultationType;
 use App\Models\ItemType;
@@ -13,32 +13,31 @@ use App\Models\Preference;
 use App\Models\UnitOfMeasure;
 use App\Models\User;
 use App\Models\UserPrivilege;
-use App\Constants\RolePrivileges;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+class FreshClientSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Seed a clean client installation: a single clinic, one admin user
+     * (the clinic owner) and the reference data required for the system
+     * to run. No demo users and no sample patients.
      *
      * @return void
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
         $now = Carbon::now()->toDateTimeString();
 
         Clinic::insert([
             [
-                'name' => 'SmartSoft Clinic',
-                'phone' => '076855364',
-                'email' => 'smartsoft@gmail.com',
-                'address' => 'P. O. Box 879 DSM',
+                'name' => 'Sarah Dental Clinic',
+                'phone' => '',
+                'email' => '',
+                'address' => '',
                 'created_at' => $now,
-                'updated_at' => $now
+                'updated_at' => $now,
             ],
         ]);
 
@@ -51,46 +50,13 @@ class DatabaseSeeder extends Seeder
         User::insert([
             [
                 'clinic_id' => 1,
-                'first_name' => 'Admin',
-                'last_name' => 'User',
+                'first_name' => 'Sarah',
+                'last_name' => 'Admin',
                 'role' => 'Admin',
-                'username' => 'admin',
-                'password' => Hash::make('1234'),
-                'gender' => 'Male',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Cashier',
-                'last_name' => 'User',
-                'role' => 'Cashier',
-                'username' => 'cashier',
+                'designation' => 'Admin',
+                'username' => 'sarah',
                 'password' => Hash::make('1234'),
                 'gender' => 'Female',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Receptionist',
-                'last_name' => 'User',
-                'role' => 'Receptionist',
-                'username' => 'receptionist',
-                'password' => Hash::make('1234'),
-                'gender' => 'Female',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Doctor',
-                'last_name' => 'User',
-                'role' => 'Doctor',
-                'designation' => 'Doctor',
-                'username' => 'doctor',
-                'password' => Hash::make('1234'),
-                'gender' => 'Male',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -162,49 +128,8 @@ class DatabaseSeeder extends Seeder
             ['clinic_id' => 1, 'key' => 'MARKETING_MODULE', 'value' => 'Yes'],
         ]);
 
-        // Add sample patients
-        \App\Models\Patient::insert([
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Alice',
-                'last_name' => 'Johnson',
-                'phone' => '0712345678',
-                'gender' => 'Female',
-                'date_of_birth' => '1985-03-15',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Bob',
-                'last_name' => 'Williams',
-                'phone' => '0723456789',
-                'gender' => 'Male',
-                'date_of_birth' => '1978-07-22',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'Carol',
-                'last_name' => 'Brown',
-                'phone' => '0734567890',
-                'gender' => 'Female',
-                'date_of_birth' => '1992-11-08',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'clinic_id' => 1,
-                'first_name' => 'David',
-                'last_name' => 'Davis',
-                'phone' => '0745678901',
-                'gender' => 'Male',
-                'date_of_birth' => '1980-05-12',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-        ]);
-
+        // Reference/dropdown options (gender, tooth numbers, anaesthesia types,
+        // oral exam findings, etc.) required for forms throughout the system.
+        $this->call(OptionsSeeder::class);
     }
 }

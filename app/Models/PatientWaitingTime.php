@@ -10,6 +10,17 @@ class PatientWaitingTime extends Model
 {
     use HasFactory;
 
+    public const STATUS_WAITING = 'waiting';
+    public const STATUS_IN_TREATMENT = 'in_treatment';
+    public const STATUS_COMPLETED = 'completed';
+
+    public const DEPARTMENT_RECEPTION = 'reception';
+    public const DEPARTMENT_CONSULTATION = 'consultation';
+    public const DEPARTMENT_CASHIER = 'cashier';
+    public const DEPARTMENT_DISPENSING = 'dispensing';
+    public const DEPARTMENT_PROCEDURE_ROOM = 'procedure_room';
+    public const DEPARTMENT_DENTAL_LAB = 'dental_lab';
+
     protected $fillable = [
         'patient_id', 'registration_time', 'treatment_start_time', 'treatment_end_time',
         'waiting_duration_minutes', 'treatment_duration_minutes', 'status', 'doctor_id',
@@ -37,7 +48,7 @@ class PatientWaitingTime extends Model
     public function startTreatment($doctorId = null)
     {
         $this->treatment_start_time = now();
-        $this->status = 'in_treatment';
+        $this->status = self::STATUS_IN_TREATMENT;
         if ($doctorId) {
             $this->doctor_id = $doctorId;
         }
@@ -62,7 +73,7 @@ class PatientWaitingTime extends Model
     public function endTreatment()
     {
         $this->treatment_end_time = now();
-        $this->status = 'completed';
+        $this->status = self::STATUS_COMPLETED;
         
         // Ensure treatment duration is calculated correctly
         if ($this->treatment_start_time) {
@@ -122,7 +133,7 @@ class PatientWaitingTime extends Model
     }
 
     // Update status when patient is checked in
-    public function checkIn($department = 'reception')
+    public function checkIn($department = self::DEPARTMENT_RECEPTION)
     {
         $this->current_department = $department;
         $this->moveToDepartment($department, 'Patient checked in');
@@ -132,7 +143,7 @@ class PatientWaitingTime extends Model
     // Update status when patient is sent to cashier
     public function sendToCashier()
     {
-        $this->moveToDepartment('cashier', 'Patient sent to cashier for payment');
+        $this->moveToDepartment(self::DEPARTMENT_CASHIER, 'Patient sent to cashier for payment');
         return $this;
     }
 
@@ -140,12 +151,12 @@ class PatientWaitingTime extends Model
     public function sendToConsultation()
     {
         // If the patient is still marked as waiting, start treatment now
-        if ($this->status === 'waiting') {
+        if ($this->status === self::STATUS_WAITING) {
             // Preserve existing doctor if already assigned by upstream logic
             $this->startTreatment($this->doctor_id);
         }
 
-        $this->moveToDepartment('consultation', 'Patient sent to consultation room');
+        $this->moveToDepartment(self::DEPARTMENT_CONSULTATION, 'Patient sent to consultation room');
         
         // Assign consulting doctor if not already assigned
         if (!$this->doctor_id) {
@@ -158,21 +169,21 @@ class PatientWaitingTime extends Model
     // Update status when patient is sent to dispensing
     public function sendToDispensing()
     {
-        $this->moveToDepartment('dispensing', 'Patient sent to dispensing');
+        $this->moveToDepartment(self::DEPARTMENT_DISPENSING, 'Patient sent to dispensing');
         return $this;
     }
 
     // Update status when patient is sent to procedure room
     public function sendToProcedureRoom()
     {
-        $this->moveToDepartment('procedure_room', 'Patient sent to procedure room');
+        $this->moveToDepartment(self::DEPARTMENT_PROCEDURE_ROOM, 'Patient sent to procedure room');
         return $this;
     }
 
     // Update status when patient returns to reception (after payment/billing)
     public function returnToReception($reason = 'Returned to reception')
     {
-        $this->moveToDepartment('reception', $reason);
+        $this->moveToDepartment(self::DEPARTMENT_RECEPTION, $reason);
         return $this;
     }
 
@@ -236,7 +247,7 @@ class PatientWaitingTime extends Model
     // Get current waiting time in real-time
     public function getCurrentWaitingTimeAttribute()
     {
-        if ($this->status === 'waiting' && $this->registration_time) {
+        if ($this->status === self::STATUS_WAITING && $this->registration_time) {
             return $this->registration_time->diffInMinutes(now());
         }
         
@@ -252,7 +263,7 @@ class PatientWaitingTime extends Model
     // Get current treatment time in real-time
     public function getCurrentTreatmentTimeAttribute()
     {
-        if ($this->status === 'in_treatment' && $this->treatment_start_time) {
+        if ($this->status === self::STATUS_IN_TREATMENT && $this->treatment_start_time) {
             return $this->treatment_start_time->diffInMinutes(now());
         }
         return $this->treatment_duration_minutes;
@@ -271,7 +282,7 @@ class PatientWaitingTime extends Model
             
         if ($currentEntry) {
             // For completed patients, calculate time to treatment end
-            if ($this->status === 'completed' && $this->treatment_end_time) {
+            if ($this->status === self::STATUS_COMPLETED && $this->treatment_end_time) {
                 return Carbon::parse($currentEntry['moved_at'])->diffInMinutes($this->treatment_end_time);
             }
             // For active patients, calculate time to now
@@ -387,20 +398,26 @@ class PatientWaitingTime extends Model
 
         if ($paymentCache) {
             // Any Dental Lab or Pharmacy-like items imply dispensing step
+            $dentalLabTypeId = \App\Models\ConsultationType::idForCode(\App\Models\ConsultationType::CODE_DENTAL_LAB);
             $dentalLabCount = $paymentCache->items()
-                ->whereHas('consultation_type', function($q){ $q->where('name', 'Dental Lab'); })
+                ->whereHas('consultation_type', function($q) use ($dentalLabTypeId) {
+                    $q->whereKey($dentalLabTypeId);
+                })
                 ->count();
             $requiresDispensing = $dentalLabCount > 0;
 
             // Procedure items imply procedure room step
+            $procedureTypeId = \App\Models\ConsultationType::idForCode(\App\Models\ConsultationType::CODE_PROCEDURE);
             $procedureCount = $paymentCache->items()
-                ->whereHas('consultation_type', function($q){ $q->where('name', 'Procedure'); })
+                ->whereHas('consultation_type', function($q) use ($procedureTypeId) {
+                    $q->whereKey($procedureTypeId);
+                })
                 ->count();
             $requiresProcedureRoom = $procedureCount > 0;
         }
 
         // Enforce department visits for required steps
-        if ($requiresDispensing && !$this->hasBeenToDepartment('dispensing')) {
+        if ($requiresDispensing && !$this->hasBeenToDepartment(self::DEPARTMENT_DISPENSING)) {
             \Log::info('Journey not complete - dispensing step required but not visited', [
                 'patient_id' => $this->patient_id,
                 'current_department' => $this->current_department
@@ -408,7 +425,7 @@ class PatientWaitingTime extends Model
             return false;
         }
 
-        if ($requiresProcedureRoom && !$this->hasBeenToDepartment('procedure_room')) {
+        if ($requiresProcedureRoom && !$this->hasBeenToDepartment(self::DEPARTMENT_PROCEDURE_ROOM)) {
             \Log::info('Journey not complete - procedure room step required but not visited', [
                 'patient_id' => $this->patient_id,
                 'current_department' => $this->current_department
@@ -450,7 +467,7 @@ class PatientWaitingTime extends Model
     // Auto-complete treatment if conditions are met
     public function autoCompleteIfReady()
     {
-        if ($this->shouldCompleteTreatment() && $this->status === 'in_treatment') {
+        if ($this->shouldCompleteTreatment() && $this->status === self::STATUS_IN_TREATMENT) {
             $this->endTreatment();
             return true;
         }
@@ -461,7 +478,7 @@ class PatientWaitingTime extends Model
     public function autoCompleteIfStuck()
     {
         // If patient has been in treatment for more than 8 hours, force complete
-        if ($this->status === 'in_treatment' && $this->treatment_start_time) {
+        if ($this->status === self::STATUS_IN_TREATMENT && $this->treatment_start_time) {
             $hoursInTreatment = $this->treatment_start_time->diffInHours(now());
             
             if ($hoursInTreatment > 8) {
@@ -483,7 +500,7 @@ class PatientWaitingTime extends Model
     // Auto-complete patients who have been waiting too long
     public function autoCompleteIfWaitingTooLong()
     {
-        if ($this->status === 'waiting' && $this->registration_time) {
+        if ($this->status === self::STATUS_WAITING && $this->registration_time) {
             $waitingHours = $this->registration_time->diffInHours(now());
             
             // If patient has been waiting for more than 4 hours, auto-complete them
@@ -506,7 +523,7 @@ class PatientWaitingTime extends Model
     // Force complete treatment (for cases where journey logic might be too strict)
     public function forceCompleteTreatment($reason = 'Manually completed')
     {
-        if ($this->status === 'in_treatment') {
+        if ($this->status === self::STATUS_IN_TREATMENT) {
             \Log::info('Force completing treatment', [
                 'patient_id' => $this->patient_id,
                 'patient_name' => $this->patient->full_name ?? 'Unknown',
@@ -523,17 +540,17 @@ class PatientWaitingTime extends Model
 
     public function scopeWaiting($query)
     {
-        return $query->where('status', 'waiting');
+        return $query->where('status', self::STATUS_WAITING);
     }
 
     public function scopeInTreatment($query)
     {
-        return $query->where('status', 'in_treatment');
+        return $query->where('status', self::STATUS_IN_TREATMENT);
     }
 
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', self::STATUS_COMPLETED);
     }
 
     public function scopeByDepartment($query, $department)

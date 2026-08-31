@@ -109,6 +109,54 @@ class Patient extends Model
         return $this->hasMany(PatientMedicalHistory::class, 'patient_id')->where('is_active', true);
     }
 
+    protected function displayTitleCase($value)
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return $value;
+        }
+        return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
+    }
+
+    public function getFirstNameAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getMiddleNameAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getLastNameAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getAddressAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getTribeAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getReligionAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getOccupationAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
+    public function getNextOfKinAttribute($value)
+    {
+        return $this->displayTitleCase($value);
+    }
+
     public function getFullNameAttribute()
     {
         $parts = array_filter([

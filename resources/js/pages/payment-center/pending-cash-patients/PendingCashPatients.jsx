@@ -37,7 +37,7 @@ const PendingCashPatients = () => {
     return {
       page: 1,
       per_page: 25,
-      item_status: "Pending",
+      billing_queue: 1,
       patient_id: undefined,
       patient_name: undefined,
       patient_gender: undefined,

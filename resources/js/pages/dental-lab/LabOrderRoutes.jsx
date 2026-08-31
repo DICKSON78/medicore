@@ -149,14 +149,13 @@ const LabOrderRoutes = () => {
   };
 
   const handleStatus = async (id, status) => {
-    const endpoint = status === "Ready"
-      ? `/api/dental-lab-orders/${id}/mark-delivered`
-      : `/api/dental-lab-orders/${id}`;
     try {
       if (status === "Ready") {
-        await patch(endpoint, {});
+        await patch(`/api/dental-lab-orders/${id}/mark-ready`, {});
+      } else if (status === "Delivered") {
+        await patch(`/api/dental-lab-orders/${id}/mark-delivered`, {});
       } else {
-        await patch(endpoint, { status });
+        await patch(`/api/dental-lab-orders/${id}`, { status });
       }
       const res = await fetch(`/api/dental-lab-orders?consultation_id=${consultationId}`);
       setOrders((await res.json()).data?.data || []);
@@ -182,11 +181,11 @@ const LabOrderRoutes = () => {
     const teethLabels = order.teeth_involved
       ? (Array.isArray(order.teeth_involved) ? order.teeth_involved : [order.teeth_involved])
           .map((t) => {
-            const found = dentalOptions.toothNumbers.find((tn) => tn.value === String(t));
+            const found = dentalOptions.toothNumbers?.find((tn) => tn.value === String(t));
             return found ? found.label : `Tooth ${t}`;
           }).join(", ")
       : (order.tooth_number
-          ? (dentalOptions.toothNumbers.find((tn) => tn.value === order.tooth_number)?.label || `Tooth ${order.tooth_number}`)
+          ? (dentalOptions.toothNumbers?.find((tn) => tn.value === order.tooth_number)?.label || `Tooth ${order.tooth_number}`)
           : "N/A");
 
     printWindow.document.write(`
@@ -243,7 +242,7 @@ const LabOrderRoutes = () => {
       ? String(order.teeth_involved[0])
       : order.tooth_number;
     if (!tooth) return "-";
-    return dentalOptions.toothNumbers.find((tn) => tn.value === String(tooth))?.value || tooth;
+    return dentalOptions.toothNumbers?.find((tn) => tn.value === String(tooth))?.value || tooth;
   };
 
   const WorkflowButton = ({ order }) => {
