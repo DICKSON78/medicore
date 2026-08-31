@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, throttle } from "../../../helpers";
+import { formatError, isAdmin, throttle } from "../../../helpers";
 
 const SelectDiagnoses = ({
   consultationId,
@@ -206,9 +206,10 @@ const SelectDiagnoses = ({
                     {
                       field: "actions",
                       headerName: "Actions",
-                      renderCell: (item) => (
-                        <Tooltip title="Delete">
-                          <span>
+                      show: isAdmin(),
+                      renderCell: (item) =>
+                        isAdmin() ? (
+                          <Tooltip title="Delete">
                             <IconButton
                               size="small"
                               disabled={loadingDelete}
@@ -216,9 +217,8 @@ const SelectDiagnoses = ({
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
-                          </span>
-                        </Tooltip>
-                      ),
+                          </Tooltip>
+                        ) : null,
                     },
                   ]}
                   items={selected}

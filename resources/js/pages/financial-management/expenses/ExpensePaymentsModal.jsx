@@ -21,6 +21,7 @@ import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
 import {
   formatError,
   getValidationRules,
+  isAdmin,
   numberFormat,
 } from "../../../helpers";
 
@@ -238,9 +239,10 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
                     {
                       field: "actions",
                       headerName: "Actions",
-                      renderCell: (item) => (
-                        <Tooltip title="Delete">
-                          <span>
+                      show: isAdmin(),
+                      renderCell: (item) =>
+                        isAdmin() ? (
+                          <Tooltip title="Delete">
                             <IconButton
                               size="small"
                               disabled={
@@ -251,9 +253,8 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
-                          </span>
-                        </Tooltip>
-                      ),
+                          </Tooltip>
+                        ) : null,
                     },
                   ]}
                   items={expensePayments}

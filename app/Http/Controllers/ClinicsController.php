@@ -116,6 +116,7 @@ class ClinicsController extends Controller
             return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
         }
 
-        //
+        Clinic::findOrFail($id)->delete();
+        return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_OK, 'Deleted successfully.');
     }
 }

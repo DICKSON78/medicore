@@ -18,7 +18,7 @@ import Modal from "../../../components/Modal";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import { useFetch, usePost, useDelete, useToast } from "../../../hooks";
-import { formatError } from "../../../helpers";
+import { formatError, isAdmin } from "../../../helpers";
 
 const CATEGORIES = [
   { label: "Medical", value: "Medical" },
@@ -146,9 +146,11 @@ const PatientMedicalHistory = ({ patientId, consultationId }) => {
               <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Details</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Medications</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }} align="right">
-                Action
-              </TableCell>
+              {isAdmin() && (
+                <TableCell sx={{ fontWeight: "bold" }} align="right">
+                  Action
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -165,15 +167,17 @@ const PatientMedicalHistory = ({ patientId, consultationId }) => {
                 </TableCell>
                 <TableCell>{history.details || "—"}</TableCell>
                 <TableCell>{history.medications || "—"}</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleRemove(history.id)}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
+                {isAdmin() && (
+                  <TableCell align="right">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleRemove(history.id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

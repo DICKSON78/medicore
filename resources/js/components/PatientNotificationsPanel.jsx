@@ -29,7 +29,7 @@ import {
 } from "@mui/icons-material";
 
 import { useFetch, usePost, useToast } from "../hooks";
-import { formatError } from "../helpers";
+import { formatError, isAdmin } from "../helpers";
 
 const PatientNotificationsPanel = () => {
   const addToast = useToast();
@@ -300,12 +300,14 @@ const PatientNotificationsPanel = () => {
           </ListItemIcon>
           Mark as Read
         </MenuItem>
-        <MenuItem onClick={handleDelete}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          Delete
-        </MenuItem>
+        {isAdmin() && (
+          <MenuItem onClick={handleDelete}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            Delete
+          </MenuItem>
+        )}
       </Menu>
     </Card>
   );

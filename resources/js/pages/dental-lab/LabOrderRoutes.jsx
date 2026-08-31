@@ -23,7 +23,7 @@ import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import DatePicker from "../../components/DatePicker";
 import { usePatch, useToast, useOptions } from "../../hooks";
-import { formatDate } from "../../helpers";
+import { formatDate, isAdmin } from "../../helpers";
 
 const statusColors = {
   Ordered: "warning",
@@ -474,7 +474,7 @@ const LabOrderRoutes = () => {
                           <Tooltip title="Edit order">
                             <Button size="small" startIcon={<EditIcon />} onClick={() => handleEditClick(order)}>Edit</Button>
                           </Tooltip>
-                          {(order.status === "Ordered" || order.status === "In Progress") && (
+                          {(order.status === "Ordered" || order.status === "In Progress") && isAdmin() && (
                             <Tooltip title="Delete order">
                               <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(order.id)}>Delete</Button>
                             </Tooltip>

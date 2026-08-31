@@ -437,3 +437,15 @@ export const getRoleOptions = (preferences) => {
     privileges,
   }));
 };
+
+/**
+ * Whether the currently logged-in user is an admin.
+ * Admin-only operations (delete) are gated on the backend; this mirrors that rule in the UI.
+ * @returns {boolean}
+ */
+export const isAdmin = () => {
+  return !!(
+    window.user &&
+    (window.user.is_admin === true || window.user.role === "Admin")
+  );
+};

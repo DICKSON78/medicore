@@ -188,6 +188,7 @@ class PatientPaymentCacheController extends Controller
             return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
         }
 
-        //
+        PatientPaymentCache::findOrFail($id)->delete();
+        return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_OK, 'Deleted successfully.');
     }
 }

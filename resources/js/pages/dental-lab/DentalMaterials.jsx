@@ -12,7 +12,7 @@ import Page from "../../components/Page";
 import Report from "../../components/reports/Report";
 import { SearchTextField } from "../../components/Table";
 
-import { numberFormat, throttle, formatError } from "../../helpers";
+import { numberFormat, throttle, formatError, isAdmin } from "../../helpers";
 import Modal from "../../components/Modal";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useDelete, useToast } from "../../hooks";
@@ -134,13 +134,13 @@ const DentalMaterials = () => {
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={deleting ? "Deleting..." : "Delete"}>
-                  <span>
+                {isAdmin() && (
+                  <Tooltip title={deleting ? "Deleting..." : "Delete"}>
                     <IconButton size="small" disabled={deleting} onClick={() => confirmDelete(item)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
-                  </span>
-                </Tooltip>
+                  </Tooltip>
+                )}
               </Stack>
             ),
           },

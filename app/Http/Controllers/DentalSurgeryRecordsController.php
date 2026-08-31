@@ -148,6 +148,7 @@ class DentalSurgeryRecordsController extends Controller
             return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_FORBIDDEN, 'Unauthorized. Admin only.');
         }
 
-        //
+        DentalSurgeryRecord::findOrFail($id)->delete();
+        return $this->sendResponse(null, \Illuminate\Http\Response::HTTP_OK, 'Deleted successfully.');
     }
 }

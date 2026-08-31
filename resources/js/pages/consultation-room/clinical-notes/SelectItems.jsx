@@ -27,6 +27,7 @@ import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
 import {
   formatError,
   getValidationRules,
+  isAdmin,
   numberFormat,
   throttle,
   validateInteger,
@@ -557,9 +558,10 @@ const SelectItems = ({
                     {
                       field: "actions",
                       headerName: "Actions",
-                      renderCell: (item) => (
-                        <Tooltip title="Delete">
-                          <span>
+                      show: isAdmin(),
+                      renderCell: (item) =>
+                        isAdmin() ? (
+                          <Tooltip title="Delete">
                             <IconButton
                               size="small"
                               disabled={
@@ -569,9 +571,8 @@ const SelectItems = ({
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
-                          </span>
-                        </Tooltip>
-                      ),
+                          </Tooltip>
+                        ) : null,
                     },
                   ]}
                   items={selected}

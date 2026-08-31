@@ -19,7 +19,7 @@ import DentalChartingEditor from "./DentalChartingEditor";
 import PrescriptionForm from "./PrescriptionForm";
 import DentalRadiographs from "./DentalRadiographs";
 import { useFetch, usePatch, useToast, useOptions } from "../../../hooks";
-import { formatDateForDb, formatDate, formatError, getValidationError } from "../../../helpers";
+import { formatDateForDb, formatDate, formatError, getValidationError, isAdmin } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => (
   <Box sx={{
@@ -598,7 +598,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                         setLabEditingId(order.id);
                         setLabFormOpen(true);
                       }}>Edit</Button>
-                      {order.status === "Ordered" && (
+                      {order.status === "Ordered" && isAdmin() && (
                         <Button size="small" variant="text" color="error" onClick={() => handleDeleteLabOrder(order.id)}>Delete</Button>
                       )}
                     </Grid>

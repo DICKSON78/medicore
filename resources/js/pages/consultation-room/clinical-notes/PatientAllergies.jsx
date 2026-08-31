@@ -18,7 +18,7 @@ import Modal from "../../../components/Modal";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import { useFetch, usePost, useDelete, useToast } from "../../../hooks";
-import { formatError } from "../../../helpers";
+import { formatError, isAdmin } from "../../../helpers";
 
 const ALLERGY_TYPES = [
   { label: "Drug", value: "Drug" },
@@ -144,9 +144,11 @@ const PatientAllergies = ({ patientId, consultationId }) => {
               <TableCell sx={{ fontWeight: "bold" }}>Type</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Severity</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Reaction</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }} align="right">
-                Action
-              </TableCell>
+              {isAdmin() && (
+                <TableCell sx={{ fontWeight: "bold" }} align="right">
+                  Action
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -162,15 +164,17 @@ const PatientAllergies = ({ patientId, consultationId }) => {
                   />
                 </TableCell>
                 <TableCell>{allergy.reaction || "—"}</TableCell>
-                <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => handleRemove(allergy.id)}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
+                {isAdmin() && (
+                  <TableCell align="right">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleRemove(allergy.id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
