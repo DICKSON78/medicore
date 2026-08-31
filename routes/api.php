@@ -197,6 +197,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->get('/dashboard', [\App\Http\Controllers\PaymentCenterDashboardController::class, '__invoke']);
         });
 
+        $router->prefix('installment-management')->group(function ($router) {
+            $router->get('/partial-payments', [\App\Http\Controllers\InstallmentManagementController::class, 'partialPayments']);
+        });
+
         $router->prefix('reports')->group(function ($router) {
             $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
                 $router->get('/cash-collection', 'getCashCollectionReport');
