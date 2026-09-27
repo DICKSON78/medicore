@@ -1,5 +1,6 @@
 /node_modules
-/public/build
+# public/build is committed so shared hosting can deploy without Node.
+# After editing resources/: npm run build && git add public/build
 /public/hot
 /public/storage
 /storage/*.key
