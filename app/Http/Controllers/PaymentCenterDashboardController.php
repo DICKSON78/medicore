@@ -55,18 +55,11 @@ class PaymentCenterDashboardController extends Controller
         // Partner item amounts to exclude from revenue
         $partnerItemAmount = $this->getPartnerItemAmount($clinic_id, $start_date, $end_date);
 
-        // Total revenue from patient payments and cleared bills
-        $data['summary']['total_revenue'] = PatientItemPayment::query()
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount') - $partnerItemAmount +
-            // Cleared bills — use cleared_at to attribute revenue to the day payment completed
-            PatientItemBill::query()
+        // Total revenue: a sale (cash or credit) is recognized once when its bill is
+        // cleared. A cash sale previously created BOTH a PatientItemPayment and a
+        // Cleared PatientItemBill for the same amount, so summing cleared bills once
+        // avoids double-counting.
+        $data['summary']['total_revenue'] = PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -76,7 +69,7 @@ class PaymentCenterDashboardController extends Controller
             ->whereDate('cleared_at', '>=', $start_date)
             ->whereDate('cleared_at', '<=', $end_date)
             ->get()
-            ->sum(fn($bill) => $bill->amount - $bill->discount);
+            ->sum(fn($bill) => $bill->amount - $bill->discount) - $partnerItemAmount;
 
         // Cash payments - actual cash payments
         $data['summary']['cash_payments'] = PatientItemPayment::query()
@@ -161,15 +154,6 @@ class PaymentCenterDashboardController extends Controller
         $today = Carbon::today()->format('Y-m-d');
         $todayPartnerItemAmount = $this->getPartnerItemAmount($clinic_id, $today, $today);
 
-        $todayCashPayments = PatientItemPayment::query()
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereDate('created_at', Carbon::today())
-            ->sum('amount');
-
         $todayClearedBills = PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -181,22 +165,13 @@ class PaymentCenterDashboardController extends Controller
             ->get()
             ->sum(fn($bill) => $bill->amount - $bill->discount);
 
-        $data['summary']['today_collections'] = $todayCashPayments + $todayClearedBills - $todayPartnerItemAmount;
+        $data['summary']['today_collections'] = $todayClearedBills - $todayPartnerItemAmount;
 
-        // Payment trends (last 7 days) — includes both cash payments and cleared bills
+        // Payment trends (last 7 days) — cleared bills recognized on the day paid
         $data['statistics']['payment_trends'] = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $partnerAmount = $this->getPartnerItemAmount($clinic_id, $date, $date);
-
-            $cashRevenue = PatientItemPayment::query()
-                ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($query) use ($clinic_id) {
-                        $query->where('clinic_id', $clinic_id);
-                    });
-                })
-                ->whereDate('created_at', $date)
-                ->sum('amount');
 
             $clearedRevenue = PatientItemBill::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -211,7 +186,7 @@ class PaymentCenterDashboardController extends Controller
 
             $data['statistics']['payment_trends'][] = [
                 'date' => $date,
-                'revenue' => ($cashRevenue + $clearedRevenue) - $partnerAmount
+                'revenue' => $clearedRevenue - $partnerAmount
             ];
         }
 
@@ -235,26 +210,33 @@ class PaymentCenterDashboardController extends Controller
         ]);
 
         // Top paying patients (real data)
-        $data['statistics']['top_paying_patients'] = PatientItemPayment::query()
+        $data['statistics']['top_paying_patients'] = DB::table('patients')
+            ->joinSub(
+                DB::table('patient_item_payments as pip')
+                    ->selectRaw('DISTINCT pip.id, pip.created_by, patients.id as patient_id, pip.amount')
+                    ->join('patient_payment_cache_items as ipci', 'ipci.item_payment_id', '=', 'pip.id')
+                    ->join('patient_payment_cache as ppc', 'ppc.id', '=', 'ipci.payment_cache_id')
+                    ->join('patient_check_ins as pci', 'pci.id', '=', 'ppc.check_in_id')
+                    ->join('patients', 'patients.id', '=', 'pci.patient_id')
+                    ->whereDate('pip.created_at', '>=', $start_date)
+                    ->whereDate('pip.created_at', '<=', $end_date),
+                'sub',
+                'patients.id',
+                '=',
+                'sub.patient_id'
+            )
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
+                $query->join('users', 'users.id', '=', 'sub.created_by')
+                    ->where('users.clinic_id', $clinic_id);
             })
-            ->join('patient_payment_cache_items', 'patient_payment_cache_items.item_payment_id', '=', 'patient_item_payments.id')
-            ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
-            ->join('patient_check_ins', 'patient_payment_cache.check_in_id', '=', 'patient_check_ins.id')
-            ->join('patients', 'patient_check_ins.patient_id', '=', 'patients.id')
-            ->whereDate('patient_item_payments.created_at', '>=', $start_date)
-            ->whereDate('patient_item_payments.created_at', '<=', $end_date)
+            ->groupBy('patients.id', 'patients.first_name', 'patients.last_name')
             ->select(
                 'patients.id',
-                'patients.first_name', 
-                'patients.last_name', 
+                'patients.first_name',
+                'patients.last_name',
                 DB::raw('CONCAT(patients.first_name, " ", patients.last_name) as patient_name'),
-                DB::raw('SUM(patient_item_payments.amount) as total_paid')
+                DB::raw('COALESCE(SUM(sub.amount), 0) as total_paid')
             )
-            ->groupBy('patients.id', 'patients.first_name', 'patients.last_name')
             ->orderBy('total_paid', 'desc')
             ->limit(3)
             ->get();

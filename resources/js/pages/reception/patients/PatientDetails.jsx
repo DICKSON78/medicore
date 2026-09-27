@@ -127,7 +127,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-                  MEDICORE DENTAL CLINIC
+                  SARAH DENTAL CLINIC
                 </Typography>
                 <Typography variant="caption" sx={{ opacity: 0.8 }}>
                   Patient Information

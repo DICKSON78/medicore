@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
@@ -20,14 +20,27 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
   const { handlePatch: patch } = usePatch();
   const { options } = useOptions();
 
-  const handleChange = useCallback((field, value) => {
-    const payload = { what: "Dental Oral Examination", [field]: value };
+  const [values, setValues] = useState({});
+  const saveTimer = useRef(null);
 
-    patch(`/api/consultations/${consultationId}/auto-save-clinical-notes`, payload)
-      .then(() => {
-        if (onUpdate) onUpdate();
-      });
+  useEffect(() => {
+    setValues((prev) => ({ ...prev, ...(data || {}) }));
+  }, [data]);
+
+  const handleChange = useCallback((field, value) => {
+    setValues((prev) => ({ ...prev, [field]: value }));
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      const payload = { what: "Dental Oral Examination", [field]: value };
+      patch(`/api/consultations/${consultationId}/auto-save-clinical-notes`, payload)
+        .then(() => {
+          if (onUpdate) onUpdate();
+        });
+    }, 600);
   }, [consultationId, patch, onUpdate]);
+
+  const getValue = (key) => (values && values[key] !== undefined ? values[key] : (data?.[key] || ""));
 
   return (
     <Box>
@@ -39,7 +52,7 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
           <Grid item xs={12} sm={6} md={4} key={key}>
             <Select
               label={label}
-              value={data?.[key] || ""}
+              value={getValue(key)}
               options={options[category] || []}
               onChange={(v) => handleChange(key, v)}
               size="small"
@@ -50,7 +63,7 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
         <Grid item xs={12}>
           <TextField
             label="Other Findings"
-            value={data?.other_findings || ""}
+            value={getValue("other_findings")}
             onChange={(v) => handleChange("other_findings", v || "")}
             multiline
             rows={2}
@@ -58,17 +71,17 @@ const DentalOralExamination = ({ consultationId, data, onUpdate }) => {
             fullWidth
           />
         </Grid>
-        {data?.occlusion && (
+        {values?.occlusion !== undefined || data?.occlusion ? (
           <Grid item xs={12} sm={6}>
             <TextField
               label="Occlusion"
-              value={data.occlusion || ""}
+              value={getValue("occlusion")}
               onChange={(v) => handleChange("occlusion", v || "")}
               size="small"
               fullWidth
             />
           </Grid>
-        )}
+        ) : null}
       </Grid>
     </Box>
   );

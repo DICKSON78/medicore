@@ -491,7 +491,10 @@ class PatientPaymentCacheItemsController extends Controller
                 $patient = $payment_cache->check_in->patient ?? null;
                 if ($patient) {
                     $waitingTime = $patient->waiting_times()
-                        ->where('status', 'in_treatment')
+                        ->where(function ($q) {
+                            $q->where('status', 'in_treatment')
+                              ->orWhere('status', 'waiting');
+                        })
                         ->latest()
                         ->first();
 
@@ -539,7 +542,60 @@ class PatientPaymentCacheItemsController extends Controller
 
     public function complete(Request $request)
     {
-        return $this->updateStatus($request, 'Served', 'Completed successfully.', null);
+        return $this->updateStatus($request, 'Served', 'Completed successfully.', function ($payment_cache) use ($request) {
+            $user = $request->user();
+
+            // If a Procedure-room item was served, return the patient to the doctor so they
+            // can verify the outcome and discharge the patient to the cashier for payment.
+            $servedProcedureId = null;
+            foreach ($payment_cache->items as $item) {
+                if ($item->status === 'Served'
+                    && $item->consultation_type
+                    && strtolower($item->consultation_type->name) === 'procedure') {
+                    $servedProcedureId = $item->id;
+                    break;
+                }
+            }
+
+            if (!$servedProcedureId) {
+                return;
+            }
+
+            // The consultation is linked via the cache's consultation_id (both the fee cache
+            // and add-item caches carry the consultation_id).
+            $consultation = $payment_cache->consultation;
+
+            if ($consultation) {
+                $consultation->update([
+                    'status' => 'Pending',
+                    'returned_from' => 'procedure',
+                ]);
+
+                $patient = $consultation->payment_cache_item?->payment_cache?->check_in?->patient;
+                if ($patient) {
+                    $waitingTime = $patient->waiting_times()
+                        ->whereDate('registration_time', $consultation->created_at->format('Y-m-d'))
+                        ->whereIn('status', ['waiting', 'in_treatment'])
+                        ->latest()
+                        ->first();
+
+                    if ($waitingTime) {
+                        $waitingTime->moveToDepartment('consultation', 'Patient returned from procedure room for review');
+                    }
+                }
+
+                \Log::info('Procedure completed - patient returned to doctor for review', [
+                    'procedure_item_id' => $servedProcedureId,
+                    'consultation_id' => $consultation->id,
+                    'patient_id' => $patient->id ?? null,
+                ]);
+            }
+
+            try {
+                event(new \App\Events\NotificationUpdate());
+            } catch (\Exception $e) {
+            }
+        });
     }
 
     /**

@@ -15,7 +15,7 @@ import DiagnosisCard from "../clinical-notes/DiagnosisCard";
 import SelectDiagnoses from "../clinical-notes/SelectDiagnoses";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 import DentalOralExamination from "./DentalOralExamination";
-import DentalChartingEditor from "./DentalChartingEditor";
+
 import PrescriptionForm from "./PrescriptionForm";
 import DentalRadiographs from "./DentalRadiographs";
 import { useFetch, usePatch, useToast, useOptions } from "../../../hooks";
@@ -39,6 +39,8 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [dischargeLoading, setDischargeLoading] = useState(false);
+  const [dischargeDialogOpen, setDischargeDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     chief_complaint: "", history_present_illness: "", family_history: "",
@@ -63,6 +65,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
 
   const { handlePatch: autoPatch } = usePatch();
   const { handlePatch: completePatch, loading: completing } = usePatch();
+  const { handlePatch: dischargePatch, loading: discharging } = usePatch();
   const { options } = useOptions();
 
   const fetchDiagnoses = async () => {
@@ -246,10 +249,17 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
     }
   }, [consultation?.id]);
 
+  const formDataRef = useRef(formData);
+  formDataRef.current = formData;
+
   const handleChange = (field) => (e) => {
     const value = e.target ? e.target.value : e;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    scheduleAutoSave({ ...formData, [field]: value });
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      formDataRef.current = next;
+      scheduleAutoSave(next);
+      return next;
+    });
   };
 
   const scheduleAutoSave = (data) => {
@@ -263,14 +273,49 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
     if (!consultation?.id) return;
     setAutoSaveStatus("Saving...");
     try {
-      const payload = { what: "Consultation", ...data };
-      await autoPatch(`/api/consultations/${consultation.id}/auto-save-clinical-notes`, payload);
-      setAutoSaveStatus("Saved");
+      const payload = { what: "Consultation", ...buildAutoSavePayload(data) };
+      await autoPatch(`api/consultations/${consultation.id}/auto-save-clinical-notes`, payload);
+      setAutoSaveStatus("Draft saved");
       setTimeout(() => setAutoSaveStatus(""), 3000);
     } catch {
       setAutoSaveStatus("Save failed");
     }
   };
+
+  const buildAutoSavePayload = (data) => {
+    const d = { ...data };
+    if (d.to_return_date === "") d.to_return_date = null;
+    if (d.to_return_time === "") d.to_return_time = null;
+    return d;
+  };
+
+  const flushDraft = () => {
+    if (!consultation?.id) return;
+    const data = formDataRef.current;
+    if (!data) return;
+    const payload = { what: "Consultation", ...buildAutoSavePayload(data) };
+    fetch(`/api/consultations/${consultation.id}/auto-save-clinical-notes`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      flushDraft();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      flushDraft();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consultation?.id]);
 
   const handleCompleteClinicalNotes = async () => {
     if (!consultation?.id) return;
@@ -291,16 +336,39 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         patient_to_return: formData.patient_to_return,
         to_return_date: formData.patient_to_return === "Yes" ? formData.to_return_date : null,
       };
-      await completePatch(`/api/consultations/${consultation.id}/complete-clinical-notes`, {
+      const result = await completePatch(`api/consultations/${consultation.id}/complete-clinical-notes`, {
         ...payload,
       });
+      if (!result) {
+        addToast("Failed to complete clinical notes. Please try again.", { variant: "error" });
+        return;
+      }
       addToast("Clinical notes saved successfully", { variant: "success" });
       setCompleteDialogOpen(false);
-      navigate(-1);
+      navigate("/consultation-room/consultation-patients/pending");
     } catch (e) {
       addToast(formatError(e), { variant: "error" });
     } finally {
       setCompleteLoading(false);
+    }
+  };
+
+  const handleDischarge = async () => {
+    if (!consultation?.id) return;
+    setDischargeLoading(true);
+    try {
+      const result = await dischargePatch(`api/consultations/${consultation.id}/discharge`);
+      if (!result) {
+        addToast("Failed to discharge patient. Please try again.", { variant: "error" });
+        return;
+      }
+      addToast("Patient discharged. Sent to cashier for final payment.", { variant: "success" });
+      setDischargeDialogOpen(false);
+      navigate("/consultation-room/consultation-patients/return");
+    } catch (e) {
+      addToast(formatError(e), { variant: "error" });
+    } finally {
+      setDischargeLoading(false);
     }
   };
 
@@ -449,11 +517,6 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
         }}
       />
 
-      <Box sx={{ my: 2 }}>
-        <Subheader title="Dental Charting (Odontogram)" />
-        <DentalChartingEditor consultationId={consultation.id} readOnly={isCompleted} />
-      </Box>
-
       <Subheader title="Oral Hygiene Status" />
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
@@ -502,16 +565,7 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
       <Box sx={{ my: 2 }}>
         <Subheader title="Diagnosis & Treatment Plan" />
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <DiagnosisCard
-              title="Principal Diagnosis"
-              consultationId={consultation.id}
-              items={diagnoses || []}
-              diagnosisType="Principal"
-              onClickAdd={(title, type) => openSelectDiagnosesModal(title, type)}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <DiagnosisCard
               title="Additional Diagnosis"
               consultationId={consultation.id}
@@ -530,12 +584,8 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           items={consItems || []}
           consultationId={consultation.id}
           showAllTypes={true}
+          onClickAdd={() => openSelectItemsModal("Add Treatment Item", "Dental Lab")}
         />
-        <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-          <Button variant="contained" size="small" onClick={() => openSelectItemsModal("Add Treatment Item", "Dental Lab")}>
-            + Add Item
-          </Button>
-        </Box>
       </Box>
 
       <Subheader title="Dental Lab Orders" />
@@ -603,6 +653,12 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
                       )}
                     </Grid>
                   </Grid>
+                  {order.lab_notes ? (
+                    <Box sx={{ mt: 1, borderLeft: "3px solid", borderColor: "primary.main", pl: 1 }}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>Lab Notes</Typography>
+                      <Typography variant="body2">{order.lab_notes}</Typography>
+                    </Box>
+                  ) : null}
                 </Paper>
               ))}
             </Stack>
@@ -653,6 +709,16 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
             disabled={completeLoading}
           >
             {completeLoading ? "Saving..." : "Complete Clinical Notes"}
+          </Button>
+        )}
+        {consultation?.returned_from && (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setDischargeDialogOpen(true)}
+            disabled={dischargeLoading}
+          >
+            {dischargeLoading ? "Discharging..." : "Discharge Patient"}
           </Button>
         )}
         <PatientFilePDF
@@ -780,6 +846,18 @@ const DentalClinicalNotes = ({ patient, consultation }) => {
           <Button onClick={() => setCompleteDialogOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleCompleteClinicalNotes} disabled={completeLoading}>
             {completeLoading ? "Saving..." : "Complete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={dischargeDialogOpen} onClose={() => setDischargeDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Discharge Patient</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to discharge this patient? They will be sent to the cashier for final payment.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDischargeDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="success" onClick={handleDischarge} disabled={dischargeLoading}>
+            {dischargeLoading ? "Discharging..." : "Discharge"}
           </Button>
         </DialogActions>
       </Dialog>

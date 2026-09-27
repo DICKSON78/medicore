@@ -64,19 +64,11 @@ class DashboardController extends Controller
             ],
         ];
 
-        $totalCash = PatientItemPayment::query()
-            ->whereHas('items', fn($q) => $q->where(function($qq) {
-                $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
-            }))
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('amount - discount'));
-
+        // Total sales: revenue is recognized when a bill is cleared.
+        // Every sale (cash or credit) is finalized through a Cleared PatientItemBill
+        // (a cash sale creates both a PatientItemPayment and a Cleared bill for the
+        // same amount), so summing cleared bills once counts each sale exactly once
+        // and avoids double-counting.
         $totalBills = PatientItemBill::where('status', 'Cleared')
             ->whereHas('items', fn($q) => $q->where(function($qq) {
                 $qq->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
@@ -90,7 +82,7 @@ class DashboardController extends Controller
             })
             ->sum(DB::raw('amount - discount'));
 
-        $data['summary']['total_sales'] = $totalCash + $totalBills;
+        $data['summary']['total_sales'] = $totalBills;
 
         $data['summary']['discount'] = PatientItemPayment::query()
             ->whereHas('items', fn($q) => $q->where(function($qq) {
@@ -158,93 +150,44 @@ class DashboardController extends Controller
             ->where('status', 'Consulted')
             ->count();
 
-        $data['summary']['dental_lab'] = PatientPaymentCacheItem::query()
-            ->where(function ($q) {
-                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
-            })
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Dental Lab');
-            })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
+        $categoryRevenue = function ($name) use ($clinic_id, $start_date, $end_date) {
+            return PatientPaymentCacheItem::query()
+                ->where(function ($q) {
+                    $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
+                })
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('consultation_type', function ($query) use ($name) {
+                    $query->where('name', $name);
+                })
+                ->whereHas('bill', function ($query) use ($start_date, $end_date) {
+                    $query->where('status', 'Cleared')
+                        ->whereDate('cleared_at', '>=', $start_date)
+                        ->whereDate('cleared_at', '<=', $end_date);
+                })
+                ->sum(DB::raw('unit_price * quantity'));
+        };
 
-        $data['summary']['pharmacy'] = PatientPaymentCacheItem::query()
-            ->where(function ($q) {
-                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
-            })
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Pharmacy');
-            })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
+        $data['summary']['dental_lab'] = $categoryRevenue('Dental Lab');
 
-        $data['summary']['procedure'] = PatientPaymentCacheItem::query()
-            ->where(function ($q) {
-                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
-            })
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Procedure');
-            })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
+        $data['summary']['pharmacy'] = $categoryRevenue('Pharmacy');
+        $data['summary']['procedure'] = $categoryRevenue('Procedure');
+        $data['summary']['others'] = $categoryRevenue('Others');
 
-        $data['summary']['others'] = PatientPaymentCacheItem::query()
-            ->where(function ($q) {
-                $q->where('is_partner_item', '!=', true)->orWhereNull('is_partner_item');
-            })
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Others');
-            })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-
-        $data['summary']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            })
-            ->where(function ($q) {
-                $q->where('it.is_partner_item', '!=', true)->orWhereNull('it.is_partner_item');
-            })
-            ->where('consultations.patient_direction', 'Direct to Doctor')
-            ->whereIn('it.status', ['Paid', 'Billed', 'Served'])
-            ->whereNull('it.bill_id')
-            ->whereDate('it.created_at', '>=', $start_date)
-            ->whereDate('it.created_at', '<=', $end_date)
-            ->sum(DB::raw('it.unit_price * it.quantity'));
+        // Consultation = the remainder of cleared-bill revenue not attributed to an
+        // explicit department category. This keeps the five category slices summing
+        // exactly to total_sales without double-counting (consultation charges are
+        // recorded under a consultation_type such as 'Others').
+        $data['summary']['consultation'] = max(0,
+            $data['summary']['total_sales']
+            - $data['summary']['dental_lab']
+            - $data['summary']['pharmacy']
+            - $data['summary']['procedure']
+            - $data['summary']['others']
+        );
 
         $data['summary']['sms_balance'] = $user->clinic?->sms_balance;
 

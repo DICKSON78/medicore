@@ -157,11 +157,7 @@ class PatientsController extends Controller
             // Accept both legacy string values ('Yes') and boolean true
             $today = now()->toDateString();
             $data = Patient::with(['payment_mode', 'information_source', 'creator'])
-                ->where(function ($q) {
-                    $q->where('is_vip', 'Yes')
-                      ->orWhere('is_vip', true)
-                      ->orWhere('is_vip', 1);
-                })
+                ->where('is_vip', true)
                 // Strong guard: exclude anyone with a check-in today
                 ->whereDoesntHave('check_ins', function ($query) use ($today) {
                     $query->whereDate('created_at', $today);

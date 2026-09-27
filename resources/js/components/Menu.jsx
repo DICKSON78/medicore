@@ -418,6 +418,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: user.privileges.consultation_room,
         },
         {
+          title: "Patient Returns",
+          icon: <PatientsToReturnIcon />,
+          to: "/consultation-room/consultation-patients/return",
+          show: user.privileges.consultation_room,
+        },
+        {
           title: "Consulted Patients",
           icon: <DoneIcon />,
           to: "/consultation-room/consultation-patients/consulted",

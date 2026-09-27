@@ -194,7 +194,7 @@ const Services = () => {
     'Teeth Cleaning',
     'Dentistry',
     'Root Canal',
-    'Medicore',
+    'Sarah',
     'Tanzania',
     'Dental Care',
   ];
@@ -272,9 +272,9 @@ const Services = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa !important', pt: { xs: '56px', sm: '64px' } }}>
       <SEO 
-        title="Our Services - Medicore Dental Clinic | Comprehensive Dental Care Solutions in Tanzania"
-        description="Medicore Dental Clinic offers comprehensive dental care services including oral examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, root canal treatment, crowns, bridges, dentures, and community oral health programs in Natta-Mwanza, Tanzania."
-        keywords="dental care services Tanzania, dentist Mwanza, oral examination, teeth cleaning, root canal, tooth extraction, dental crowns, dental clinic services, Medicore Dental services"
+        title="Our Services - Sarah Dental Clinic | Comprehensive Dental Care Solutions in Tanzania"
+        description="Sarah Dental Clinic offers comprehensive dental care services including oral examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, root canal treatment, crowns, bridges, dentures, and community oral health programs in Natta-Mwanza, Tanzania."
+        keywords="dental care services Tanzania, dentist Mwanza, oral examination, teeth cleaning, root canal, tooth extraction, dental crowns, dental clinic services, Sarah Dental services"
       />
       <Navbar />
       
@@ -350,7 +350,7 @@ const Services = () => {
                     opacity: 1,
                   }}
                 >
-                    At Medicore Dental Clinic, we provide comprehensive, patient-centered dental care services designed to preserve and enhance your oral health. Our experienced team of dentists utilizes state-of-the-art technology and evidence-based practices to deliver exceptional care tailored to your unique needs.
+                    At Sarah Dental Clinic, we provide comprehensive, patient-centered dental care services designed to preserve and enhance your oral health. Our experienced team of dentists utilizes state-of-the-art technology and evidence-based practices to deliver exceptional care tailored to your unique needs.
                 </Typography>
                 <Typography
                   className="hero-animate"

@@ -6,9 +6,9 @@ import { useLocation } from 'react-router-dom';
  * Usage: <SEO title="Page Title" description="Page description" />
  */
 const SEO = ({
-  title = 'Medicore Dental Clinic - Premier Dental Clinic in Tanzania',
-  description = 'Medicore Dental Clinic is the leading dental clinic in Natta-Mwanza, Tanzania. We offer comprehensive dental examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, extractions, root canal treatment, and community oral health programs.',
-  keywords = 'dental clinic Tanzania, dentist Natta-Mwanza, dental examination, teeth cleaning, root canal, tooth extraction, orthodontics, Medicore Dental',
+  title = 'Sarah Dental Clinic - Premier Dental Clinic in Tanzania',
+  description = 'Sarah Dental Clinic is the leading dental clinic in Natta-Mwanza, Tanzania. We offer comprehensive dental examinations, diagnosis & treatment of oral diseases, teeth cleaning, fillings, extractions, root canal treatment, and community oral health programs.',
+  keywords = 'dental clinic Tanzania, dentist Natta-Mwanza, dental examination, teeth cleaning, root canal, tooth extraction, orthodontics, Sarah Dental',
   image = null,
   type = 'website',
   noindex = false,
@@ -37,7 +37,7 @@ const SEO = ({
     updateMetaTag('description', description);
     updateMetaTag('keywords', keywords);
     updateMetaTag('robots', noindex ? 'noindex, nofollow' : 'index, follow');
-    updateMetaTag('author', 'Medicore Dental Clinic');
+    updateMetaTag('author', 'Sarah Dental Clinic');
     updateMetaTag('language', 'English');
     updateMetaTag('revisit-after', '7 days');
     updateMetaTag('theme-color', '#667eea');
@@ -50,7 +50,7 @@ const SEO = ({
     updateMetaTag('og:image', imageUrl, 'property');
     updateMetaTag('og:image:width', '1200', 'property');
     updateMetaTag('og:image:height', '630', 'property');
-    updateMetaTag('og:site_name', 'Medicore Dental Clinic', 'property');
+    updateMetaTag('og:site_name', 'Sarah Dental Clinic', 'property');
     updateMetaTag('og:locale', 'en_US', 'property');
 
     // Twitter Card Tags - MUST use 'name' attribute, not 'property'
@@ -93,7 +93,7 @@ const SEO = ({
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       '@id': fullUrl,
-      name: 'Medicore Dental Clinic',
+      name: 'Sarah Dental Clinic',
       description: description,
       url: baseUrl,
       telephone: '+255678110376',

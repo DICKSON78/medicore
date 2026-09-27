@@ -154,9 +154,9 @@ const About = () => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa', pt: { xs: '56px', sm: '64px' } }}>
       <SEO
-        title="About Us - Medicore Dental Clinic | Leading Dental Clinic in Tanzania"
-        description="Learn about Medicore Dental Clinic, the leading dental clinic in Natta-Mwanza, Tanzania. Our mission is to provide comprehensive, accessible, and high-quality dental care services to our community."
-        keywords="about Medicore Dental, dental clinic Tanzania, dentist Mwanza, dental care mission, dental clinic history, Medicore Dental team"
+        title="About Us - Sarah Dental Clinic | Leading Dental Clinic in Tanzania"
+        description="Learn about Sarah Dental Clinic, the leading dental clinic in Natta-Mwanza, Tanzania. Our mission is to provide comprehensive, accessible, and high-quality dental care services to our community."
+        keywords="about Sarah Dental, dental clinic Tanzania, dentist Mwanza, dental care mission, dental clinic history, Sarah Dental team"
       />
       <Navbar />
 
@@ -211,7 +211,7 @@ const About = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              About Medicore Dental Clinic
+              About Sarah Dental Clinic
             </Typography>
             <Typography
               variant="h6"
@@ -328,7 +328,7 @@ const About = () => {
                 <Box
                   component="img"
                   src="/images/clinic-exterior-building.jpeg"
-                    alt="Medicore Dental Clinic"
+                    alt="Sarah Dental Clinic"
                   sx={{
                     width: '100%',
                     height: { xs: 300, sm: 400, md: 500, lg: 600 },
@@ -343,7 +343,7 @@ const About = () => {
                   <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                     <Chip
                       icon={<PersonIcon />}
-                      label="Medicore Team"
+                      label="Sarah Team"
                       size="small"
                       sx={{ bgcolor: '#667eea', color: 'white' }}
                     />
@@ -374,7 +374,7 @@ const About = () => {
                       color: '#4A4A4A !important',
                     }}
                   >
-                    Medicore Dental Clinic was founded to revolutionize dental care services in Tanzania through innovative technology and compassionate care.
+                    Sarah Dental Clinic was founded to revolutionize dental care services in Tanzania through innovative technology and compassionate care.
                     We recognized the critical need for comprehensive, accessible dental care services in Mwanza, delivering comprehensive oral examinations,
                     advanced diagnostics, quality restorative treatments, and personalized care in one welcoming, professional environment.
                   </Typography>
@@ -388,7 +388,7 @@ const About = () => {
                     }}
                   >
                     We have grown to become one of Mwanza's most trusted dental care providers, serving thousands of patients throughout the region.
-                    Today, we continue to innovate and expand our services, keeping the needs of our community at the heart of everything we do. Medicore Dental Clinic remains committed to excellence in dental care.
+                    Today, we continue to innovate and expand our services, keeping the needs of our community at the heart of everything we do. Sarah Dental Clinic remains committed to excellence in dental care.
                   </Typography>
                   <Button
                     variant="contained"
@@ -547,7 +547,7 @@ const About = () => {
                     lineHeight: 1.7,
                   }}
                 >
-                   Join thousands of satisfied patients in Mwanza who trust Medicore Dental Clinic for their oral health and dental care needs.
+                   Join thousands of satisfied patients in Mwanza who trust Sarah Dental Clinic for their oral health and dental care needs.
                 </Typography>
                 <Stack
                   direction="column"
@@ -745,7 +745,7 @@ const About = () => {
                     Popular Tags
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {['Dental Care', 'Oral Health', 'Clinic', 'Dentistry', 'Teeth', 'Medicore', 'Tanzania', 'Health'].map((tag, index) => (
+                    {['Dental Care', 'Oral Health', 'Clinic', 'Dentistry', 'Teeth', 'Sarah', 'Tanzania', 'Health'].map((tag, index) => (
                       <Chip
                         key={index}
                         label={tag}

@@ -305,9 +305,9 @@ const Home = () => {
   return (
     <Box sx={{ bgcolor: colors.white, minHeight: '100vh', pt: { xs: '56px', sm: '64px' } }}>
       <SEO
-        title="Medicore Dental Clinic - Premier Dental Clinic in Tanzania | Comprehensive Dental Care"
-        description="Medicore Dental Clinic is the leading dental clinic in Natta-Mwanza, Tanzania. We offer comprehensive dental examinations, oral surgery, root canal treatment, teeth cleaning, crowns, bridges, dentures, and pediatric dentistry. Book your appointment today!"
-        keywords="dental clinic Tanzania, dentist Mwanza, dental examination, teeth cleaning, root canal, tooth extraction, crowns, bridges, dentures, orthodontics, Medicore Dental, dental care Tanzania, family dentistry"
+        title="Sarah Dental Clinic - Premier Dental Clinic in Tanzania | Comprehensive Dental Care"
+        description="Sarah Dental Clinic is the leading dental clinic in Natta-Mwanza, Tanzania. We offer comprehensive dental examinations, oral surgery, root canal treatment, teeth cleaning, crowns, bridges, dentures, and pediatric dentistry. Book your appointment today!"
+        keywords="dental clinic Tanzania, dentist Mwanza, dental examination, teeth cleaning, root canal, tooth extraction, crowns, bridges, dentures, orthodontics, Sarah Dental, dental care Tanzania, family dentistry"
       />
       <Navbar />
 
@@ -1299,7 +1299,7 @@ const Home = () => {
                   <Box
                     component="img"
                     src="/images/clinic_exterior_with_insurance_promo.jpeg"
-                    alt="Medicore Dental Clinic Building"
+                    alt="Sarah Dental Clinic Building"
                     sx={{
                       width: '100%',
                       height: '100%',
@@ -1332,7 +1332,7 @@ const Home = () => {
                         mb: 0.5,
                       }}
                     >
-                      Medicore Dental Clinic
+                      Sarah Dental Clinic
                     </Typography>
                     <Typography
                       variant="body2"
@@ -1384,7 +1384,7 @@ const Home = () => {
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    title="Medicore Dental Clinic Location - Natta-Mwanza, Tanzania"
+                    title="Sarah Dental Clinic Location - Natta-Mwanza, Tanzania"
                   />
                   <Box
                     sx={{

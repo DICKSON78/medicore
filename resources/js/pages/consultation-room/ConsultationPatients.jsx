@@ -72,7 +72,10 @@ const ConsultationPatients = () => {
     "api/consultations",
     {
       ...params,
-      status: capitalize(status),
+      status:
+        String(status || "").toLowerCase() === "return"
+          ? "Returned"
+          : capitalize(status),
       start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
     },
@@ -111,6 +114,9 @@ const ConsultationPatients = () => {
   const getTitle = () => {
     if (status === "pending") {
       return "Patients Sent to Doctor";
+    }
+    if (status === "return") {
+      return "Patient Returns";
     }
     if (status === "consulted") {
       return "Consulted Patients";
@@ -230,6 +236,17 @@ const ConsultationPatients = () => {
                 valueGetter: (item, index) => item.payment_cache_item.item.name,
               },
               {
+                field: "returned_from",
+                headerName: "Returned From",
+                valueGetter: (item, index) =>
+                  item.returned_from === "procedure"
+                    ? "Procedure Room"
+                    : item.returned_from === "dental_lab"
+                    ? "Dental Lab"
+                    : item.returned_from || "-",
+                show: status === "return",
+              },
+              {
                 field: "actions",
                 headerName: "Actions",
                 renderCell: (item) => (
@@ -253,7 +270,7 @@ const ConsultationPatients = () => {
                         )
                       }
                     >
-                      {status === "pending" ? "Manage" : "View"}
+                      {status === "pending" ? "Manage" : status === "return" ? "Review" : "View"}
                     </Button>
                   </Stack>
                 ),

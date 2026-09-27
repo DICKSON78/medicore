@@ -106,9 +106,9 @@ const ConsultationItemsCard = ({
                 value: (
                   <Button
                     variant="contained"
-                    color="secondary"
+                    color="error"
                     size="small"
-                    onClick={() => onClickAdd(title, consultationType)}
+                    onClick={() => onClickAdd && onClickAdd(title, consultationType)}
                   >
                     Add
                   </Button>

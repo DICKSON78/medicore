@@ -347,28 +347,34 @@ class PatientWaitingTime extends Model
         // Check if patient has items to dispense (either through consultation or direct dispensing)
         $hasItems = false;
         $pendingItems = 0;
-        $paymentCache = null;
-        
+
+        // Build a query over the patient's items for this visit (consultation OR direct-dispensing
+        // check-in). A consultation can span MULTIPLE payment caches: the cashier consultation-fee
+        // cache plus any "add item" caches created by the doctor. Aggregate across ALL of them so
+        // doctor-added items are not missed when deciding whether the journey is complete.
+        $itemsQuery = null;
+
         if ($consultation && $consultation->payment_cache_item && $consultation->payment_cache_item->payment_cache) {
-            // Patient has consultation with items
-            $paymentCache = $consultation->payment_cache_item->payment_cache;
-            $pendingItems = $paymentCache->items()
-                ->whereNotIn('patient_payment_cache_items.status', ['Served', 'Paid'])
-                ->count();
-            $hasItems = $paymentCache->items()->count() > 0;
+            // Consultation present: count across every payment cache linked to this consultation
+            $itemsQuery = \App\Models\PatientPaymentCacheItem::whereHas('payment_cache', function ($q) use ($consultation) {
+                $q->where('consultation_id', $consultation->id);
+            });
         } else {
-            // Check for direct dispensing (no consultation)
+            // No consultation: direct dispensing via the check-in payment cache
             $checkIn = $this->patient->check_ins()
                 ->whereDate('created_at', $this->registration_time->format('Y-m-d'))
                 ->first();
-            
+
             if ($checkIn && $checkIn->payment_cache) {
-                $paymentCache = $checkIn->payment_cache;
-                $pendingItems = $paymentCache->items()
-                    ->whereNotIn('patient_payment_cache_items.status', ['Served', 'Paid'])
-                    ->count();
-                $hasItems = $checkIn->payment_cache->items()->count() > 0;
+                $itemsQuery = $checkIn->payment_cache->items();
             }
+        }
+
+        if ($itemsQuery) {
+            $pendingItems = (clone $itemsQuery)
+                ->whereNotIn('patient_payment_cache_items.status', ['Served', 'Paid'])
+                ->count();
+            $hasItems = (clone $itemsQuery)->count() > 0;
         }
         
         // SIMPLIFIED LOGIC: If no items to dispense, treatment is complete
@@ -396,10 +402,10 @@ class PatientWaitingTime extends Model
         $requiresDispensing = false;
         $requiresProcedureRoom = false;
 
-        if ($paymentCache) {
+        if ($itemsQuery) {
             // Any Dental Lab or Pharmacy-like items imply dispensing step
             $dentalLabTypeId = \App\Models\ConsultationType::idForCode(\App\Models\ConsultationType::CODE_DENTAL_LAB);
-            $dentalLabCount = $paymentCache->items()
+            $dentalLabCount = (clone $itemsQuery)
                 ->whereHas('consultation_type', function($q) use ($dentalLabTypeId) {
                     $q->whereKey($dentalLabTypeId);
                 })
@@ -408,7 +414,7 @@ class PatientWaitingTime extends Model
 
             // Procedure items imply procedure room step
             $procedureTypeId = \App\Models\ConsultationType::idForCode(\App\Models\ConsultationType::CODE_PROCEDURE);
-            $procedureCount = $paymentCache->items()
+            $procedureCount = (clone $itemsQuery)
                 ->whereHas('consultation_type', function($q) use ($procedureTypeId) {
                     $q->whereKey($procedureTypeId);
                 })

@@ -54,7 +54,7 @@ class ConsultationDiagnosesController extends Controller
         $request->validate([
             'consultation_id' => 'required|exists:consultations,id',
             'disease_id' => 'required|exists:diseases,id',
-            'diagnosis_type' => 'required|in:Preliminary,Final',
+            'diagnosis_type' => 'required|in:Preliminary,Final,Principal,Additional',
         ]);
 
         $input = $request->all();

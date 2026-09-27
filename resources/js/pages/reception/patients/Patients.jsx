@@ -6,6 +6,11 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Menu,
@@ -14,6 +19,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddRounded";
+import CheckInIcon from "@mui/icons-material/LoginRounded";
+import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import MoreIcon from "@mui/icons-material/MoreVertRounded";
 import StarIcon from "@mui/icons-material/StarRounded";
@@ -25,8 +32,8 @@ import Filters from "./Filters";
 import CreatePatient from "./CreatePatient";
 import EditPatient from "./EditPatient";
 
-import { useFetch, useToast } from "../../../hooks";
-import { formatError, getAge } from "../../../helpers";
+import { useDelete, useFetch, useToast } from "../../../hooks";
+import { formatError, getAge, isAdmin } from "../../../helpers";
 
 const Patients = () => {
   const addToast = useToast();
@@ -36,6 +43,8 @@ const Patients = () => {
   const [item, setItem] = useState();
   const [anchorEl, setAnchorEl] = useState();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState();
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const [params, setParams] = useState({
     page: 1,
@@ -103,6 +112,39 @@ const Patients = () => {
     setAnchorEl(null);
   };
 
+  const {
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
+
+  useEffect(() => {
+    if (errorDelete) {
+      addToast({ message: formatError(errorDelete), severity: "error" });
+    }
+  }, [errorDelete]);
+
+  const handleDeletePatient = (item) => {
+    setDeleteTarget(item);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteOpen(false);
+    setDeleteTarget(undefined);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) {
+      return;
+    }
+    setConfirmDeleteOpen(false);
+    handleDelete(`api/patients/${deleteTarget.id}`, (response) => {
+      addToast({ message: response.data?.message || "Patient deleted.", severity: "success" });
+      setDeleteTarget(undefined);
+      handleFetch();
+    });
+  };
+
   return (
     <Page
       breadcrumbs={[
@@ -150,6 +192,7 @@ const Patients = () => {
                 headerName: "S/N",
                 valueGetter: (item, index) =>
                   params.per_page * (params.page - 1) + index + 1,
+                tableCellProps: { sx: { width: 50, minWidth: 50 } },
               },
               {
                 field: "full_name",
@@ -211,10 +254,15 @@ const Patients = () => {
               {
                 field: "actions",
                 headerName: "Actions",
+                tableCellProps: {
+                  align: "center",
+                  sx: { width: 190, minWidth: 190 },
+                },
                 renderCell: (item) => (
                   <Stack
                     direction="row"
                     alignItems="center"
+                    justifyContent="center"
                     spacing={1}
                   >
                     <Tooltip title="Edit">
@@ -225,15 +273,26 @@ const Patients = () => {
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() =>
-                        navigate(`/reception/patients/${item.id}/check-in`)
-                      }
-                    >
-                      Check-In
-                    </Button>
+                    <Tooltip title="Check In">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(`/reception/patients/${item.id}/check-in`)
+                        }
+                      >
+                        <CheckInIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    {isAdmin() && (
+                      <Tooltip title="Delete">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeletePatient(item)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     <Tooltip title="More">
                       <IconButton
                         size="small"
@@ -274,6 +333,43 @@ const Patients = () => {
         </Menu>
       ) : null}
       <Modal ref={modalRef} />
+      <Dialog
+        open={confirmDeleteOpen}
+        onClose={handleCancelDelete}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
+          <DeleteIcon color="error" />
+          Delete patient
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete{" "}
+            <strong>{deleteTarget?.full_name || "this patient"}</strong>?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={handleCancelDelete}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={confirmDelete}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 };

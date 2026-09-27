@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('consultation_id');
             $table->foreignId('disease_id');
-            $table->enum('diagnosis_type', ['Preliminary', 'Final']);
+            $table->enum('diagnosis_type', ['Preliminary', 'Final', 'Principal', 'Additional']);
             $table->timestamp('created_at')->nullable();
             $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();

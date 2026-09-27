@@ -26,7 +26,7 @@ import Select from "../../components/Select";
 import Table from "../../components/Table";
 
 import { useFetch, usePost, useToast } from "../../hooks";
-import { formatError, numberFormat } from "../../helpers";
+import { formatError, numberFormat, isAdmin } from "../../helpers";
 
 // item_type_id: 2 = Pharmaceutical, consultation_type_id: 1 = Pharmacy
 const MEDICINE_ITEM_TYPE_ID = 2;
@@ -295,9 +295,13 @@ const AddMedicine = () => {
                     headerName: "Actions",
                     renderCell: (item, index) => (
                       <Tooltip title="Remove">
-                        <IconButton color="error" onClick={() => handleRemoveMedicine(index)}>
-                          <DeleteIcon />
-                        </IconButton>
+                        {isAdmin() ? (
+                          <IconButton color="error" onClick={() => handleRemoveMedicine(index)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        ) : (
+                          <span />
+                        )}
                       </Tooltip>
                     ),
                   },

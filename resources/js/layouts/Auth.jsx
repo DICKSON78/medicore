@@ -23,15 +23,20 @@ const Auth = () => {
           <Box
             display="flex"
             justifyContent="center"
+            sx={{ my: 3 }}
           >
-            <Typography
-              variant="h3"
-              fontWeight="bold"
-              sx={{ my: 4 }}
-            >
-              <span style={{ color: "#009688" }}>MEDI</span>
-              <span style={{ color: "#f44336" }}>CORE</span>
-            </Typography>
+            <Box
+              component="img"
+              src="/images/sarahcliniclogo.jpg"
+              alt="Sarah Dental Clinic"
+              sx={{
+                width: 140,
+                height: 140,
+                objectFit: "cover",
+                borderRadius: "50%",
+                boxShadow: 2,
+              }}
+            />
           </Box>
           <Outlet />
         </Card>
@@ -43,7 +48,7 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()} Medicore Dental Clinic
+            {new Date().getFullYear()} Sarah Dental Clinic
           </Typography>
         </Card>
       </Box>

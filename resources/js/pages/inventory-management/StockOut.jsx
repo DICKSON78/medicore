@@ -31,6 +31,7 @@ import {
   formatError,
   getValidationError,
   getValidationRules,
+  isAdmin,
   numberFormat,
   throttle,
   validateInteger,
@@ -378,9 +379,11 @@ const StockOut = () => {
                         renderCell: (item, index) => (
                           <Tooltip title="Remove">
                             <span>
-                              <IconButton size="small" onClick={() => handleRemoveItem(index)}>
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
+                              {isAdmin() && (
+                                <IconButton size="small" onClick={() => handleRemoveItem(index)}>
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              )}
                             </span>
                           </Tooltip>
                         ),

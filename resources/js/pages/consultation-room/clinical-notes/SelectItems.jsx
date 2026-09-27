@@ -100,7 +100,7 @@ const SelectItems = ({
       status: "Active",
       per_page: 5000,
       q: itemName,
-      consultation_type: consultationType,
+      consultation_type: consultationType === "Dental Lab" ? undefined : consultationType,
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       item_type: itemType,
       stock_status: consultationType === "Pharmacy" || consultationType === "Medicine" ? "In Stock" : undefined,

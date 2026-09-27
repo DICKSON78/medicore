@@ -222,6 +222,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->post('/add-item', 'addItem');
             $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
             $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
+            $router->post('/{id}/discharge', 'discharge');
         });
         $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
         $router->apiResource('/dental-oral-examinations', DentalOralExaminationsController::class);
@@ -282,7 +283,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->get('/', 'index');
             $router->get('/{id}', 'show');
             $router->post('/', 'store');
-            $router->put('/{id}', 'update');
+            $router->match(['put', 'patch'], '/{id}', 'update');
             $router->post('/{id}/mark-ready', 'markReady');
             $router->post('/{id}/mark-delivered', 'markDelivered');
             $router->delete('/{id}', 'destroy');

@@ -86,6 +86,15 @@ class ConsultationsController extends Controller
         if ($status) {
             if ($status === 'Pending') {
                 $data->where('status', 'Pending')
+                    ->whereNull('returned_from')
+                    ->whereHas('payment_cache_item', function ($query) {
+                        $query->where('status', 'Paid');
+                    });
+            } elseif ($status === 'Returned') {
+                // Patients who were sent to a department (procedure / dental lab) and
+                // returned to the doctor for review before being discharged to cashier.
+                $data->where('status', 'Pending')
+                    ->whereNotNull('returned_from')
                     ->whereHas('payment_cache_item', function ($query) {
                         $query->where('status', 'Paid');
                     });
@@ -421,12 +430,20 @@ class ConsultationsController extends Controller
 
             switch ($request->what) {
                 case 'Consultation': {
+                    $input = $request->except('what');
+                    if (empty($input['to_return_date'])) {
+                        $input['to_return_date'] = null;
+                    }
+                    if (empty($input['to_return_time'])) {
+                        $input['to_return_time'] = null;
+                    }
+                    $request->merge($input);
                     $request->validate([
                         'patient_to_return' => 'sometimes|required|in:Yes,No',
                         'to_return_date' => 'nullable|date_format:Y-m-d',
                         'to_return_time' => 'nullable|date_format:H:i',
                     ]);
-                    $data->update($request->except('what'));
+                    $data->update($input);
                 }
                 break;
                 case 'Facial Assessment': {
@@ -531,6 +548,15 @@ class ConsultationsController extends Controller
     public function completeClinicalNotes(Request $request, $id)
     {
         try {
+            $input = $request->all();
+            if (empty($input['to_return_date'])) {
+                $input['to_return_date'] = null;
+            }
+            if (empty($input['to_return_time'])) {
+                $input['to_return_time'] = null;
+            }
+            $request->merge($input);
+
             $request->validate([
                 'patient_to_return' => 'nullable|in:Yes,No',
                 'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
@@ -587,8 +613,14 @@ class ConsultationsController extends Controller
                 if ($patient) {
                     $waitingTime = $patient->waiting_times()
                         ->whereDate('registration_time', $data->created_at->format('Y-m-d'))
-                        ->where('status', 'in_treatment')
                         ->first();
+
+                    // Ensure treatment has started so downstream routing/completion applies
+                    // even for consultations where no extra items were added (addItem normally
+                    // starts treatment, but a simple consult never calls it).
+                    if ($waitingTime && $waitingTime->status === 'waiting') {
+                        $waitingTime->startTreatment($user->id);
+                    }
 
                     // Route the patient to the right department after completion:
                     // 1. If unpaid (e.g. medicine) items were added -> pharmacy/cashier so they
@@ -596,9 +628,13 @@ class ConsultationsController extends Controller
                     // 2. Else if a dental lab order is still outstanding -> sent to dental lab,
                     //    which on delivery returns the patient to the doctor.
                     // 3. Otherwise end the treatment when the full journey is complete.
-                    $pendingCount = $data->payment_cache_item?->payment_cache?->items()
+                    $pendingCount = \App\Models\PatientPaymentCacheItem::whereHas('payment_cache', function ($q) use ($data) {
+                        // Count items across ALL payment caches linked to this consultation
+                        // (the cashier consultation-fee cache AND any add-item caches).
+                        $q->where('consultation_id', $data->id);
+                    })
                         ->where('status', 'Pending')
-                        ->count() ?? 0;
+                        ->count();
 
                     $outstandingLab = \App\Models\DentalLabOrder::where('consultation_id', $data->id)
                         ->whereNotIn('status', ['Delivered'])
@@ -669,6 +705,78 @@ class ConsultationsController extends Controller
                 'exception_type' => get_class($e),
             ]);
             return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to complete clinical notes.');
+        }
+    }
+
+    public function discharge(Request $request, $id)
+    {
+        try {
+            $data = Consultation::findOrFail($id);
+
+            $user = $request->user();
+
+            // Finalise the consultation (it was returned to the doctor for review).
+            $data->update([
+                'status' => 'Consulted',
+                'returned_from' => null,
+            ]);
+
+            // Send the patient to the cashier for final payment (or end the journey if no
+            // outstanding items remain).
+            try {
+                $patient = $data->payment_cache_item?->payment_cache?->check_in?->patient;
+                if ($patient) {
+                    $waitingTime = $patient->waiting_times()
+                        ->whereDate('registration_time', $data->created_at->format('Y-m-d'))
+                        ->whereIn('status', ['waiting', 'in_treatment'])
+                        ->latest()
+                        ->first();
+
+                    $pendingCount = \App\Models\PatientPaymentCacheItem::whereHas('payment_cache', function ($q) use ($data) {
+                        $q->where('consultation_id', $data->id);
+                    })
+                        ->whereIn('status', ['Pending', 'Billed'])
+                        ->count();
+
+                    if ($waitingTime) {
+                        if ($pendingCount > 0) {
+                            $waitingTime->sendToCashier();
+                            \Log::info('Doctor discharged patient - sent to cashier for final payment', [
+                                'consultation_id' => $data->id,
+                                'patient_id' => $patient->id,
+                                'pending_count' => $pendingCount,
+                            ]);
+                        } else {
+                            $waitingTime->endTreatment();
+                            \Log::info('Doctor discharged patient - no pending bill, treatment ended', [
+                                'consultation_id' => $data->id,
+                                'patient_id' => $patient->id,
+                            ]);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Discharge: failed to route patient to cashier', [
+                    'consultation_id' => $data->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+                event(new \App\Events\NotificationUpdate());
+            } catch (\Exception $e) {
+            }
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Patient discharged. Sent to cashier for final payment.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->sendResponse(null, Response::HTTP_NOT_FOUND, 'Consultation not found.');
+        } catch (\Throwable $e) {
+            \Log::error('ConsultationsController@discharge failed', [
+                'error' => $e->getMessage(),
+                'consultation_id' => $id,
+                'exception_type' => get_class($e),
+            ]);
+            return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to discharge patient.');
         }
     }
 

@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Primary Meta Tags -->
-    <title>Medicore Dental Clinic - Your Smile, Our Priority | Dental Clinic in Tanzania</title>
-    <meta name="title" content="Medicore Dental Clinic - Your Smile, Our Priority | Dental Clinic in Mwanza, Tanzania">
-    <meta name="description" content="Medicore Dental Clinic - Your trusted partner for comprehensive dental health. Expert general dentistry, oral surgery, orthodontics, and more.">
-    <meta name="keywords" content="dental clinic, dentist, oral health, dental care, teeth cleaning, root canal, tooth extraction, dental clinic Mwanza Tanzania, orthodontics, dental implants, Medicore Dental">
-    <meta name="author" content="Medicore Dental Clinic">
+    <title>Sarah Dental Clinic - Your Smile, Our Priority | Dental Clinic in Tanzania</title>
+    <meta name="title" content="Sarah Dental Clinic - Your Smile, Our Priority | Dental Clinic in Mwanza, Tanzania">
+    <meta name="description" content="Sarah Dental Clinic - Your trusted partner for comprehensive dental health. Expert general dentistry, oral surgery, orthodontics, and more.">
+    <meta name="keywords" content="dental clinic, dentist, oral health, dental care, teeth cleaning, root canal, tooth extraction, dental clinic Mwanza Tanzania, orthodontics, dental implants, Sarah Dental">
+    <meta name="author" content="Sarah Dental Clinic">
     <meta name="robots" content="index, follow">
     <meta name="language" content="English">
     <meta name="revisit-after" content="7 days">
@@ -19,15 +19,15 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://medicore-dental.co.tz/">
-    <meta property="og:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
+    <meta property="og:title" content="Sarah Dental Clinic - Your Smile, Our Priority">
     <meta property="og:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania. Expert general dentistry, oral surgery, orthodontics, and more.">
-    <meta property="og:site_name" content="Medicore Dental Clinic">
+    <meta property="og:site_name" content="Sarah Dental Clinic">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://medicore-dental.co.tz/">
-    <meta property="twitter:title" content="Medicore Dental Clinic - Your Smile, Our Priority">
+    <meta property="twitter:title" content="Sarah Dental Clinic - Your Smile, Our Priority">
     <meta property="twitter:description" content="Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania.">
     <!-- Canonical URL -->
     <link rel="canonical" href="https://medicore-dental.co.tz{{ request()->path() === '/' ? '' : '/' . request()->path() }}">
@@ -37,7 +37,7 @@
     {
       "@context": "https://schema.org",
       "@type": "MedicalBusiness",
-      "name": "Medicore Dental Clinic",
+      "name": "Sarah Dental Clinic",
       "description": "Your trusted partner for comprehensive dental health in Natta-Mwanza, Tanzania",
       "url": "https://medicore-dental.co.tz",
       "telephone": "+255678110376",

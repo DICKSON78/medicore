@@ -16,6 +16,7 @@ class Consultation extends Model
         'patient_to_return', 'to_return_date', 'to_return_time', 'remarks', 'created_by',
         'status', 'oral_hygiene_status', 'tobacco_use', 'alcohol_use',
         'extra_oral_examination', 'tmj_examination', 'lymph_nodes',
+        'returned_from',
     ];
 
     public function payment_cache_item()

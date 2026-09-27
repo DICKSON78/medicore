@@ -133,7 +133,12 @@ class DentalLabOrdersController extends Controller
             $consultation = $data->consultation;
             if ($consultation) {
                 if ($consultation->status !== 'Pending') {
-                    $consultation->update(['status' => 'Pending']);
+                    $consultation->update([
+                        'status' => 'Pending',
+                        'returned_from' => 'dental_lab',
+                    ]);
+                } else {
+                    $consultation->update(['returned_from' => 'dental_lab']);
                 }
 
                 $patient = $consultation->payment_cache_item?->payment_cache?->check_in?->patient;

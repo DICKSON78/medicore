@@ -83,12 +83,12 @@ class ResetDatabaseAuto extends Command
             // Create clinic
             $this->info('Creating clinic...');
             $clinicId = DB::table('clinics')->insertGetId([
-                'name' => 'Medicore Dental Clinic',
+                'name' => 'Sarah Dental Clinic',
                 'phone' => '0678110376',
                 'email' => 'info@medicore-dental.co.tz',
                 'address' => 'Natta, Mwanza',
                 'sms_balance' => '0',
-                'sms_sender_name' => 'MEDICORE',
+                'sms_sender_name' => 'SARAH',
                 'logo' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -264,7 +264,7 @@ class ResetDatabaseAuto extends Command
             // Create preferences
             $this->info('Creating system preferences...');
             $preferences = [
-                ['key' => 'CLINIC_NAME', 'value' => 'Medicore Dental Clinic'],
+                ['key' => 'CLINIC_NAME', 'value' => 'Sarah Dental Clinic'],
                 ['key' => 'CLINIC_PHONE', 'value' => '0678110376'],
                 ['key' => 'CLINIC_EMAIL', 'value' => 'info@medicore-dental.co.tz'],
                 ['key' => 'CLINIC_ADDRESS', 'value' => 'Natta, Mwanza'],

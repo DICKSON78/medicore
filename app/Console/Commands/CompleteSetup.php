@@ -61,7 +61,7 @@ class CompleteSetup extends Command
             // Create preferences
             $this->info('3. Creating system preferences...');
             $preferences = [
-                ['key' => 'CLINIC_NAME', 'value' => 'Medicore Dental Clinic'],
+                ['key' => 'CLINIC_NAME', 'value' => 'Sarah Dental Clinic'],
                 ['key' => 'CLINIC_PHONE', 'value' => '0678110376'],
                 ['key' => 'CLINIC_EMAIL', 'value' => 'info@medicore-dental.co.tz'],
                 ['key' => 'CLINIC_ADDRESS', 'value' => 'Natta, Mwanza'],

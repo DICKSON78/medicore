@@ -138,7 +138,7 @@ const Footer = () => {
                 },
               }}
             >
-              Medicore Dental Clinic
+              Sarah Dental Clinic
             </Typography>
             <Typography
               variant="body2"
@@ -382,7 +382,7 @@ const Footer = () => {
               textAlign: { xs: 'center', sm: 'left' },
             }}
           >
-            © {new Date().getFullYear()} Medicore Dental Clinic. All rights reserved.
+            © {new Date().getFullYear()} Sarah Dental Clinic. All rights reserved.
           </Typography>
 
           <Stack

@@ -141,11 +141,7 @@ class NotificationsController extends Controller
         $data['vip_patients'] = \App\Models\Patient::whereHas('creator', function ($query) use ($user) {
             $query->where('clinic_id', $user->clinic_id);
         })
-            ->where(function ($q) {
-                $q->where('is_vip', 'Yes')
-                  ->orWhere('is_vip', true)
-                  ->orWhere('is_vip', 1);
-            })
+            ->where('is_vip', true)
             ->whereDoesntHave('check_ins', function ($query) {
                 $query->whereDate('created_at', today());
             })
